@@ -24,6 +24,7 @@ export default function App() {
   
   const [loading, setLoading] = useState(true);
   const [synced, setSynced] = useState(false);
+  const [validationErrors, setValidationErrors] = useState({});
   const [statusMessage, setStatusMessage] = useState('');
   const [statusType, setStatusType] = useState(''); // 'success' or 'info' or 'error'
   const [joinedWaitlist, setJoinedWaitlist] = useState(false);
@@ -57,10 +58,6 @@ export default function App() {
       }
       setSynced(isSynced);
       setLoading(false);
-      
-      if (!isSynced) {
-        showStatus('Running in local offline database mode.', 'info');
-      }
 
     }
     initData();
@@ -192,10 +189,21 @@ export default function App() {
       const expiry = activeUpdate?.profile?.insuranceValidTill;
       if (expiry && expiry.trim() !== '') {
         if (!validateInsuranceExpiry(expiry)) {
-          showStatus("Insurance 'Valid Till' must be in a valid format (e.g., MM/YYYY or 'Dec 2028').", "error");
+          setValidationErrors(prev => ({
+            ...prev,
+            insuranceValidTill: "Invalid format. Card will not be saved until corrected."
+          }));
+          showStatus("Save failed: Please correct the date format error below the field.", "error");
           return; // Abort saving!
         }
       }
+      
+      // Clear error if valid or empty
+      setValidationErrors(prev => {
+        const copy = { ...prev };
+        delete copy.insuranceValidTill;
+        return copy;
+      });
     }
 
     // Automatically inject/update timestamp for modified card
@@ -213,11 +221,7 @@ export default function App() {
     try {
       const result = await saveCardData(finalCards, token);
       setSynced(result.synced);
-      if (result.synced) {
-        showStatus('Changes saved successfully.', 'success');
-      } else {
-        showStatus('Changes saved locally on this device.', 'success');
-      }
+      showStatus('Changes saved successfully.', 'success');
     } catch (error) {
       showStatus('Error saving cards data.', 'error');
     }
@@ -308,6 +312,21 @@ export default function App() {
   const updateActiveCardProfile = (e) => {
     const { name, value } = e.target;
     if (!selectedCardId) return;
+
+    if (name === 'insuranceValidTill') {
+      if (!value || value.trim() === '' || validateInsuranceExpiry(value)) {
+        setValidationErrors(prev => {
+          const copy = { ...prev };
+          delete copy.insuranceValidTill;
+          return copy;
+        });
+      } else {
+        setValidationErrors(prev => ({
+          ...prev,
+          insuranceValidTill: "Invalid format. Use MM/YYYY (e.g., 12/2028) or Month YYYY (e.g., Dec 2028)."
+        }));
+      }
+    }
 
     const updated = cards.map(c => {
       if (c.id === selectedCardId) {
@@ -1093,7 +1112,13 @@ export default function App() {
                         placeholder="e.g., 12/2028 or Dec 2028"
                         value={activeCard.profile.insuranceValidTill || ''} 
                         onChange={updateActiveCardProfile}
+                        style={validationErrors.insuranceValidTill ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
                       />
+                      {validationErrors.insuranceValidTill && (
+                        <span style={{ color: 'var(--danger)', fontSize: '0.8rem', fontWeight: '600', marginTop: '0.25rem' }}>
+                          {validationErrors.insuranceValidTill}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>

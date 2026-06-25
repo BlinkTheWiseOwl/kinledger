@@ -18,9 +18,6 @@ export default function EmergencyCard({ profile, emergencyContacts, medications,
           <Printer size={18} />
           Print / Save PDF
         </button>
-        <span className={`sync-badge-inline ${synced ? 'text-primary' : 'text-muted'}`}>
-          {synced ? '✓ Cloud Sync Active' : '⚠ Local Storage Only'}
-        </span>
       </div>
 
       <div className="emergency-badge-card" id="printable-card">
