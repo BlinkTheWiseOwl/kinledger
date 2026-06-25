@@ -698,7 +698,9 @@ export default function App() {
                     >
                       <Trash2 size={16} />
                     </button>
-                                   <div className="member-card-body">
+                  </div>
+
+                  <div className="member-card-body">
                     {/* Readiness Status Indicator */}
                     {(() => {
                       const readiness = getReadinessStatus(card);
@@ -766,7 +768,7 @@ export default function App() {
                     >
                       <Eye size={14} /> Open Card
                     </button>
-                  </div>   </div>
+                  </div>
                 </div>
               ))}
 
