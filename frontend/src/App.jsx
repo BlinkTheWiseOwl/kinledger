@@ -105,20 +105,119 @@ export default function App() {
     }, 4000);
   };
 
+  // Get readiness status of a card profile
+  const getReadinessStatus = (card) => {
+    if (!card) return { status: 'incomplete', label: 'Emergency Profile Incomplete', color: '#ef4444' };
+    const { profile, emergencyContacts = [], medications = [] } = card;
+    const { fullName, age, bloodGroup, conditions, allergies, insurancePolicy, insuranceNumber } = profile || {};
+    
+    // Red: if missing primary details or contacts/medications
+    if (!fullName || !age || !bloodGroup || !conditions || !allergies || emergencyContacts.length === 0 || medications.length === 0) {
+      return {
+        status: 'incomplete',
+        label: 'Emergency Profile Incomplete',
+        color: '#ef4444'
+      };
+    }
+    
+    // Yellow: if complete on primary but missing insurance
+    if (!insurancePolicy || !insuranceNumber) {
+      return {
+        status: 'missing_insurance',
+        label: 'Missing Insurance Information',
+        color: '#f59e0b'
+      };
+    }
+    
+    // Green: complete
+    return {
+      status: 'complete',
+      label: 'Emergency Profile Complete',
+      color: '#10b981'
+    };
+  };
+
+  // Format last updated duration string
+  const formatLastUpdated = (updatedAt) => {
+    if (!updatedAt) return 'Last updated: unknown';
+    const diffMs = new Date() - new Date(updatedAt);
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    if (diffDays <= 0) {
+      const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
+      if (diffHrs <= 0) {
+        const diffMins = Math.floor(diffMs / (1000 * 60));
+        if (diffMins <= 0) return 'Last updated: Just now';
+        return `Last updated: ${diffMins} min${diffMins > 1 ? 's' : ''} ago`;
+      }
+      return `Last updated: ${diffHrs} hour${diffHrs > 1 ? 's' : ''} ago`;
+    }
+    if (diffDays === 1) return 'Last updated: 1 day ago';
+    return `Last updated: ${diffDays} days ago`;
+  };
+
+  // Validate insurance valid till date format
+  const validateInsuranceExpiry = (dateStr) => {
+    if (!dateStr || !dateStr.trim()) return true; // Optional field is valid when empty
+    
+    // 1. Matches MM/YYYY (e.g. 12/2028) or MM/YY (e.g. 12/28)
+    const slashRegex = /^(0[1-9]|1[0-2])\/([0-9]{4}|[0-9]{2})$/;
+    if (slashRegex.test(dateStr)) return true;
+    
+    // 2. Matches "Dec 2028" or "December 2028" (case-insensitive)
+    const months = [
+      'jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec',
+      'january', 'february', 'march', 'april', 'june', 'july', 'august', 'september', 'october', 'november', 'december'
+    ];
+    const parts = dateStr.trim().split(/\s+/);
+    if (parts.length === 2) {
+      const monthPart = parts[0].toLowerCase();
+      const yearPart = parts[1];
+      const yearRegex = /^[0-9]{4}$/;
+      if (months.includes(monthPart) && yearRegex.test(yearPart)) {
+        return true;
+      }
+    }
+    
+    return false;
+  };
+
   // Get currently active card details
   const activeCard = cards.find(c => c.id === selectedCardId) || null;
 
   // Save the entire cards array to LocalStorage and Replicate to mock Server/DB
   const saveCollection = async (updatedCards) => {
-    setCards(updatedCards);
-    try {
-      const result = await saveCardData(updatedCards, token);
-      setSynced(result.synced);
-        if (result.synced) {
-          showStatus('Changes saved successfully.', 'success');
-        } else {
-          showStatus('Changes saved locally on this device.', 'success');
+    // Validate insurance valid till date format for active card
+    if (selectedCardId) {
+      const activeUpdate = updatedCards.find(c => c.id === selectedCardId);
+      const expiry = activeUpdate?.profile?.insuranceValidTill;
+      if (expiry && expiry.trim() !== '') {
+        if (!validateInsuranceExpiry(expiry)) {
+          showStatus("Insurance 'Valid Till' must be in a valid format (e.g., MM/YYYY or 'Dec 2028').", "error");
+          return; // Abort saving!
         }
+      }
+    }
+
+    // Automatically inject/update timestamp for modified card
+    let finalCards = updatedCards;
+    if (selectedCardId) {
+      finalCards = updatedCards.map(c => {
+        if (c.id === selectedCardId) {
+          return { ...c, updatedAt: new Date().toISOString() };
+        }
+        return c;
+      });
+    }
+
+    setCards(finalCards);
+    try {
+      const result = await saveCardData(finalCards, token);
+      setSynced(result.synced);
+      if (result.synced) {
+        showStatus('Changes saved successfully.', 'success');
+      } else {
+        showStatus('Changes saved locally on this device.', 'success');
+      }
     } catch (error) {
       showStatus('Error saving cards data.', 'error');
     }
@@ -145,7 +244,8 @@ export default function App() {
       medications: [],
       ownerEmail: userEmail,
       isShared: false,
-      sharedWith: []
+      sharedWith: [],
+      updatedAt: new Date().toISOString()
     };
 
     const updated = [...cards, newCard];
@@ -598,9 +698,18 @@ export default function App() {
                     >
                       <Trash2 size={16} />
                     </button>
-                  </div>
+                                   <div className="member-card-body">
+                    {/* Readiness Status Indicator */}
+                    {(() => {
+                      const readiness = getReadinessStatus(card);
+                      return (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', fontSize: '0.825rem', fontWeight: '600' }}>
+                          <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: readiness.color, display: 'inline-block' }}></span>
+                          <span style={{ color: 'var(--text-primary)' }}>{readiness.label}</span>
+                        </div>
+                      );
+                    })()}
 
-                  <div className="member-card-body">
                     <div>
                       <strong>Conditions:</strong>{' '}
                       {card.profile.conditions ? (
@@ -627,8 +736,13 @@ export default function App() {
                       {card.emergencyContacts.length === 1 && '1 contact registered'}
                       {card.emergencyContacts.length === 2 && '2 contacts registered'}
                     </div>
-                  </div>
 
+                    {/* Last Updated Timestamp */}
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.75rem', fontStyle: 'italic' }}>
+                      {formatLastUpdated(card.updatedAt)}
+                    </div>
+                  </div>
+ 
                   <div className="member-card-footer">
                     <button 
                       className="btn btn-secondary btn-sm" 
@@ -639,7 +753,7 @@ export default function App() {
                         setActiveTab('edit');
                       }}
                     >
-                      Setup Details
+                      {getReadinessStatus(card).status === 'complete' ? 'Edit Profile' : 'Complete Profile'}
                     </button>
                     <button 
                       className="btn btn-outline btn-sm"
@@ -650,9 +764,9 @@ export default function App() {
                         setActiveTab('view');
                       }}
                     >
-                      <Eye size={14} /> View
+                      <Eye size={14} /> Open Card
                     </button>
-                  </div>
+                  </div>   </div>
                 </div>
               ))}
 
@@ -838,7 +952,7 @@ export default function App() {
                 onClick={() => setActiveTab('edit')}
               >
                 <User size={16} />
-                Setup Card Details
+                {getReadinessStatus(activeCard).status === 'complete' ? 'Edit Profile' : 'Complete Profile'}
               </button>
               <button 
                 className={`tab-btn ${activeTab === 'view' ? 'active' : ''}`}
@@ -1163,7 +1277,7 @@ export default function App() {
                         Share this medical card with family members' email addresses. They will be able to view and update details jointly on their dashboards.
                       </p>
                       
-                      <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                      <div className="share-input-group">
                         <input 
                           type="email" 
                           placeholder="family.member@email.com" 

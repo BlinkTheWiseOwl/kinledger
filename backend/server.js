@@ -363,6 +363,7 @@ app.get('/api/cards', authenticateToken, async (req, res) => {
         ownerEmail: p.owner_email,
         isShared: p.is_shared,
         sharedWith: cardShares,
+        updatedAt: p.updated_at,
         profile: {
           fullName: decrypt(p.full_name) || '',
           age: p.age !== null ? p.age.toString() : '',
@@ -428,7 +429,7 @@ app.post('/api/cards', authenticateToken, async (req, res) => {
 
     // 2. Process Updates and Inserts
     for (const card of cards) {
-      const { id, relationship, profile, emergencyContacts = [], medications = [] } = card;
+      const { id, relationship, profile, emergencyContacts = [], medications = [], updatedAt } = card;
       const { fullName = '', age, bloodGroup = '', allergies = '', conditions = '', insurancePolicy = '', insuranceNumber = '', insuranceValidTill = '' } = profile || {};
       
       const cleanAge = age ? parseInt(age) : null;
@@ -447,9 +448,9 @@ app.post('/api/cards', authenticateToken, async (req, res) => {
         // Insert new profile owned by current user
         await client.query(`
           INSERT INTO public.profiles (
-            id, owner_id, relationship, full_name, age, blood_group, allergies, conditions, insurance_policy, insurance_number, insurance_valid_till
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-        `, [id, userId, relationship, encryptedFullName, cleanAge, bloodGroup, encryptedAllergies, encryptedConditions, insurancePolicy, encryptedInsuranceNumber, encryptedInsuranceValidTill]);
+            id, owner_id, relationship, full_name, age, blood_group, allergies, conditions, insurance_policy, insurance_number, insurance_valid_till, updated_at
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, COALESCE($12, CURRENT_TIMESTAMP))
+        `, [id, userId, relationship, encryptedFullName, cleanAge, bloodGroup, encryptedAllergies, encryptedConditions, insurancePolicy, encryptedInsuranceNumber, encryptedInsuranceValidTill, updatedAt ? new Date(updatedAt) : null]);
       } else {
         // Update existing card: ensure edit rights
         const ownerId = pCheck.rows[0].owner_id;
@@ -477,9 +478,10 @@ app.post('/api/cards', authenticateToken, async (req, res) => {
         await client.query(`
           UPDATE public.profiles
           SET relationship = $2, full_name = $3, age = $4, blood_group = $5, allergies = $6,
-              conditions = $7, insurance_policy = $8, insurance_number = $9, insurance_valid_till = $10, updated_at = CURRENT_TIMESTAMP
+              conditions = $7, insurance_policy = $8, insurance_number = $9, insurance_valid_till = $10, 
+              updated_at = COALESCE($11, CURRENT_TIMESTAMP)
           WHERE id = $1
-        `, [id, relationship, encryptedFullName, cleanAge, bloodGroup, encryptedAllergies, encryptedConditions, insurancePolicy, encryptedInsuranceNumber, encryptedInsuranceValidTill]);
+        `, [id, relationship, encryptedFullName, cleanAge, bloodGroup, encryptedAllergies, encryptedConditions, insurancePolicy, encryptedInsuranceNumber, encryptedInsuranceValidTill, updatedAt ? new Date(updatedAt) : null]);
       }
 
       // Sync contacts list: clean delete + re-insert

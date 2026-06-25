@@ -321,6 +321,9 @@ input::-ms-clear {
   padding: 1rem 1.5rem;
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 72px;
+  z-index: 90;
 }
 
 .workspace-info {
@@ -1070,10 +1073,12 @@ textarea {
   /* Responsive workspace header fix (resolves button misalignment and horizontal scroll) */
   .workspace-header {
     flex-direction: column;
-    align-items: stretch;
-    gap: 1.25rem;
+    align-items: center;
+    gap: 0.75rem;
     text-align: center;
     padding: 1.25rem 1rem;
+    position: static; /* Remove sticky position on mobile */
+    margin-bottom: 1rem;
   }
 
   .workspace-info {
@@ -1082,13 +1087,69 @@ textarea {
     gap: 0.5rem;
   }
 
+  /* Floating Bottom Bar for Workspace Actions on Mobile */
   .workspace-actions {
-    flex-direction: column;
-    width: 100%;
-    gap: 0.5rem;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: white;
+    border-top: 1px solid var(--border);
+    padding: 1rem;
+    display: flex;
+    flex-direction: row !important; /* Force side-by-side buttons on mobile */
+    gap: 0.75rem;
+    z-index: 999;
+    box-shadow: 0 -4px 12px rgba(15, 108, 95, 0.08);
   }
 
   .workspace-actions .btn {
+    flex: 1;
+    width: auto !important;
+    justify-content: center;
+  }
+
+  /* Prevent main content from being covered by the sticky bottom bar */
+  .main-content {
+    padding-bottom: 6.5rem !important;
+  }
+
+  /* Responsive layout for header auth section */
+  .header-auth-badge {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    width: 100%;
+    align-items: center;
+    margin-top: 0.25rem;
+  }
+
+  .header-auth-badge .user-email-text {
+    grid-column: 1 / -1;
+    text-align: center;
+    width: fit-content;
+    margin: 0 auto;
+  }
+
+  .header-auth-badge .btn-logout,
+  .header-auth-badge .btn-delete-account {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Responsive share section input/button */
+  .share-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+  }
+
+  .share-input-group input {
+    width: 100%;
+  }
+
+  .share-input-group button {
     width: 100%;
     justify-content: center;
   }
