@@ -1,0 +1,8 @@
+{
+  "appId": "com.kinledger.app",
+  "appName": "KinLedger",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  }
+}

@@ -1,0 +1,112 @@
+[
+  {
+    "id": "card-1782138830815",
+    "relationship": "Father",
+    "profile": {
+      "fullName": "Jon Doe",
+      "age": "67",
+      "bloodGroup": "A+",
+      "allergies": "asdf",
+      "conditions": "ascv",
+      "insurancePolicy": "str",
+      "insuranceNumber": "sdf-098"
+    },
+    "emergencyContacts": [
+      {
+        "name": "me",
+        "relationship": "daughter",
+        "phoneNumber": "9886612345"
+      }
+    ],
+    "medications": [
+      {
+        "name": "metformin",
+        "dosage": "500mg",
+        "frequency": "1-0-1",
+        "instructions": ""
+      },
+      {
+        "name": "ace inhibitor",
+        "dosage": "5g",
+        "frequency": "1-0-1",
+        "instructions": ""
+      },
+      {
+        "name": "analgesic",
+        "dosage": "250mg",
+        "frequency": "1-1-0",
+        "instructions": ""
+      }
+    ]
+  },
+  {
+    "id": "card-1782144641844",
+    "relationship": "Mother",
+    "profile": {
+      "fullName": "Jane Doe",
+      "age": "64",
+      "bloodGroup": "A+",
+      "allergies": "none",
+      "conditions": "hypertensive",
+      "insurancePolicy": "Max Bupa",
+      "insuranceNumber": "MxBp/2000/S2033"
+    },
+    "emergencyContacts": [
+      {
+        "name": "Me",
+        "relationship": "Son",
+        "phoneNumber": "9986123456"
+      }
+    ],
+    "medications": [
+      {
+        "name": "losar h",
+        "dosage": "5mg",
+        "frequency": "100",
+        "instructions": ""
+      },
+      {
+        "name": "hopace 5",
+        "dosage": "5mg",
+        "frequency": "101",
+        "instructions": ""
+      }
+    ]
+  },
+  {
+    "id": "card-1782192023068",
+    "relationship": "Spouse",
+    "profile": {
+      "fullName": "Gene Doe",
+      "age": "38",
+      "bloodGroup": "A+",
+      "allergies": "groundnuts",
+      "conditions": "none",
+      "insurancePolicy": "str",
+      "insuranceNumber": "str/2003/S2333"
+    },
+    "emergencyContacts": [
+      {
+        "name": "you",
+        "relationship": "spouse",
+        "phoneNumber": "9980234567"
+      }
+    ],
+    "medications": []
+  },
+  {
+    "id": "card-1782196014359",
+    "relationship": "Daughter",
+    "profile": {
+      "fullName": "Lilly Doe",
+      "age": "11",
+      "bloodGroup": "AB+",
+      "allergies": "",
+      "conditions": "",
+      "insurancePolicy": "",
+      "insuranceNumber": ""
+    },
+    "emergencyContacts": [],
+    "medications": []
+  }
+]

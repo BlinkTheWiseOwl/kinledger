@@ -1,0 +1,1217 @@
+import React, { useState, useEffect } from 'react';
+import { Shield, FileText, Plus, Trash2, Save, User, Heart, ShieldAlert, Award, Phone, ArrowLeft, Printer, Eye, Share2, LogOut } from 'lucide-react';
+import { loadCardData, saveCardData, BACKEND_URL } from './utils/storage';
+import EmergencyCard from './components/EmergencyCard';
+import AuthScreen from './components/AuthScreen';
+
+const UPCOMING_FEATURES = [
+  { id: 'emergency', label: 'Have critical health information ready during emergencies' },
+  { id: 'medicine', label: 'Never worry about missed medicines again' },
+  { id: 'document', label: 'Find your medical documents in seconds' },
+  { id: 'history', label: 'Never search or explain your parent\'s medical history from scratch again' },
+  { id: 'family', label: 'Keep the whole family on the same page' },
+  { id: 'benefits', label: 'Discover healthcare related financial benefits and savings you\'re eligible for' }
+];
+
+export default function App() {
+  // Session states
+  const [token, setToken] = useState(localStorage.getItem('kinledger_jwt_token'));
+  const [userEmail, setUserEmail] = useState(localStorage.getItem('kinledger_user_email'));
+
+  const [cards, setCards] = useState([]);
+  const [selectedCardId, setSelectedCardId] = useState(null); // null = Dashboard view
+  const [activeTab, setActiveTab] = useState('edit'); // 'edit' or 'view' for the selected card
+  
+  const [loading, setLoading] = useState(true);
+  const [synced, setSynced] = useState(false);
+  const [statusMessage, setStatusMessage] = useState('');
+  const [statusType, setStatusType] = useState(''); // 'success' or 'info' or 'error'
+  const [joinedWaitlist, setJoinedWaitlist] = useState(false);
+  const [votedFeature, setVotedFeature] = useState(null);
+  const [selectedFeature, setSelectedFeature] = useState(null);
+
+  // Sharing field state
+  const [shareEmail, setShareEmail] = useState('');
+
+  // Dashboard state for adding a new member
+  const [showAddMenu, setShowAddMenu] = useState(false);
+  const [customRelation, setCustomRelation] = useState('');
+
+  // Temp contact and medication forms state (local to selected card workspace)
+  const [newContact, setNewContact] = useState({ name: '', relationship: '', phoneNumber: '' });
+  const [newMed, setNewMed] = useState({ name: '', dosage: '', frequency: '', instructions: '' });
+
+  // Load cards array on mount or session change
+  useEffect(() => {
+    if (!token) {
+      setCards([]);
+      setLoading(false);
+      return;
+    }
+
+    async function initData() {
+      setLoading(true);
+      const { data, synced: isSynced } = await loadCardData(token);
+      if (Array.isArray(data)) {
+        setCards(data);
+      }
+      setSynced(isSynced);
+      setLoading(false);
+      
+      if (!isSynced) {
+        showStatus('Running in local offline database mode.', 'info');
+      }
+
+    }
+    initData();
+  }, [token]);
+
+  // Load waitlist status scoped to current user
+  useEffect(() => {
+    if (userEmail) {
+      const emailKey = userEmail.toLowerCase().trim();
+      const userJoined = localStorage.getItem(`kinledger_waitlist_joined_${emailKey}`) === 'true';
+      const userFeaturesRaw = localStorage.getItem(`kinledger_waitlist_features_${emailKey}`);
+      let userVoted = null;
+      if (userFeaturesRaw) {
+        try {
+          const parsed = JSON.parse(userFeaturesRaw);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            userVoted = parsed[0];
+          }
+        } catch (e) {}
+      }
+      setJoinedWaitlist(userJoined);
+      setVotedFeature(userVoted);
+      setSelectedFeature(userVoted);
+    } else {
+      setJoinedWaitlist(false);
+      setVotedFeature(null);
+      setSelectedFeature(null);
+    }
+  }, [userEmail]);
+
+  // Clear local contact and medication input fields when switching cards or adding members
+  useEffect(() => {
+    setNewContact({ name: '', relationship: '', phoneNumber: '' });
+    setNewMed({ name: '', dosage: '', frequency: '', instructions: '' });
+  }, [selectedCardId]);
+
+  const showStatus = (message, type = 'info') => {
+    setStatusMessage(message);
+    setStatusType(type);
+    setTimeout(() => {
+      setStatusMessage('');
+    }, 4000);
+  };
+
+  // Get currently active card details
+  const activeCard = cards.find(c => c.id === selectedCardId) || null;
+
+  // Save the entire cards array to LocalStorage and Replicate to mock Server/DB
+  const saveCollection = async (updatedCards) => {
+    setCards(updatedCards);
+    try {
+      const result = await saveCardData(updatedCards, token);
+      setSynced(result.synced);
+        if (result.synced) {
+          showStatus('Changes saved successfully.', 'success');
+        } else {
+          showStatus('Changes saved locally on this device.', 'success');
+        }
+    } catch (error) {
+      showStatus('Error saving cards data.', 'error');
+    }
+  };
+
+  // Add a new profile card
+  const handleCreateCard = (relation) => {
+    if (!relation) return;
+    
+    const newCard = {
+      id: 'card-' + Date.now(),
+      relationship: relation,
+      profile: {
+        fullName: '',
+        age: '',
+        bloodGroup: '',
+        allergies: '',
+        conditions: '',
+        insurancePolicy: '',
+        insuranceNumber: '',
+        insuranceValidTill: ''
+      },
+      emergencyContacts: [],
+      medications: [],
+      ownerEmail: userEmail,
+      isShared: false,
+      sharedWith: []
+    };
+
+    const updated = [...cards, newCard];
+    saveCollection(updated);
+    
+    // Jump straight to editing this new card
+    setSelectedCardId(newCard.id);
+    setActiveTab('edit');
+    setShowAddMenu(false);
+    setCustomRelation('');
+    showStatus(`New card created for ${relation}.`, 'success');
+  };
+
+  // Delete a profile card (revokes access if shared card)
+  const handleDeleteCard = async (id, event) => {
+    if (event) event.stopPropagation(); // prevent opening card if clicked from dashboard
+    
+    const cardToDelete = cards.find(c => c.id === id);
+    const name = cardToDelete?.profile?.fullName || cardToDelete?.relationship || 'Family Member';
+    
+    const confirmMsg = cardToDelete?.isShared 
+      ? `Are you sure you want to remove the shared card for ${name}? You will lose access.` 
+      : `Are you sure you want to delete the emergency card for ${name}? This will delete it for everyone.`;
+
+    if (window.confirm(confirmMsg)) {
+      const updated = cards.filter(c => c.id !== id);
+      
+      if (cardToDelete?.isShared) {
+        try {
+          const response = await fetch(`${BACKEND_URL}/shares`, {
+            method: 'DELETE',
+            headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ profileId: id, emailToRevoke: userEmail })
+          });
+
+          if (!response.ok) {
+            throw new Error('Revocation failed.');
+          }
+
+          setCards(updated);
+          showStatus('Shared card removed from dashboard.', 'info');
+        } catch (err) {
+          showStatus('Error revoking shared card access.', 'error');
+        }
+      } else {
+        saveCollection(updated);
+        showStatus('Emergency card deleted.', 'info');
+      }
+
+      if (selectedCardId === id) {
+        setSelectedCardId(null);
+      }
+    }
+  };
+
+  // Update details of selected card
+  const updateActiveCardProfile = (e) => {
+    const { name, value } = e.target;
+    if (!selectedCardId) return;
+
+    const updated = cards.map(c => {
+      if (c.id === selectedCardId) {
+        return {
+          ...c,
+          profile: {
+            ...c.profile,
+            [name]: value
+          }
+        };
+      }
+      return c;
+    });
+
+    setCards(updated); // Local update only; saved when clicking "Save Information"
+  };
+
+  // Update active card relationship type
+  const updateActiveCardRelationship = (value) => {
+    if (!selectedCardId || !value) return;
+    const updated = cards.map(c => {
+      if (c.id === selectedCardId) {
+        return { ...c, relationship: value };
+      }
+      return c;
+    });
+    setCards(updated);
+  };
+
+  // Add contact to selected card
+  const addContactToActiveCard = (e) => {
+    e.preventDefault();
+    if (!selectedCardId) return;
+    if (!newContact.name || !newContact.phoneNumber || !newContact.relationship) {
+      showStatus('Please fill in all contact fields.', 'error');
+      return;
+    }
+
+    if (activeCard.emergencyContacts.length >= 2) {
+      showStatus('Emergency contacts are limited to 2 per card.', 'error');
+      return;
+    }
+
+    const updated = cards.map(c => {
+      if (c.id === selectedCardId) {
+        return {
+          ...c,
+          emergencyContacts: [...c.emergencyContacts, { ...newContact }]
+        };
+      }
+      return c;
+    });
+
+    setCards(updated);
+    setNewContact({ name: '', relationship: '', phoneNumber: '' });
+    showStatus('Emergency contact added (unsaved). Click Save.', 'info');
+  };
+
+  // Remove contact from selected card
+  const removeContactFromActiveCard = (index) => {
+    if (!selectedCardId) return;
+    const updated = cards.map(c => {
+      if (c.id === selectedCardId) {
+        return {
+          ...c,
+          emergencyContacts: c.emergencyContacts.filter((_, i) => i !== index)
+        };
+      }
+      return c;
+    });
+    setCards(updated);
+    showStatus('Emergency contact removed (unsaved). Click Save.', 'info');
+  };
+
+  // Add medication to selected card
+  const addMedicationToActiveCard = (e) => {
+    e.preventDefault();
+    if (!selectedCardId) return;
+    if (!newMed.name || !newMed.dosage || !newMed.frequency) {
+      showStatus('Please specify medication name, dosage, and frequency.', 'error');
+      return;
+    }
+
+    const updated = cards.map(c => {
+      if (c.id === selectedCardId) {
+        return {
+          ...c,
+          medications: [...c.medications, { ...newMed }]
+        };
+      }
+      return c;
+    });
+
+    setCards(updated);
+    setNewMed({ name: '', dosage: '', frequency: '', instructions: '' });
+    showStatus('Medication added (unsaved). Click Save.', 'info');
+  };
+
+  // Remove medication from selected card
+  const removeMedicationFromActiveCard = (index) => {
+    if (!selectedCardId) return;
+    const updated = cards.map(c => {
+      if (c.id === selectedCardId) {
+        return {
+          ...c,
+          medications: c.medications.filter((_, i) => i !== index)
+        };
+      }
+      return c;
+    });
+    setCards(updated);
+    showStatus('Medication removed (unsaved). Click Save.', 'info');
+  };
+
+  // Manual trigger to save current active states
+  const handleSaveActiveCard = async () => {
+    await saveCollection(cards);
+  };
+
+  // Share Card Handler
+  const handleShareCard = async () => {
+    if (!shareEmail) return;
+    const cleanEmail = shareEmail.toLowerCase().trim();
+    
+    if (cleanEmail === userEmail) {
+      showStatus("You cannot share a card with yourself.", "error");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${BACKEND_URL}/shares`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ profileId: selectedCardId, emailToShare: cleanEmail })
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to share card.');
+      }
+
+      showStatus(`Card successfully shared with ${cleanEmail}!`, 'success');
+      setShareEmail('');
+      
+      // Update local share state
+      setCards(prev => prev.map(c => {
+        if (c.id === selectedCardId) {
+          const list = c.sharedWith || [];
+          if (!list.includes(cleanEmail)) {
+            return { ...c, sharedWith: [...list, cleanEmail] };
+          }
+        }
+        return c;
+      }));
+    } catch (err) {
+      showStatus(err.message, 'error');
+    }
+  };
+
+  // Revoke Share Handler
+  const handleRevokeShare = async (emailToRevoke) => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/shares`, {
+        method: 'DELETE',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ profileId: selectedCardId, emailToRevoke })
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to revoke access.');
+      }
+
+      showStatus(`Access revoked for ${emailToRevoke}.`, 'info');
+      
+      // Update local state share list
+      setCards(prev => prev.map(c => {
+        if (c.id === selectedCardId) {
+          return { ...c, sharedWith: (c.sharedWith || []).filter(e => e !== emailToRevoke) };
+        }
+        return c;
+      }));
+    } catch (err) {
+      showStatus(err.message, 'error');
+    }
+  };
+
+  // Log out session
+  const handleLogout = () => {
+    localStorage.removeItem('kinledger_jwt_token');
+    localStorage.removeItem('kinledger_user_email');
+    setToken(null);
+    setUserEmail(null);
+    setCards([]);
+    setSelectedCardId(null);
+    showStatus("Logged out successfully.", "info");
+  };
+
+  // Delete account permanently (DPDP / Right to Erasure)
+  const handleDeleteAccount = async () => {
+    const password = window.prompt("WARNING: This will permanently delete your KinLedger account and all associated family medical profiles. This action cannot be undone.\n\nEnter your password to confirm deletion:");
+    if (password === null) return; // User cancelled
+    if (!password.trim()) {
+      showStatus("Password is required to delete account.", "error");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${BACKEND_URL}/auth/account`, {
+        method: 'DELETE',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ password })
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to delete account.');
+      }
+
+      showStatus("Your account and all family records have been permanently deleted.", "success");
+      
+      // Purge credentials and return to auth screen
+      localStorage.removeItem('kinledger_jwt_token');
+      localStorage.removeItem('kinledger_user_email');
+      setToken(null);
+      setUserEmail(null);
+      setCards([]);
+      setSelectedCardId(null);
+    } catch (err) {
+      showStatus(err.message, 'error');
+    }
+  };
+
+  const handleFeatureSelect = (featureId) => {
+    setSelectedFeature(featureId);
+  };
+
+  const handleJoinWaitlist = async () => {
+    if (!selectedFeature) {
+      showStatus("Please select a feature to vote on.", "error");
+      return;
+    }
+    
+    const keySuffix = userEmail ? `_${userEmail.toLowerCase().trim()}` : '';
+    localStorage.setItem(`kinledger_waitlist_joined${keySuffix}`, 'true');
+    localStorage.setItem(`kinledger_waitlist_features${keySuffix}`, JSON.stringify([selectedFeature]));
+    setJoinedWaitlist(true);
+    setVotedFeature(selectedFeature);
+    showStatus("Thank you for voting and joining the KinLedger Waitlist!", "success");
+    try {
+      await fetch(`${BACKEND_URL}/waitlist`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          timestamp: new Date(),
+          feature: selectedFeature,
+          email: userEmail
+        })
+      });
+    } catch (err) {
+      console.log('Waitlist API bypassed in offline mode.');
+    }
+  };
+
+  const handleResetWaitlist = () => {
+    const keySuffix = userEmail ? `_${userEmail.toLowerCase().trim()}` : '';
+    localStorage.removeItem(`kinledger_waitlist_joined${keySuffix}`);
+    localStorage.removeItem(`kinledger_waitlist_features${keySuffix}`);
+    setJoinedWaitlist(false);
+    setSelectedFeature(null);
+    setVotedFeature(null);
+    showStatus("Waitlist selection reset. You can vote again.", "info");
+  };
+
+  const getRelationBadgeClass = (relation) => {
+    if (!relation) return 'badge-other';
+    const clean = relation.toLowerCase().trim();
+    if (clean === 'father') return 'badge-father';
+    if (clean === 'mother') return 'badge-mother';
+    if (clean === 'spouse' || clean === 'husband' || clean === 'wife') return 'badge-spouse';
+    if (clean === 'son') return 'badge-son';
+    if (clean === 'daughter') return 'badge-daughter';
+    if (clean === 'father-in-law') return 'badge-father-in-law';
+    if (clean === 'mother-in-law') return 'badge-mother-in-law';
+    return 'badge-other';
+  };
+
+  if (!token) {
+    return <AuthScreen onAuthSuccess={(t, email) => { setToken(t); setUserEmail(email); }} showStatus={showStatus} />;
+  }
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <h2 style={{ fontFamily: 'var(--font-title)', color: 'var(--primary)' }}>Loading Family Dashboard...</h2>
+      </div>
+    );
+  }
+
+  return (
+    <div className="app-container">
+      {/* Header Banner */}
+      <header className="app-header">
+        <div className="header-content">
+          <a href="#" className="logo" onClick={() => setSelectedCardId(null)}>
+            <span className="logo-icon">🛡️</span>
+            <span>KinLedger</span>
+          </a>
+          <div className="header-auth-badge">
+            <span className="user-email-text">{userEmail}</span>
+            <button className="btn-logout" onClick={handleLogout} title="Log Out">
+              <LogOut size={16} />
+              <span>Sign Out</span>
+            </button>
+            <button className="btn-delete-account" onClick={handleDeleteAccount} title="Permanently Delete Account">
+              <span>Delete Account</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main className="main-content">
+        {/* Sync/Status Banner notifications */}
+        {statusMessage && (
+          <div className={`sync-banner ${statusType === 'success' ? 'success' : ''} ${statusType === 'error' ? 'danger' : ''}`}>
+            <span>{statusMessage}</span>
+          </div>
+        )}
+
+        {/* ============================================== */}
+        {/* VIEW 1: FAMILY CARDS DASHBOARD                  */}
+        {/* ============================================== */}
+        {selectedCardId === null ? (
+          <div className="animated">
+            <div className="dashboard-title-bar">
+              <div>
+                <h2>Family Emergency Directory</h2>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '0.2rem' }}>
+                  Create, share, and manage emergency medical profiles for family members.
+                </p>
+              </div>
+            </div>
+
+            <div className="dashboard-grid">
+              {/* Profile Card List */}
+              {cards.map(card => (
+                <div 
+                  key={card.id} 
+                  className="member-summary-card" 
+                  onClick={() => {
+                    setSelectedCardId(card.id);
+                    setActiveTab('view');
+                  }}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <div className="member-card-header">
+                    <div>
+                      <div className="member-name">
+                        {card.profile.fullName || 'Unnamed Profile'}
+                        {card.isShared && (
+                          <span className="shared-badge" title={`Shared by ${card.ownerEmail}`}>
+                            Shared
+                          </span>
+                        )}
+                      </div>
+                      <div className="member-meta">
+                        <span className={`relationship-badge ${getRelationBadgeClass(card.relationship)}`}>
+                          {card.relationship}
+                        </span>
+                        {card.profile.age && <span>• {card.profile.age} yrs</span>}
+                        {card.profile.bloodGroup && <span>• {card.profile.bloodGroup}</span>}
+                      </div>
+                    </div>
+                    {/* Delete/Remove card directly from dashboard */}
+                    <button 
+                      className="btn-icon-only danger" 
+                      onClick={(e) => handleDeleteCard(card.id, e)}
+                      title={card.isShared ? "Remove card from dashboard" : "Delete card"}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+
+                  <div className="member-card-body">
+                    <div>
+                      <strong>Conditions:</strong>{' '}
+                      {card.profile.conditions ? (
+                        <span style={{ color: 'var(--text-primary)' }}>
+                          {card.profile.conditions.substring(0, 50)}
+                          {card.profile.conditions.length > 50 ? '...' : ''}
+                        </span>
+                      ) : (
+                        <span style={{ color: 'var(--text-muted)' }}>None listed</span>
+                      )}
+                    </div>
+                    <div>
+                      <strong>Meds:</strong>{' '}
+                      {card.medications.length > 0 
+                        ? `${card.medications.length} active medication(s)` 
+                        : <span style={{ color: 'var(--text-muted)' }}>None listed</span>
+                      }
+                    </div>
+                    <div>
+                      <strong>Emergency Contact:</strong>{' '}
+                      {card.emergencyContacts.length === 0 && (
+                        <span style={{ color: 'var(--text-muted)' }}>No contacts registered</span>
+                      )}
+                      {card.emergencyContacts.length === 1 && '1 contact registered'}
+                      {card.emergencyContacts.length === 2 && '2 contacts registered'}
+                    </div>
+                  </div>
+
+                  <div className="member-card-footer">
+                    <button 
+                      className="btn btn-secondary btn-sm" 
+                      style={{ flex: 1 }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedCardId(card.id);
+                        setActiveTab('edit');
+                      }}
+                    >
+                      Setup Details
+                    </button>
+                    <button 
+                      className="btn btn-outline btn-sm"
+                      style={{ display: 'flex', gap: '0.25rem', alignItems: 'center' }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedCardId(card.id);
+                        setActiveTab('view');
+                      }}
+                    >
+                      <Eye size={14} /> View
+                    </button>
+                  </div>
+                </div>
+              ))}
+
+              {/* Add Member Button Card */}
+              {!showAddMenu ? (
+                <button className="add-member-card" onClick={() => setShowAddMenu(true)}>
+                  <div className="add-member-icon-wrap">
+                    <Plus size={24} />
+                  </div>
+                  Add Family Member
+                </button>
+              ) : (
+                <div className="member-summary-card" style={{ borderStyle: 'solid', borderColor: 'var(--primary)', backgroundColor: 'var(--primary-light)' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', width: '100%', height: '100%' }}>
+                    <div style={{ fontWeight: 'bold', color: 'var(--primary)', fontFamily: 'var(--font-title)' }}>
+                      Select Relationship
+                    </div>
+                    <select 
+                      onChange={(e) => {
+                        if (e.target.value === 'custom') {
+                          // keep menu open, let user input custom relation
+                        } else {
+                          handleCreateCard(e.target.value);
+                        }
+                      }}
+                      defaultValue=""
+                    >
+                      <option value="" disabled>Choose relationship...</option>
+                      <option value="Father">Father</option>
+                      <option value="Mother">Mother</option>
+                      <option value="Spouse">Spouse</option>
+                      <option value="Son">Son</option>
+                      <option value="Daughter">Daughter</option>
+                      <option value="Father-in-law">Father-in-law</option>
+                      <option value="Mother-in-law">Mother-in-law</option>
+                      <option value="custom">Other / Custom...</option>
+                    </select>
+
+                    {/* Show input if custom relation selected */}
+                    {customRelation !== null && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginTop: '0.2rem' }}>
+                        <input 
+                          type="text" 
+                          placeholder="e.g., Grandfather, Aunt" 
+                          value={customRelation}
+                          onChange={(e) => setCustomRelation(e.target.value)}
+                        />
+                        <button 
+                          className="btn btn-primary btn-sm"
+                          onClick={() => handleCreateCard(customRelation || 'Family Member')}
+                        >
+                          Confirm
+                        </button>
+                      </div>
+                    )}
+
+                    <button 
+                      className="btn btn-danger btn-sm" 
+                      style={{ marginTop: 'auto', alignSelf: 'flex-start' }}
+                      onClick={() => {
+                        setShowAddMenu(false);
+                        setCustomRelation('');
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Waitlist Banner for Upcoming Features */}
+            <div className="waitlist-banner card">
+              <div className="waitlist-header-row">
+                <span className="waitlist-tag">🚀 Coming soon</span>
+                {joinedWaitlist ? (
+                  <div className="waitlist-joined-container">
+                    <div className="waitlist-joined-badge">
+                      <span className="logo-icon">✓</span>
+                      <span>You're on the Waitlist!</span>
+                    </div>
+                    <button className="btn btn-outline btn-sm" onClick={handleResetWaitlist}>
+                      Reset Vote
+                    </button>
+                  </div>
+                ) : (
+                  <button className="btn btn-primary" onClick={handleJoinWaitlist}>
+                    Vote & Join the Waitlist
+                  </button>
+                )}
+              </div>
+              
+              <div className="waitlist-body-section">
+                {joinedWaitlist ? (
+                  <div className="waitlist-voted-area">
+                    <p style={{ marginBottom: '1rem', color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
+                      Thank you for helping us shape KinLedger! We have recorded your choice:
+                    </p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '1rem 1.25rem', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--primary-light)', border: '1.5px solid rgba(15, 108, 95, 0.15)', color: 'var(--primary)', fontWeight: '600', fontSize: '1rem', marginBottom: '1.5rem', animation: 'fadeIn 0.3s ease' }}>
+                      <span style={{ fontSize: '1.25rem' }}>🎯</span> 
+                      <span>{UPCOMING_FEATURES.find(f => f.id === votedFeature)?.label || 'General Interest'}</span>
+                    </div>
+                    <div style={{ borderTop: '1px solid var(--border)', paddingTop: '1.25rem' }}>
+                      <button className="btn btn-secondary btn-sm" onClick={handleResetWaitlist}>
+                        Change Selection / Reset Vote
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="waitlist-voting-area">
+                    <p style={{ marginBottom: '1.25rem', color: 'var(--text-primary)', fontFamily: 'var(--font-title)', fontWeight: '600', fontSize: '1.1rem', lineHeight: '1.4' }}>
+                      Which of these would make the biggest difference for your family right now?
+                    </p>
+                    <div className="features-checklist-grid">
+                      {UPCOMING_FEATURES.map(feature => {
+                        const isChecked = selectedFeature === feature.id;
+                        return (
+                          <div 
+                            key={feature.id} 
+                            className={`checklist-item-card ${isChecked ? 'active' : ''}`}
+                            onClick={() => handleFeatureSelect(feature.id)}
+                          >
+                            <div className="checkbox-wrap">
+                              <input 
+                                type="radio" 
+                                name="waitlist-feature-choice"
+                                checked={isChecked}
+                                onChange={() => {}} // handled by card onClick
+                                style={{ pointerEvents: 'none', cursor: 'pointer' }}
+                              />
+                            </div>
+                            <div className="checklist-text-wrap">
+                              <span className="checklist-label">{feature.label}</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        ) : (
+          /* ============================================== */
+          /* VIEW 2: SELECTED CARD SETUP WORKSPACE           */
+          /* ============================================== */
+          <div className="animated">
+            {/* Header bar back to dashboard */}
+            <div className="workspace-header">
+              <div className="workspace-info">
+                <button className="btn-icon-only" onClick={() => setSelectedCardId(null)} title="Back to Dashboard">
+                  <ArrowLeft size={20} />
+                </button>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <h3>{activeCard.profile.fullName || 'New Profile'}</h3>
+                    <span className={`relationship-badge ${getRelationBadgeClass(activeCard.relationship)}`}>
+                      {activeCard.relationship}
+                    </span>
+                  </div>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                    Selected Card Setup Workspace
+                  </span>
+                </div>
+              </div>
+              
+              <div className="workspace-actions">
+                <button className="btn btn-secondary" onClick={() => setSelectedCardId(null)}>
+                  Dashboard
+                </button>
+                <button className="btn btn-primary" onClick={handleSaveActiveCard}>
+                  <Save size={18} />
+                  Save Card Information
+                </button>
+              </div>
+            </div>
+
+            {/* Sub Tabs Inside Workspace */}
+            <div className="nav-tabs">
+              <button 
+                className={`tab-btn ${activeTab === 'edit' ? 'active' : ''}`}
+                onClick={() => setActiveTab('edit')}
+              >
+                <User size={16} />
+                Setup Card Details
+              </button>
+              <button 
+                className={`tab-btn ${activeTab === 'view' ? 'active' : ''}`}
+                onClick={() => setActiveTab('view')}
+              >
+                <FileText size={16} />
+                View & Share Printable Card
+              </button>
+            </div>
+
+            {/* Sub Tab Content */}
+            {activeTab === 'edit' && (
+              <div>
+                {/* Profile Form */}
+                <div className="card">
+                  <h3 className="card-title">
+                    <User size={20} className="text-primary" />
+                    1. Card Profile Details
+                  </h3>
+                  <div className="form-grid">
+                    <div className="form-group">
+                      <label htmlFor="fullName">Full Name</label>
+                      <input 
+                        type="text" 
+                        id="fullName" 
+                        name="fullName" 
+                        placeholder="e.g., Ramachandra Gowda"
+                        value={activeCard.profile.fullName} 
+                        onChange={updateActiveCardProfile}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="age">Age</label>
+                      <input 
+                        type="number" 
+                        id="age" 
+                        name="age" 
+                        placeholder="e.g., 68"
+                        value={activeCard.profile.age} 
+                        onChange={updateActiveCardProfile}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="bloodGroup">Blood Group</label>
+                      <select 
+                        id="bloodGroup" 
+                        name="bloodGroup" 
+                        value={activeCard.profile.bloodGroup} 
+                        onChange={updateActiveCardProfile}
+                      >
+                        <option value="">Select Blood Group</option>
+                        <option value="A+">A+</option>
+                        <option value="A-">A-</option>
+                        <option value="B+">B+</option>
+                        <option value="B-">B-</option>
+                        <option value="AB+">AB+</option>
+                        <option value="AB-">AB-</option>
+                        <option value="O+">O+</option>
+                        <option value="O-">O-</option>
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label>Relationship Tag</label>
+                      <select 
+                        value={activeCard.relationship} 
+                        onChange={(e) => updateActiveCardRelationship(e.target.value)}
+                      >
+                        <option value="Father">Father</option>
+                        <option value="Mother">Mother</option>
+                        <option value="Spouse">Spouse</option>
+                        <option value="Son">Son</option>
+                        <option value="Daughter">Daughter</option>
+                        <option value="Father-in-law">Father-in-law</option>
+                        <option value="Mother-in-law">Mother-in-law</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+                    <div className="form-group full-width">
+                      <label htmlFor="conditions">Medical Conditions / Diagnosis</label>
+                      <textarea 
+                        id="conditions" 
+                        name="conditions" 
+                        placeholder="e.g., Type 2 Diabetes, Hypertension. Undergoing treatment."
+                        value={activeCard.profile.conditions} 
+                        onChange={updateActiveCardProfile}
+                      />
+                    </div>
+                    <div className="form-group full-width">
+                      <label htmlFor="allergies">Critical Allergies</label>
+                      <textarea 
+                        id="allergies" 
+                        name="allergies" 
+                        placeholder="e.g., Penicillin (Anaphylaxis), Peanuts."
+                        value={activeCard.profile.allergies} 
+                        onChange={updateActiveCardProfile}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Insurance Form */}
+                <div className="card">
+                  <h3 className="card-title">
+                    <Award size={20} className="text-primary" />
+                    2. Insurance Card details
+                  </h3>
+                  <div className="form-grid">
+                    <div className="form-group">
+                      <label htmlFor="insurancePolicy">Insurance Policy / Issuer Name</label>
+                      <input 
+                        type="text" 
+                        id="insurancePolicy" 
+                        name="insurancePolicy" 
+                        placeholder="e.g., Star Health Senior Citizens Policy"
+                        value={activeCard.profile.insurancePolicy} 
+                        onChange={updateActiveCardProfile}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="insuranceNumber">Policy Number / Member ID</label>
+                      <input 
+                        type="text" 
+                        id="insuranceNumber" 
+                        name="insuranceNumber" 
+                        placeholder="e.g., POL-8849-002"
+                        value={activeCard.profile.insuranceNumber} 
+                        onChange={updateActiveCardProfile}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="insuranceValidTill">Valid Till / Expiry Date</label>
+                      <input 
+                        type="text" 
+                        id="insuranceValidTill" 
+                        name="insuranceValidTill" 
+                        placeholder="e.g., 12/2028 or Dec 2028"
+                        value={activeCard.profile.insuranceValidTill || ''} 
+                        onChange={updateActiveCardProfile}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Contacts Section */}
+                <div className="card">
+                  <h3 className="card-title">
+                    <Phone size={20} className="text-primary" />
+                    3. Emergency Contacts ({activeCard.emergencyContacts.length}/2)
+                  </h3>
+
+                  {activeCard.emergencyContacts.length > 0 ? (
+                    <div>
+                      {activeCard.emergencyContacts.map((contact, index) => (
+                        <div key={index} className="item-row item-row-contact">
+                          <div>
+                            <strong>{contact.name}</strong>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Name</div>
+                          </div>
+                          <div>
+                            <strong>{contact.relationship}</strong>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Relationship</div>
+                          </div>
+                          <div>
+                            <strong>{contact.phoneNumber}</strong>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Phone Number</div>
+                          </div>
+                          <button className="btn btn-danger btn-sm" onClick={() => removeContactFromActiveCard(index)}>
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="item-list-empty">
+                      No emergency contacts registered yet. Please add up to 2 contacts below.
+                    </div>
+                  )}
+
+                  {activeCard.emergencyContacts.length < 2 && (
+                    <form onSubmit={addContactToActiveCard} style={{ borderTop: '1px solid var(--border)', paddingTop: '1.5rem', marginTop: '1rem' }}>
+                      <h4 style={{ marginBottom: '1rem', fontSize: '0.95rem', color: 'var(--text-secondary)' }}>Add Emergency Contact</h4>
+                      <div className="form-grid" style={{ gap: '1rem' }}>
+                        <div className="form-group">
+                          <label>Contact Name</label>
+                          <input 
+                            type="text" 
+                            placeholder="e.g., Sunitha Gowda" 
+                            value={newContact.name}
+                            onChange={e => setNewContact(prev => ({ ...prev, name: e.target.value }))}
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label>Relationship</label>
+                          <input 
+                            type="text" 
+                            placeholder="e.g., Daughter, Son" 
+                            value={newContact.relationship}
+                            onChange={e => setNewContact(prev => ({ ...prev, relationship: e.target.value }))}
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label>Phone Number</label>
+                          <input 
+                            type="tel" 
+                            placeholder="e.g., 9886012345" 
+                            value={newContact.phoneNumber}
+                            onChange={e => setNewContact(prev => ({ ...prev, phoneNumber: e.target.value }))}
+                          />
+                        </div>
+                        <div className="form-group" style={{ justifyContent: 'flex-end' }}>
+                          <button type="submit" className="btn btn-secondary" style={{ width: 'fit-content', alignSelf: 'flex-end' }}>
+                            <Plus size={16} /> Add Contact
+                          </button>
+                        </div>
+                      </div>
+                    </form>
+                  )}
+                </div>
+
+                {/* Medications Section */}
+                <div className="card">
+                  <h3 className="card-title">
+                    <Heart size={20} className="text-primary" />
+                    4. Medications List
+                  </h3>
+
+                  {activeCard.medications.length > 0 ? (
+                    <div>
+                      {activeCard.medications.map((med, index) => (
+                        <div key={index} className="item-row">
+                          <div>
+                            <strong>{med.name}</strong>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Name</div>
+                          </div>
+                          <div>
+                            <strong>{med.dosage}</strong>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Dosage</div>
+                          </div>
+                          <div>
+                            <strong>{med.frequency}</strong>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Frequency</div>
+                          </div>
+                          <div>
+                            <strong>{med.instructions || 'None'}</strong>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Instructions</div>
+                          </div>
+                          <button className="btn btn-danger btn-sm" onClick={() => removeMedicationFromActiveCard(index)}>
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="item-list-empty">
+                      No medications documented. Add chronic medications below.
+                    </div>
+                  )}
+
+                  <form onSubmit={addMedicationToActiveCard} style={{ borderTop: '1px solid var(--border)', paddingTop: '1.5rem', marginTop: '1rem' }}>
+                    <h4 style={{ marginBottom: '1rem', fontSize: '0.95rem', color: 'var(--text-secondary)' }}>Add Chronic Medication</h4>
+                    <div className="form-grid" style={{ gap: '1rem' }}>
+                      <div className="form-group">
+                        <label>Medication Name</label>
+                        <input 
+                          type="text" 
+                          placeholder="e.g., Metformin" 
+                          value={newMed.name}
+                          onChange={e => setNewMed(prev => ({ ...prev, name: e.target.value }))}
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label>Dosage</label>
+                        <input 
+                          type="text" 
+                          placeholder="e.g., 500mg, 1 tab" 
+                          value={newMed.dosage}
+                          onChange={e => setNewMed(prev => ({ ...prev, dosage: e.target.value }))}
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label>Frequency</label>
+                        <input 
+                          type="text" 
+                          placeholder="e.g., Once morning" 
+                          value={newMed.frequency}
+                          onChange={e => setNewMed(prev => ({ ...prev, frequency: e.target.value }))}
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label>Instructions (Optional)</label>
+                        <input 
+                          type="text" 
+                          placeholder="e.g., After meals" 
+                          value={newMed.instructions}
+                          onChange={e => setNewMed(prev => ({ ...prev, instructions: e.target.value }))}
+                        />
+                      </div>
+                      <div className="form-group" style={{ gridColumn: '1 / -1', alignItems: 'flex-end', marginTop: '0.5rem' }}>
+                        <button type="submit" className="btn btn-secondary">
+                          <Plus size={16} /> Add Medication
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+
+                {/* Collaborative Joint Sharing Section */}
+                <div className="card">
+                  <h3 className="card-title">
+                    <Share2 size={20} className="text-primary" />
+                    5. Share Card with Family
+                  </h3>
+                  
+                  {activeCard.isShared ? (
+                    <div className="item-list-empty" style={{ backgroundColor: 'var(--bg-app)', color: 'var(--text-secondary)' }}>
+                      This profile is owned by <strong>{activeCard.ownerEmail}</strong>. 
+                      Only the owner can manage sharing permissions for this card.
+                    </div>
+                  ) : (
+                    <div>
+                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1.25rem' }}>
+                        Share this medical card with family members' email addresses. They will be able to view and update details jointly on their dashboards.
+                      </p>
+                      
+                      <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                        <input 
+                          type="email" 
+                          placeholder="family.member@email.com" 
+                          value={shareEmail} 
+                          onChange={(e) => setShareEmail(e.target.value)}
+                          style={{ flex: 1 }}
+                        />
+                        <button className="btn btn-primary btn-sm" onClick={handleShareCard}>
+                          Add Share
+                        </button>
+                      </div>
+
+                      {activeCard.sharedWith && activeCard.sharedWith.length > 0 ? (
+                        <div>
+                          <h4 style={{ fontSize: '0.9rem', color: 'var(--text-primary)', marginBottom: '0.5rem' }}>Currently Shared With:</h4>
+                          <div className="shares-list">
+                            {activeCard.sharedWith.map(email => (
+                              <div key={email} className="item-row" style={{ gridTemplateColumns: '1fr auto', padding: '0.5rem 1rem', background: 'var(--bg-app)', borderRadius: 'var(--radius-sm)', marginBottom: '0.5rem', alignItems: 'center' }}>
+                                <span style={{ fontSize: '0.9rem', fontWeight: '500' }}>{email}</span>
+                                <button className="btn btn-danger btn-sm" onClick={() => handleRevokeShare(email)}>
+                                  Revoke
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="item-list-empty">
+                          This card is private. Share with family to enable collaborative editing.
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'view' && (
+              <EmergencyCard 
+                profile={activeCard.profile}
+                emergencyContacts={activeCard.emergencyContacts}
+                medications={activeCard.medications}
+                synced={synced}
+              />
+            )}
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}

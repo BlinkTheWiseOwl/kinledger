@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">KinLedger</string>
+    <string name="title_activity_main">KinLedger</string>
+    <string name="package_name">com.kinledger.app</string>
+    <string name="custom_url_scheme">com.kinledger.app</string>
+</resources>
