@@ -10,7 +10,7 @@ const BlueShield = ({ size = 24, className = "" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={{ display: 'inline-block', verticalAlign: 'middle' }}>
     <path d="M12 2C12 2 14.5 3 19 3V11C19 16.5 15.5 20.5 12 22V2Z" fill="#60a5fa"/>
     <path d="M12 2V22C8.5 20.5 5 16.5 5 11V3C9.5 3 12 2 12 2Z" fill="#2563eb"/>
-    <path d="M12 2C12 2 14.5 3 19 3V11C19 16.5 15.5 20.5 12 22C8.5 20.5 5 16.5 5 11V3C9.5 3 12 2 12 2Z" stroke="#1e3a8a" strokeWidth="1.5" strokeLinejoin="round"/>
+    <path d="M12 2C12 2 14.5 3 19 3V11C19 16.5 15.5 20.5 12 22C8.5 20.5 5 16.5 5 11V3C9.5 3 12 2 12 2Z" stroke="#d4af37" strokeWidth="1.5" strokeLinejoin="round"/>
   </svg>
 );
 
@@ -1057,53 +1057,73 @@ export default function App() {
   }
 
   if (showOnboarding) {
+    const handleCompleteOnboarding = () => {
+      localStorage.setItem('kinledger_onboarding_completed', 'true');
+      setShowOnboarding(false);
+    };
+
     return (
       <div className="onboarding-screen">
         <div className="onboarding-card animated">
           <div className="onboarding-slides">
             {onboardingSlide === 0 && (
               <div className="onboarding-slide animated">
-                <BlueShield size={80} style={{ marginBottom: '1rem' }} />
-                <h2>Secure Emergency Cards</h2>
-                <p>Create digital emergency medical cards for your parents and family members containing critical health profiles.</p>
+                <div className="onboarding-icon-wrap" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100px', marginBottom: '1.5rem' }}>
+                  <ShieldAlert size={80} style={{ color: 'var(--danger)', strokeWidth: 1.5, animation: 'pulse 2s infinite' }} />
+                </div>
+                <h2>Be Prepared Before an Emergency Happens</h2>
+                <p>Keep your loved one's essential medical information ready—so you're never scrambling when every second matters.</p>
               </div>
             )}
             {onboardingSlide === 1 && (
               <div className="onboarding-slide animated">
-                <div className="onboarding-icon">🖨️</div>
-                <h2>Instant Access & Printing</h2>
-                <p>Keep medical details, allergies, and contacts ready for doctors. Print or save the card as a PDF for quick offline reference.</p>
+                <div className="onboarding-icon-wrap" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100px', marginBottom: '1.5rem' }}>
+                  <Heart size={80} style={{ color: 'var(--primary)', fill: 'rgba(15, 108, 95, 0.1)', strokeWidth: 1.5 }} />
+                </div>
+                <h2>One Place for Your Family's Health Records</h2>
+                <p>Store medical conditions, medications, allergies, insurance details, and emergency contacts in a secure, organized profile.</p>
               </div>
             )}
             {onboardingSlide === 2 && (
               <div className="onboarding-slide animated">
-                <div className="onboarding-icon">👥</div>
-                <h2>Offline Access & Family Sharing</h2>
-                <p>All emergency profiles are stored securely on your device and are fully accessible offline. Share edit access with family members to manage details collaboratively.</p>
+                <div className="onboarding-icon-wrap" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100px', marginBottom: '1.5rem' }}>
+                  <Share2 size={80} style={{ color: '#2563eb', strokeWidth: 1.5 }} />
+                </div>
+                <h2>Share Critical Information Instantly</h2>
+                <p>Open or share an emergency medical card with family members or healthcare providers in just a few taps.</p>
               </div>
             )}
           </div>
 
-          <div className="onboarding-footer">
-            <div className="onboarding-dots">
+          <div className="onboarding-footer" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', alignItems: 'center', width: '100%' }}>
+            <div className="onboarding-dots" style={{ display: 'flex', gap: '8px' }}>
               <span className={`dot ${onboardingSlide === 0 ? 'active' : ''}`} onClick={() => setOnboardingSlide(0)}></span>
               <span className={`dot ${onboardingSlide === 1 ? 'active' : ''}`} onClick={() => setOnboardingSlide(1)}></span>
               <span className={`dot ${onboardingSlide === 2 ? 'active' : ''}`} onClick={() => setOnboardingSlide(2)}></span>
             </div>
             
-            <button 
-              className="btn btn-primary" 
-              onClick={() => {
-                if (onboardingSlide < 2) {
-                  setOnboardingSlide(onboardingSlide + 1);
-                } else {
-                  localStorage.setItem('kinledger_onboarding_completed', 'true');
-                  setShowOnboarding(false);
-                }
-              }}
-            >
-              {onboardingSlide === 2 ? 'Get Started' : 'Next'}
-            </button>
+            <div style={{ display: 'flex', gap: '1rem', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
+              <button 
+                className="btn btn-outline" 
+                style={{ flex: 1, borderColor: 'var(--border)', color: 'var(--text-secondary)' }}
+                onClick={handleCompleteOnboarding}
+              >
+                Skip
+              </button>
+              <button 
+                className="btn btn-primary" 
+                style={{ flex: 1 }}
+                onClick={() => {
+                  if (onboardingSlide < 2) {
+                    setOnboardingSlide(onboardingSlide + 1);
+                  } else {
+                    handleCompleteOnboarding();
+                  }
+                }}
+              >
+                {onboardingSlide === 2 ? 'Get Started' : 'Next'}
+              </button>
+            </div>
           </div>
         </div>
       </div>
