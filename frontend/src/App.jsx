@@ -10,7 +10,7 @@ const BlueShield = ({ size = 24, className = "" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={{ display: 'inline-block', verticalAlign: 'middle' }}>
     <path d="M12 2C12 2 14.5 3 19 3V11C19 16.5 15.5 20.5 12 22V2Z" fill="#60a5fa" />
     <path d="M12 2V22C8.5 20.5 5 16.5 5 11V3C9.5 3 12 2 12 2Z" fill="#2563eb" />
-    <path d="M12 2C12 2 14.5 3 19 3V11C19 16.5 15.5 20.5 12 22C8.5 20.5 5 16.5 5 11V3C9.5 3 12 2 12 2Z" stroke="#d4af37" strokeWidth="1.5" strokeLinejoin="round" />
+    <path d="M12 2C12 2 14.5 3 19 3V11C19 16.5 15.5 20.5 12 22C8.5 20.5 5 16.5 5 11V3C9.5 3 12 2 12 2Z" stroke="#d4af37" strokeWidth="0.75" strokeLinejoin="round" />
   </svg>
 );
 
@@ -1101,7 +1101,7 @@ export default function App() {
                     <circle cx="100" cy="100" r="80" fill="rgba(239, 68, 68, 0.03)" />
                     <circle cx="100" cy="100" r="60" fill="rgba(239, 68, 68, 0.06)" />
                     <path d="M30 100H60L72 65L88 135L104 80L116 120L128 100H170" stroke="rgba(239, 68, 68, 0.15)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-                    <path d="M100 40C100 40 120 47 150 47V105C150 145 125 170 100 180C75 170 50 145 50 105V47C80 47 100 40 100 40Z" fill="url(#shieldGrad)" stroke="#d4af37" strokeWidth="3" strokeLinejoin="round" />
+                    <path d="M100 40C100 40 120 47 150 47V105C150 145 125 170 100 180C75 170 50 145 50 105V47C80 47 100 40 100 40Z" fill="url(#shieldGrad)" stroke="#d4af37" strokeWidth="1.5" strokeLinejoin="round" />
                     <path d="M75 105H90L97 85L105 125L112 95L118 115L125 105H140" stroke="#ffffff" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
                     <defs>
                       <linearGradient id="shieldGrad" x1="50" y1="40" x2="150" y2="180" gradientUnits="userSpaceOnUse">
@@ -1861,7 +1861,7 @@ export default function App() {
                           <label>Email Address (Optional)</label>
                           <input
                             type="email"
-                            placeholder="e.g., sunitha@email.com"
+                            placeholder="e.g., shloka@email.com"
                             value={newContact.email || ''}
                             onChange={e => updateNewContact('email', e.target.value)}
                             style={validationErrors.contactEmail ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
