@@ -779,7 +779,7 @@ export default function App() {
       return copy;
     });
 
-    showStatus('Emergency contact added (unsaved). Click Save.', 'info');
+    showStatus("Emergency contact added. Click 'Save Card Information' at the top to save your changes.", "info");
   };
 
   // Remove contact from selected card
@@ -795,7 +795,7 @@ export default function App() {
       return c;
     });
     setCards(updated);
-    showStatus('Emergency contact removed (unsaved). Click Save.', 'info');
+    showStatus("Emergency contact removed. Click 'Save Card Information' at the top to save your changes.", "info");
   };
 
   // Add medication to selected card
@@ -849,7 +849,7 @@ export default function App() {
 
     setCards(updated);
     setNewMed({ name: '', dosage: '', frequency: '', instructions: '' });
-    showStatus('Medication added (unsaved). Click Save.', 'info');
+    showStatus("Medication added. Click 'Save Card Information' at the top to save your changes.", "info");
   };
 
   // Remove medication from selected card
@@ -865,7 +865,7 @@ export default function App() {
       return c;
     });
     setCards(updated);
-    showStatus('Medication removed (unsaved). Click Save.', 'info');
+    showStatus("Medication removed. Click 'Save Card Information' at the top to save your changes.", "info");
   };
 
   // Manual trigger to save current active states
