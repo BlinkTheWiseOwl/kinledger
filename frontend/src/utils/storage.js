@@ -148,6 +148,9 @@ export async function saveCardData(cards, token) {
     clearTimeout(timeoutId);
     if (response.ok) {
       return { success: true, synced: true };
+    } else {
+      const data = await response.json();
+      return { success: false, synced: false, error: data.error || 'Server validation failed.' };
     }
   } catch (err) {
     console.warn('Backend sync failed. Changes saved locally in offline cards collection.', err);

@@ -90,10 +90,10 @@ export default function AuthScreen({ onAuthSuccess, showStatus, onShowPolicy }) 
     <div className="auth-container animated">
       <div className="auth-card">
         <div className="auth-header">
-          <div className="auth-logo-icon">
-            <Shield size={32} />
+          <div className="auth-logo">
+            <Shield className="logo-icon-svg" size={32} style={{ color: 'var(--primary)', fill: 'var(--primary-light)', strokeWidth: 2.5 }} />
+            <h1>KinLedger</h1>
           </div>
-          <h2>KinLedger</h2>
           <p className="auth-subtitle">
             {isLogin 
               ? 'Sign in to access your family emergency profiles' 

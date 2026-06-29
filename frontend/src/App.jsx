@@ -58,7 +58,7 @@ export default function App() {
       if (onboardingCompleted !== 'true') {
         setShowOnboarding(true);
       }
-    }, 1000);
+    }, 3000); // 3 seconds
     return () => clearTimeout(splashTimer);
   }, []);
   const [votedFeature, setVotedFeature] = useState(null);
@@ -302,6 +302,8 @@ export default function App() {
         const rel = activeUpdate.relationship || '';
         if (!rel || rel.trim() === '') {
           errors.relationship = "Relationship is required.";
+        } else if (containsUnsafeChars(rel)) {
+          errors.relationship = "Relationship cannot contain unsafe characters (<, >, \\, `).";
         }
         
         // 3. Age
@@ -362,17 +364,38 @@ export default function App() {
           }
         }
         
+        // 10. Emergency Contacts
+        (activeUpdate.emergencyContacts || []).forEach((contact, idx) => {
+          if (containsUnsafeChars(contact.name)) {
+            errors[`contactName_${idx}`] = `Emergency Contact #${idx + 1} Name cannot contain unsafe characters (<, >, \\, \`).`;
+          }
+          if (containsUnsafeChars(contact.email)) {
+            errors[`contactEmail_${idx}`] = `Emergency Contact #${idx + 1} Email cannot contain unsafe characters (<, >, \\, \`).`;
+          }
+        });
+
+        // 11. Medications
+        (activeUpdate.medications || []).forEach((med, idx) => {
+          if (containsUnsafeChars(med.name)) {
+            errors[`medName_${idx}`] = `Medication #${idx + 1} Name cannot contain unsafe characters (<, >, \\, \`).`;
+          }
+          if (containsUnsafeChars(med.dosage)) {
+            errors[`medDosage_${idx}`] = `Medication #${idx + 1} Dosage cannot contain unsafe characters (<, >, \\, \`).`;
+          }
+          if (containsUnsafeChars(med.instructions)) {
+            errors[`medInstructions_${idx}`] = `Medication #${idx + 1} Instructions cannot contain unsafe characters (<, >, \\, \`).`;
+          }
+        });
+
         if (Object.keys(errors).length > 0) {
           setValidationErrors(errors);
           showStatus("Save failed: Please correct the errors in the form.", "error");
           return; // Abort saving!
         }
       }
-      
-      setValidationErrors({});
     }
 
-    // Automatically inject/update timestamp for modified card
+    // Set updated list in state
     let finalCards = updatedCards;
     if (selectedCardId) {
       finalCards = updatedCards.map(c => {
@@ -387,7 +410,11 @@ export default function App() {
     try {
       const result = await saveCardData(finalCards, token);
       setSynced(result.synced);
-      showStatus('Changes saved successfully.', 'success');
+      if (result.success) {
+        showStatus('Changes saved successfully.', 'success');
+      } else {
+        showStatus(`Save failed: ${result.error}`, 'error');
+      }
     } catch (error) {
       showStatus('Error saving cards data.', 'error');
     }
@@ -1011,7 +1038,7 @@ export default function App() {
     return (
       <div className="splash-screen">
         <div className="splash-content animated">
-          <span className="splash-logo-icon">🛡️</span>
+          <Shield className="logo-icon-svg splash-logo-icon" size={80} style={{ color: '#ffffff', fill: 'rgba(255, 255, 255, 0.15)', strokeWidth: 2 }} />
           <h1 className="splash-title">KinLedger</h1>
           <p className="splash-subtitle">Your Family Emergency Shield</p>
         </div>
@@ -1026,7 +1053,7 @@ export default function App() {
           <div className="onboarding-slides">
             {onboardingSlide === 0 && (
               <div className="onboarding-slide animated">
-                <div className="onboarding-icon">🛡️</div>
+                <Shield className="logo-icon-svg" size={80} style={{ color: 'var(--primary)', fill: 'var(--primary-light)', strokeWidth: 2, marginBottom: '1rem' }} />
                 <h2>Secure Emergency Cards</h2>
                 <p>Create digital emergency medical cards for your parents and family members containing critical health profiles.</p>
               </div>
@@ -1096,7 +1123,7 @@ export default function App() {
         <div className="header-content">
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <a href="#" className="logo" onClick={() => { setSelectedCardId(null); setMenuOpen(false); }}>
-              <span className="logo-icon">🛡️</span>
+              <Shield className="logo-icon-svg" size={28} style={{ color: 'var(--primary)', fill: 'var(--primary-light)', strokeWidth: 2.5 }} />
               <span>KinLedger</span>
             </a>
             {isOffline && (
