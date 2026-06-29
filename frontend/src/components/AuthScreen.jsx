@@ -184,11 +184,27 @@ export default function AuthScreen({ onAuthSuccess, showStatus, onShowPolicy }) 
                     style={{ marginTop: '3px', width: '16px', height: '16px', cursor: 'pointer' }}
                   />
                   <span className="checkbox-label" style={{ fontSize: '0.85rem', color: '#a0aec0', lineHeight: '1.35' }}>
-                    I agree to the KinLedger Privacy Policy and consent to the secure storage of my family's medical information under the Indian DPDP Act 2023.{' '}
+                    I agree to the KinLedger{' '}
+                    <button 
+                      type="button" 
+                      onClick={(e) => { e.preventDefault(); onShowPolicy && onShowPolicy('privacy'); }}
+                      style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', textDecoration: 'underline', padding: 0, font: 'inherit', fontWeight: '600', display: 'inline' }}
+                    >
+                      Privacy Policy
+                    </button>
+                    {' '}and{' '}
+                    <button 
+                      type="button" 
+                      onClick={(e) => { e.preventDefault(); onShowPolicy && onShowPolicy('terms'); }}
+                      style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', textDecoration: 'underline', padding: 0, font: 'inherit', fontWeight: '600', display: 'inline' }}
+                    >
+                      Terms of Service
+                    </button>
+                    {', and consent to the secure storage of my family\'s medical information under the Indian DPDP Act 2023.'}{' '}
                     <button 
                       type="button" 
                       onClick={(e) => { e.preventDefault(); setShowConsentInfo(!showConsentInfo); }}
-                      style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', textDecoration: 'underline', padding: 0, font: 'inherit', fontSize: '0.8rem', display: 'inline' }}
+                      style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', textDecoration: 'underline', padding: 0, font: 'inherit', fontSize: '0.8rem', display: 'inline', marginLeft: '4px' }}
                     >
                       {showConsentInfo ? 'Hide Details' : 'Learn More'}
                     </button>
@@ -198,12 +214,30 @@ export default function AuthScreen({ onAuthSuccess, showStatus, onShowPolicy }) 
                 {showConsentInfo && (
                   <div style={{ marginTop: '10px', padding: '12px', borderRadius: 'var(--radius-sm)', backgroundColor: 'var(--bg-app)', border: '1px solid var(--border)', fontSize: '0.78rem', color: 'var(--text-secondary)', lineHeight: '1.45', textAlign: 'left', animation: 'fadeIn 0.3s ease' }}>
                     <strong style={{ color: 'var(--primary)', display: 'block', marginBottom: '4px' }}>DPDP Consent Information Notice:</strong>
-                    <ul style={{ paddingLeft: '15px', margin: 0, display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <ul style={{ paddingLeft: '15px', margin: '0 0 10px 0', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                       <li><strong>Data Collected</strong>: Family names, age, blood group, chronic medical conditions, critical allergies, medication names/dosages, and emergency contacts.</li>
                       <li><strong>Purpose</strong>: To securely save your health card profiles in our database so they can be instantly fetched during emergencies and shared collaboratively among family members.</li>
                       <li><strong>Security</strong>: Sensitive medical conditions, allergies, medications, and insurance numbers are fully encrypted at rest using AES-256-CBC.</li>
                       <li><strong>Your Rights</strong>: You hold the absolute right to correct, share, revoke sharing access, or permanently delete your account and all associated profiles at any time.</li>
                     </ul>
+                    <div style={{ borderTop: '1px solid var(--border)', paddingTop: '8px', display: 'flex', gap: '8px', alignItems: 'center', fontSize: '0.75rem' }}>
+                      <span>Read our full:</span>
+                      <button 
+                        type="button" 
+                        onClick={(e) => { e.preventDefault(); onShowPolicy && onShowPolicy('privacy'); }}
+                        style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', textDecoration: 'underline', padding: 0, font: 'inherit', fontWeight: '600' }}
+                      >
+                        Privacy Policy
+                      </button>
+                      <span style={{ color: 'var(--text-muted)' }}>|</span>
+                      <button 
+                        type="button" 
+                        onClick={(e) => { e.preventDefault(); onShowPolicy && onShowPolicy('terms'); }}
+                        style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', textDecoration: 'underline', padding: 0, font: 'inherit', fontWeight: '600' }}
+                      >
+                        Terms of Service
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
