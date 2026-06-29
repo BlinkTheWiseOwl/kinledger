@@ -138,6 +138,28 @@ export default function App() {
     setNewMed({ name: '', dosage: '', frequency: '', instructions: '' });
   }, [selectedCardId]);
 
+  // Close hamburger menu when clicking outside
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (menuOpen) {
+        const menuDropdown = document.querySelector('.menu-dropdown');
+        const hamburgerBtn = document.querySelector('.hamburger-btn');
+        if (
+          menuDropdown && 
+          !menuDropdown.contains(event.target) && 
+          hamburgerBtn && 
+          !hamburgerBtn.contains(event.target)
+        ) {
+          setMenuOpen(false);
+        }
+      }
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+    };
+  }, [menuOpen]);
+
   const showStatus = (message, type = 'info') => {
     setStatusMessage(message);
     setStatusType(type);
@@ -1567,7 +1589,7 @@ export default function App() {
                         type="text"
                         id="fullName"
                         name="fullName"
-                        placeholder="e.g., Ramachandra Gowda"
+                        placeholder="e.g., Rajesh Kumar"
                         value={activeCard.profile.fullName}
                         onChange={updateActiveCardProfile}
                         style={validationErrors.fullName ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
@@ -1783,7 +1805,7 @@ export default function App() {
                           <label>Contact Name</label>
                           <input
                             type="text"
-                            placeholder="e.g., Sunitha Gowda"
+                            placeholder="e.g., Sunita Kumar"
                             value={newContact.name}
                             onChange={e => updateNewContact('name', e.target.value)}
                             style={validationErrors.contactName ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
@@ -1974,7 +1996,7 @@ export default function App() {
                         Share this medical card with family members' email addresses. They will be able to view and update details jointly on their dashboards.
                       </p>
 
-                      <div className="share-input-group">
+                      <div className="share-input-group" style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.25rem' }}>
                         <input
                           type="email"
                           placeholder="family.member@email.com"
