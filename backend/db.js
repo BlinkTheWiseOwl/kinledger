@@ -74,8 +74,14 @@ const initDb = async () => {
         profile_id VARCHAR(100) REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
         name VARCHAR(255) NOT NULL,
         relationship VARCHAR(100) NOT NULL,
-        phone_number VARCHAR(50) NOT NULL
+        phone_number VARCHAR(50) NOT NULL,
+        email VARCHAR(255)
       );
+    `);
+
+    // Ensure the email column exists in case the table was created earlier
+    await client.query(`
+      ALTER TABLE public.emergency_contacts ADD COLUMN IF NOT EXISTS email VARCHAR(255);
     `);
 
     // 5. Create Medications Table

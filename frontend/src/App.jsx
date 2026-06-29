@@ -39,7 +39,7 @@ export default function App() {
   const [customRelation, setCustomRelation] = useState('');
 
   // Temp contact and medication forms state (local to selected card workspace)
-  const [newContact, setNewContact] = useState({ name: '', relationship: '', phoneNumber: '' });
+  const [newContact, setNewContact] = useState({ name: '', relationship: '', phoneNumber: '', email: '' });
   const [newMed, setNewMed] = useState({ name: '', dosage: '', frequency: '', instructions: '' });
 
   // Load cards array on mount or session change
@@ -90,7 +90,7 @@ export default function App() {
 
   // Clear local contact and medication input fields when switching cards or adding members
   useEffect(() => {
-    setNewContact({ name: '', relationship: '', phoneNumber: '' });
+    setNewContact({ name: '', relationship: '', phoneNumber: '', email: '' });
     setNewMed({ name: '', dosage: '', frequency: '', instructions: '' });
   }, [selectedCardId]);
 
@@ -152,6 +152,72 @@ export default function App() {
     return `Last updated: ${diffDays} days ago`;
   };
 
+  const containsUnsafeChars = (text) => {
+    if (!text) return false;
+    return /[<>\\`]/.test(String(text));
+  };
+
+  const parseInsuranceExpiry = (dateStr) => {
+    const months = {
+      jan: 1, january: 1, janruary: 1, feb: 2, february: 2, mar: 3, march: 3,
+      apr: 4, april: 4, may: 5, jun: 6, june: 6, jul: 7, july: 7,
+      aug: 8, august: 8, sep: 9, september: 9, oct: 10, october: 10,
+      nov: 11, november: 11, dec: 12, december: 12
+    };
+    
+    const trimmed = dateStr.trim();
+    
+    // Try MM/YYYY or MM/YY
+    const mmyyyy = trimmed.match(/^([0-9]{1,2})\/([0-9]{4}|[0-9]{2})$/);
+    if (mmyyyy) {
+      let m = parseInt(mmyyyy[1], 10);
+      let y = parseInt(mmyyyy[2], 10);
+      if (mmyyyy[2].length === 2) {
+        y += 2000;
+      }
+      return { month: m, year: y };
+    }
+    
+    // Try Month YYYY
+    const parts = trimmed.split(/\s+/);
+    if (parts.length === 2) {
+      const m = months[parts[0].toLowerCase()];
+      const y = parseInt(parts[1], 10);
+      if (m && !isNaN(y)) {
+        return { month: m, year: y };
+      }
+    }
+    return null;
+  };
+
+  const validateInsuranceExpiryWithDate = (dateStr) => {
+    if (!dateStr || !dateStr.trim()) return { valid: true };
+    
+    if (!validateInsuranceExpiry(dateStr)) {
+      return { valid: false, message: "Invalid format. Use MM/YYYY (e.g., 12/2028) or Month YYYY (e.g., Dec 2028)." };
+    }
+    
+    const parsed = parseInsuranceExpiry(dateStr);
+    if (!parsed) {
+      return { valid: false, message: "Invalid format. Use MM/YYYY (e.g., 12/2028) or Month YYYY (e.g., Dec 2028)." };
+    }
+    
+    const { month, year } = parsed;
+    const now = new Date();
+    const curYear = now.getFullYear();
+    const curMonth = now.getMonth() + 1;
+    
+    if (year < curYear || (year === curYear && month < curMonth)) {
+      return { valid: false, message: "Valid Till date cannot be in the past." };
+    }
+    
+    if (year > curYear + 10 || (year === curYear + 10 && month > curMonth)) {
+      return { valid: false, message: "Valid Till date cannot be more than 10 years in the future." };
+    }
+    
+    return { valid: true };
+  };
+
   // Validate insurance valid till date format
   const validateInsuranceExpiry = (dateStr) => {
     if (!dateStr || !dateStr.trim()) return true; // Optional field is valid when empty
@@ -183,27 +249,94 @@ export default function App() {
 
   // Save the entire cards array to LocalStorage and Replicate to mock Server/DB
   const saveCollection = async (updatedCards) => {
-    // Validate insurance valid till date format for active card
+    // Validate all fields for active card
     if (selectedCardId) {
       const activeUpdate = updatedCards.find(c => c.id === selectedCardId);
-      const expiry = activeUpdate?.profile?.insuranceValidTill;
-      if (expiry && expiry.trim() !== '') {
-        if (!validateInsuranceExpiry(expiry)) {
-          setValidationErrors(prev => ({
-            ...prev,
-            insuranceValidTill: "Invalid format. Card will not be saved until corrected."
-          }));
-          showStatus("Save failed: Please correct the date format error below the field.", "error");
+      if (activeUpdate) {
+        const errors = {};
+        
+        // 1. Full Name
+        const name = activeUpdate.profile.fullName || '';
+        if (!name.trim()) {
+          errors.fullName = "Full Name is required.";
+        } else if (name.length < 2 || name.length > 100) {
+          errors.fullName = "Full Name must be between 2 and 100 characters.";
+        } else if (containsUnsafeChars(name)) {
+          errors.fullName = "Full Name cannot contain unsafe characters (<, >, \\, `).";
+        }
+        
+        // 2. Relationship Tag
+        const rel = activeUpdate.relationship || '';
+        if (!rel || rel.trim() === '') {
+          errors.relationship = "Relationship is required.";
+        }
+        
+        // 3. Age
+        const ageVal = activeUpdate.profile.age;
+        if (ageVal === undefined || ageVal === null || String(ageVal).trim() === '') {
+          errors.age = "Age is required.";
+        } else {
+          const ageNum = Number(ageVal);
+          if (!Number.isInteger(ageNum) || ageNum < 0 || ageNum > 130) {
+            errors.age = "Age must be an integer between 0 and 130.";
+          }
+        }
+        
+        // 4. Blood Group
+        const bg = activeUpdate.profile.bloodGroup || '';
+        if (!bg || bg.trim() === '') {
+          errors.bloodGroup = "Blood Group is required.";
+        }
+        
+        // 5. Conditions
+        const cond = activeUpdate.profile.conditions || '';
+        if (cond.length > 2000) {
+          errors.conditions = "Conditions cannot exceed 2000 characters.";
+        } else if (containsUnsafeChars(cond)) {
+          errors.conditions = "Conditions cannot contain unsafe characters (<, >, \\, `).";
+        }
+        
+        // 6. Allergies
+        const allg = activeUpdate.profile.allergies || '';
+        if (allg.length > 1000) {
+          errors.allergies = "Allergies cannot exceed 1000 characters.";
+        } else if (containsUnsafeChars(allg)) {
+          errors.allergies = "Allergies cannot contain unsafe characters (<, >, \\, `).";
+        }
+        
+        // 7. Insurance Provider
+        const insPol = activeUpdate.profile.insurancePolicy || '';
+        if (insPol.length > 100) {
+          errors.insurancePolicy = "Insurance Provider cannot exceed 100 characters.";
+        } else if (containsUnsafeChars(insPol)) {
+          errors.insurancePolicy = "Insurance Provider cannot contain unsafe characters (<, >, \\, `).";
+        }
+        
+        // 8. Policy Number
+        const insNum = activeUpdate.profile.insuranceNumber || '';
+        if (insNum.length > 100) {
+          errors.insuranceNumber = "Policy Number cannot exceed 100 characters.";
+        } else if (containsUnsafeChars(insNum)) {
+          errors.insuranceNumber = "Policy Number cannot contain unsafe characters (<, >, \\, `).";
+        }
+        
+        // 9. Valid Till
+        const expiry = activeUpdate.profile.insuranceValidTill || '';
+        if (expiry && expiry.trim() !== '') {
+          const expiryVal = validateInsuranceExpiryWithDate(expiry);
+          if (!expiryVal.valid) {
+            errors.insuranceValidTill = expiryVal.message;
+          }
+        }
+        
+        if (Object.keys(errors).length > 0) {
+          setValidationErrors(errors);
+          showStatus("Save failed: Please correct the errors in the form.", "error");
           return; // Abort saving!
         }
       }
       
-      // Clear error if valid or empty
-      setValidationErrors(prev => {
-        const copy = { ...prev };
-        delete copy.insuranceValidTill;
-        return copy;
-      });
+      setValidationErrors({});
     }
 
     // Automatically inject/update timestamp for modified card
@@ -313,20 +446,98 @@ export default function App() {
     const { name, value } = e.target;
     if (!selectedCardId) return;
 
-    if (name === 'insuranceValidTill') {
-      if (!value || value.trim() === '' || validateInsuranceExpiry(value)) {
-        setValidationErrors(prev => {
-          const copy = { ...prev };
-          delete copy.insuranceValidTill;
-          return copy;
-        });
-      } else {
-        setValidationErrors(prev => ({
-          ...prev,
-          insuranceValidTill: "Invalid format. Use MM/YYYY (e.g., 12/2028) or Month YYYY (e.g., Dec 2028)."
-        }));
+    // Real-time validation
+    setValidationErrors(prev => {
+      const copy = { ...prev };
+      
+      if (name === 'fullName') {
+        if (!value.trim()) {
+          copy.fullName = "Full Name is required.";
+        } else if (value.length < 2 || value.length > 100) {
+          copy.fullName = "Full Name must be between 2 and 100 characters.";
+        } else if (containsUnsafeChars(value)) {
+          copy.fullName = "Full Name cannot contain unsafe characters (<, >, \\, `).";
+        } else {
+          delete copy.fullName;
+        }
       }
-    }
+      
+      if (name === 'age') {
+        if (value === undefined || value === null || String(value).trim() === '') {
+          copy.age = "Age is required.";
+        } else {
+          const ageNum = Number(value);
+          if (!Number.isInteger(ageNum) || ageNum < 0 || ageNum > 130) {
+            copy.age = "Age must be an integer between 0 and 130.";
+          } else {
+            delete copy.age;
+          }
+        }
+      }
+      
+      if (name === 'bloodGroup') {
+        if (!value || value.trim() === '') {
+          copy.bloodGroup = "Blood Group is required.";
+        } else {
+          delete copy.bloodGroup;
+        }
+      }
+      
+      if (name === 'conditions') {
+        if (value.length > 2000) {
+          copy.conditions = "Conditions cannot exceed 2000 characters.";
+        } else if (containsUnsafeChars(value)) {
+          copy.conditions = "Conditions cannot contain unsafe characters (<, >, \\, `).";
+        } else {
+          delete copy.conditions;
+        }
+      }
+      
+      if (name === 'allergies') {
+        if (value.length > 1000) {
+          copy.allergies = "Allergies cannot exceed 1000 characters.";
+        } else if (containsUnsafeChars(value)) {
+          copy.allergies = "Allergies cannot contain unsafe characters (<, >, \\, `).";
+        } else {
+          delete copy.allergies;
+        }
+      }
+      
+      if (name === 'insurancePolicy') {
+        if (value.length > 100) {
+          copy.insurancePolicy = "Insurance Provider cannot exceed 100 characters.";
+        } else if (containsUnsafeChars(value)) {
+          copy.insurancePolicy = "Insurance Provider cannot contain unsafe characters (<, >, \\, `).";
+        } else {
+          delete copy.insurancePolicy;
+        }
+      }
+      
+      if (name === 'insuranceNumber') {
+        if (value.length > 100) {
+          copy.insuranceNumber = "Policy Number cannot exceed 100 characters.";
+        } else if (containsUnsafeChars(value)) {
+          copy.insuranceNumber = "Policy Number cannot contain unsafe characters (<, >, \\, `).";
+        } else {
+          delete copy.insuranceNumber;
+        }
+      }
+      
+      if (name === 'insuranceValidTill') {
+        if (!value || value.trim() === '' || validateInsuranceExpiry(value)) {
+          const expiryVal = validateInsuranceExpiryWithDate(value);
+          if (!expiryVal.valid) {
+            copy.insuranceValidTill = expiryVal.message;
+          } else {
+            delete copy.insuranceValidTill;
+          }
+        } else {
+          copy.insuranceValidTill = "Invalid format. Use MM/YYYY (e.g., 12/2028) or Month YYYY (e.g., Dec 2028).";
+        }
+      }
+      
+      return copy;
+    });
 
     const updated = cards.map(c => {
       if (c.id === selectedCardId) {
@@ -347,6 +558,17 @@ export default function App() {
   // Update active card relationship type
   const updateActiveCardRelationship = (value) => {
     if (!selectedCardId || !value) return;
+
+    setValidationErrors(prev => {
+      const copy = { ...prev };
+      if (!value || value.trim() === '') {
+        copy.relationship = "Relationship is required.";
+      } else {
+        delete copy.relationship;
+      }
+      return copy;
+    });
+
     const updated = cards.map(c => {
       if (c.id === selectedCardId) {
         return { ...c, relationship: value };
@@ -360,9 +582,51 @@ export default function App() {
   const addContactToActiveCard = (e) => {
     e.preventDefault();
     if (!selectedCardId) return;
-    if (!newContact.name || !newContact.phoneNumber || !newContact.relationship) {
-      showStatus('Please fill in all contact fields.', 'error');
+    
+    const { name, relationship, phoneNumber, email = '' } = newContact;
+    
+    if (!name.trim()) {
+      showStatus('Contact Name is required.', 'error');
       return;
+    }
+    if (name.length < 2 || name.length > 100) {
+      showStatus('Contact Name must be between 2 and 100 characters.', 'error');
+      return;
+    }
+    if (containsUnsafeChars(name)) {
+      showStatus('Contact Name cannot contain unsafe characters (<, >, \\, `).', 'error');
+      return;
+    }
+    
+    if (!relationship) {
+      showStatus('Relationship is required.', 'error');
+      return;
+    }
+    
+    if (!phoneNumber.trim()) {
+      showStatus('Phone Number is required.', 'error');
+      return;
+    }
+    const digits = phoneNumber.replace(/\D/g, '');
+    if (digits.length < 8 || digits.length > 14) {
+      showStatus('Phone Number must contain between 8 and 14 digits.', 'error');
+      return;
+    }
+    if (!/^\+?[0-9\s\-()]+$/.test(phoneNumber)) {
+      showStatus('Phone Number contains invalid characters.', 'error');
+      return;
+    }
+    
+    if (email && email.trim() !== '') {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email.trim())) {
+        showStatus('Contact Email is invalid.', 'error');
+        return;
+      }
+      if (containsUnsafeChars(email)) {
+        showStatus('Contact Email contains unsafe characters.', 'error');
+        return;
+      }
     }
 
     if (activeCard.emergencyContacts.length >= 2) {
@@ -381,7 +645,7 @@ export default function App() {
     });
 
     setCards(updated);
-    setNewContact({ name: '', relationship: '', phoneNumber: '' });
+    setNewContact({ name: '', relationship: '', phoneNumber: '', email: '' });
     showStatus('Emergency contact added (unsaved). Click Save.', 'info');
   };
 
@@ -405,8 +669,38 @@ export default function App() {
   const addMedicationToActiveCard = (e) => {
     e.preventDefault();
     if (!selectedCardId) return;
-    if (!newMed.name || !newMed.dosage || !newMed.frequency) {
-      showStatus('Please specify medication name, dosage, and frequency.', 'error');
+    
+    const { name, dosage = '', frequency = '', instructions = '' } = newMed;
+    
+    if (!name.trim()) {
+      showStatus('Medication Name is required.', 'error');
+      return;
+    }
+    if (name.length > 100) {
+      showStatus('Medication Name cannot exceed 100 characters.', 'error');
+      return;
+    }
+    if (containsUnsafeChars(name)) {
+      showStatus('Medication Name cannot contain unsafe characters (<, >, \\, `).', 'error');
+      return;
+    }
+    
+    if (dosage && dosage.length > 50) {
+      showStatus('Dosage cannot exceed 50 characters.', 'error');
+      return;
+    }
+    if (containsUnsafeChars(dosage)) {
+      showStatus('Dosage cannot contain unsafe characters (<, >, \\, `).', 'error');
+      return;
+    }
+    
+    if (containsUnsafeChars(frequency)) {
+      showStatus('Frequency cannot contain unsafe characters (<, >, \\, `).', 'error');
+      return;
+    }
+    
+    if (containsUnsafeChars(instructions)) {
+      showStatus('Instructions cannot contain unsafe characters (<, >, \\, `).', 'error');
       return;
     }
 
@@ -1003,7 +1297,13 @@ export default function App() {
                         placeholder="e.g., Ramachandra Gowda"
                         value={activeCard.profile.fullName} 
                         onChange={updateActiveCardProfile}
+                        style={validationErrors.fullName ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
                       />
+                      {validationErrors.fullName && (
+                        <span style={{ color: 'var(--danger)', fontSize: '0.8rem', fontWeight: '600', marginTop: '0.25rem' }}>
+                          {validationErrors.fullName}
+                        </span>
+                      )}
                     </div>
                     <div className="form-group">
                       <label htmlFor="age">Age</label>
@@ -1014,7 +1314,13 @@ export default function App() {
                         placeholder="e.g., 68"
                         value={activeCard.profile.age} 
                         onChange={updateActiveCardProfile}
+                        style={validationErrors.age ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
                       />
+                      {validationErrors.age && (
+                        <span style={{ color: 'var(--danger)', fontSize: '0.8rem', fontWeight: '600', marginTop: '0.25rem' }}>
+                          {validationErrors.age}
+                        </span>
+                      )}
                     </div>
                     <div className="form-group">
                       <label htmlFor="bloodGroup">Blood Group</label>
@@ -1023,6 +1329,7 @@ export default function App() {
                         name="bloodGroup" 
                         value={activeCard.profile.bloodGroup} 
                         onChange={updateActiveCardProfile}
+                        style={validationErrors.bloodGroup ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
                       >
                         <option value="">Select Blood Group</option>
                         <option value="A+">A+</option>
@@ -1034,13 +1341,20 @@ export default function App() {
                         <option value="O+">O+</option>
                         <option value="O-">O-</option>
                       </select>
+                      {validationErrors.bloodGroup && (
+                        <span style={{ color: 'var(--danger)', fontSize: '0.8rem', fontWeight: '600', marginTop: '0.25rem' }}>
+                          {validationErrors.bloodGroup}
+                        </span>
+                      )}
                     </div>
                     <div className="form-group">
                       <label>Relationship Tag</label>
                       <select 
                         value={activeCard.relationship} 
                         onChange={(e) => updateActiveCardRelationship(e.target.value)}
+                        style={validationErrors.relationship ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
                       >
+                        <option value="">Select Relationship</option>
                         <option value="Father">Father</option>
                         <option value="Mother">Mother</option>
                         <option value="Spouse">Spouse</option>
@@ -1050,26 +1364,43 @@ export default function App() {
                         <option value="Mother-in-law">Mother-in-law</option>
                         <option value="Other">Other</option>
                       </select>
+                      {validationErrors.relationship && (
+                        <span style={{ color: 'var(--danger)', fontSize: '0.8rem', fontWeight: '600', marginTop: '0.25rem' }}>
+                          {validationErrors.relationship}
+                        </span>
+                      )}
                     </div>
                     <div className="form-group full-width">
-                      <label htmlFor="conditions">Medical Conditions / Diagnosis</label>
+                      <label htmlFor="conditions">Medical Conditions / Diagnosis (Optional)</label>
                       <textarea 
                         id="conditions" 
                         name="conditions" 
                         placeholder="e.g., Type 2 Diabetes, Hypertension. Undergoing treatment."
                         value={activeCard.profile.conditions} 
                         onChange={updateActiveCardProfile}
+                        style={validationErrors.conditions ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
                       />
+                      {validationErrors.conditions && (
+                        <span style={{ color: 'var(--danger)', fontSize: '0.8rem', fontWeight: '600', marginTop: '0.25rem' }}>
+                          {validationErrors.conditions}
+                        </span>
+                      )}
                     </div>
                     <div className="form-group full-width">
-                      <label htmlFor="allergies">Critical Allergies</label>
+                      <label htmlFor="allergies">Critical Allergies (Optional)</label>
                       <textarea 
                         id="allergies" 
                         name="allergies" 
                         placeholder="e.g., Penicillin (Anaphylaxis), Peanuts."
                         value={activeCard.profile.allergies} 
                         onChange={updateActiveCardProfile}
+                        style={validationErrors.allergies ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
                       />
+                      {validationErrors.allergies && (
+                        <span style={{ color: 'var(--danger)', fontSize: '0.8rem', fontWeight: '600', marginTop: '0.25rem' }}>
+                          {validationErrors.allergies}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -1082,7 +1413,7 @@ export default function App() {
                   </h3>
                   <div className="form-grid">
                     <div className="form-group">
-                      <label htmlFor="insurancePolicy">Insurance Policy / Issuer Name</label>
+                      <label htmlFor="insurancePolicy">Insurance Policy / Issuer Name (Optional)</label>
                       <input 
                         type="text" 
                         id="insurancePolicy" 
@@ -1090,10 +1421,16 @@ export default function App() {
                         placeholder="e.g., Star Health Senior Citizens Policy"
                         value={activeCard.profile.insurancePolicy} 
                         onChange={updateActiveCardProfile}
+                        style={validationErrors.insurancePolicy ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
                       />
+                      {validationErrors.insurancePolicy && (
+                        <span style={{ color: 'var(--danger)', fontSize: '0.8rem', fontWeight: '600', marginTop: '0.25rem' }}>
+                          {validationErrors.insurancePolicy}
+                        </span>
+                      )}
                     </div>
                     <div className="form-group">
-                      <label htmlFor="insuranceNumber">Policy Number / Member ID</label>
+                      <label htmlFor="insuranceNumber">Policy Number / Member ID (Optional)</label>
                       <input 
                         type="text" 
                         id="insuranceNumber" 
@@ -1101,7 +1438,13 @@ export default function App() {
                         placeholder="e.g., POL-8849-002"
                         value={activeCard.profile.insuranceNumber} 
                         onChange={updateActiveCardProfile}
+                        style={validationErrors.insuranceNumber ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
                       />
+                      {validationErrors.insuranceNumber && (
+                        <span style={{ color: 'var(--danger)', fontSize: '0.8rem', fontWeight: '600', marginTop: '0.25rem' }}>
+                          {validationErrors.insuranceNumber}
+                        </span>
+                      )}
                     </div>
                     <div className="form-group">
                       <label htmlFor="insuranceValidTill">Valid Till / Expiry Date</label>
@@ -1133,7 +1476,7 @@ export default function App() {
                   {activeCard.emergencyContacts.length > 0 ? (
                     <div>
                       {activeCard.emergencyContacts.map((contact, index) => (
-                        <div key={index} className="item-row item-row-contact">
+                        <div key={index} className="item-row item-row-contact" style={{ gridTemplateColumns: '1.5fr 1fr 2fr auto' }}>
                           <div>
                             <strong>{contact.name}</strong>
                             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Name</div>
@@ -1144,7 +1487,8 @@ export default function App() {
                           </div>
                           <div>
                             <strong>{contact.phoneNumber}</strong>
-                            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Phone Number</div>
+                            {contact.email && <div style={{ fontSize: '0.85rem', color: 'var(--primary)', wordBreak: 'break-all' }}>{contact.email}</div>}
+                            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Contact Info</div>
                           </div>
                           <button className="btn btn-danger btn-sm" onClick={() => removeContactFromActiveCard(index)}>
                             <Trash2 size={16} />
@@ -1173,12 +1517,23 @@ export default function App() {
                         </div>
                         <div className="form-group">
                           <label>Relationship</label>
-                          <input 
-                            type="text" 
-                            placeholder="e.g., Daughter, Son" 
+                          <select 
                             value={newContact.relationship}
                             onChange={e => setNewContact(prev => ({ ...prev, relationship: e.target.value }))}
-                          />
+                          >
+                            <option value="">Select Relationship</option>
+                            <option value="Daughter">Daughter</option>
+                            <option value="Son">Son</option>
+                            <option value="Spouse">Spouse</option>
+                            <option value="Father">Father</option>
+                            <option value="Mother">Mother</option>
+                            <option value="Brother">Brother</option>
+                            <option value="Sister">Sister</option>
+                            <option value="Friend">Friend</option>
+                            <option value="Guardian">Guardian</option>
+                            <option value="Neighbor">Neighbor</option>
+                            <option value="Other">Other</option>
+                          </select>
                         </div>
                         <div className="form-group">
                           <label>Phone Number</label>
@@ -1189,8 +1544,17 @@ export default function App() {
                             onChange={e => setNewContact(prev => ({ ...prev, phoneNumber: e.target.value }))}
                           />
                         </div>
-                        <div className="form-group" style={{ justifyContent: 'flex-end' }}>
-                          <button type="submit" className="btn btn-secondary" style={{ width: 'fit-content', alignSelf: 'flex-end' }}>
+                        <div className="form-group">
+                          <label>Email Address (Optional)</label>
+                          <input 
+                            type="email" 
+                            placeholder="e.g., sunitha@email.com" 
+                            value={newContact.email || ''}
+                            onChange={e => setNewContact(prev => ({ ...prev, email: e.target.value }))}
+                          />
+                        </div>
+                        <div className="form-group" style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
+                          <button type="submit" className="btn btn-secondary" style={{ width: 'fit-content' }}>
                             <Plus size={16} /> Add Contact
                           </button>
                         </div>
@@ -1251,7 +1615,7 @@ export default function App() {
                         />
                       </div>
                       <div className="form-group">
-                        <label>Dosage</label>
+                        <label>Dosage (Optional)</label>
                         <input 
                           type="text" 
                           placeholder="e.g., 500mg, 1 tab" 
@@ -1260,13 +1624,22 @@ export default function App() {
                         />
                       </div>
                       <div className="form-group">
-                        <label>Frequency</label>
-                        <input 
-                          type="text" 
-                          placeholder="e.g., Once morning" 
+                        <label>Frequency (Optional)</label>
+                        <select 
                           value={newMed.frequency}
                           onChange={e => setNewMed(prev => ({ ...prev, frequency: e.target.value }))}
-                        />
+                        >
+                          <option value="">Select Frequency</option>
+                          <option value="Once daily (morning)">Once daily (morning)</option>
+                          <option value="Once daily (night)">Once daily (night)</option>
+                          <option value="Twice daily (morning & night)">Twice daily (morning & night)</option>
+                          <option value="Three times daily">Three times daily</option>
+                          <option value="Four times daily">Four times daily</option>
+                          <option value="Once a week">Once a week</option>
+                          <option value="Twice a week">Twice a week</option>
+                          <option value="As needed (SOS)">As needed (SOS)</option>
+                          <option value="Other">Other</option>
+                        </select>
                       </div>
                       <div className="form-group">
                         <label>Instructions (Optional)</label>
@@ -1277,8 +1650,8 @@ export default function App() {
                           onChange={e => setNewMed(prev => ({ ...prev, instructions: e.target.value }))}
                         />
                       </div>
-                      <div className="form-group" style={{ gridColumn: '1 / -1', alignItems: 'flex-end', marginTop: '0.5rem' }}>
-                        <button type="submit" className="btn btn-secondary">
+                      <div className="form-group" style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
+                        <button type="submit" className="btn btn-secondary" style={{ width: 'fit-content' }}>
                           <Plus size={16} /> Add Medication
                         </button>
                       </div>

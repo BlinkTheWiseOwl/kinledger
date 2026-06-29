@@ -52,6 +52,55 @@ const decrypt = (cipherText) => {
   }
 };
 
+// Input Validation Helpers
+const containsUnsafeChars = (text) => {
+  if (!text) return false;
+  return /[<>\\`]/.test(String(text));
+};
+
+const validateInsuranceExpiryBackend = (dateStr) => {
+  const months = {
+    jan: 1, january: 1, janruary: 1, feb: 2, february: 2, mar: 3, march: 3,
+    apr: 4, april: 4, may: 5, jun: 6, june: 6, jul: 7, july: 7,
+    aug: 8, august: 8, sep: 9, september: 9, oct: 10, october: 10,
+    nov: 11, november: 11, dec: 12, december: 12
+  };
+  
+  const trimmed = dateStr.trim();
+  let month = null;
+  let year = null;
+  
+  const mmyyyy = trimmed.match(/^([0-9]{1,2})\/([0-9]{4})$/);
+  if (mmyyyy) {
+    month = parseInt(mmyyyy[1], 10);
+    year = parseInt(mmyyyy[2], 10);
+  } else {
+    const parts = trimmed.split(/\s+/);
+    if (parts.length === 2) {
+      month = months[parts[0].toLowerCase()];
+      year = parseInt(parts[1], 10);
+    }
+  }
+  
+  if (!month || isNaN(year) || month < 1 || month > 12) {
+    return { valid: false, message: "Insurance Valid Till must be in a valid format (e.g. MM/YYYY or 'Dec 2028')." };
+  }
+  
+  const now = new Date();
+  const curYear = now.getFullYear();
+  const curMonth = now.getMonth() + 1;
+  
+  if (year < curYear || (year === curYear && month < curMonth)) {
+    return { valid: false, message: "Insurance Valid Till date cannot be in the past." };
+  }
+  
+  if (year > curYear + 10 || (year === curYear + 10 && month > curMonth)) {
+    return { valid: false, message: "Insurance Valid Till date cannot be more than 10 years in the future." };
+  }
+  
+  return { valid: true };
+};
+
 // Audit Log Helper
 const logAudit = async (userId, email, action, details) => {
   try {
@@ -100,6 +149,19 @@ app.post('/api/auth/signup', async (req, res) => {
     return res.status(400).json({ error: 'Email and password are required.' });
   }
 
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email.trim())) {
+    return res.status(400).json({ error: 'Please enter a valid email address.' });
+  }
+
+  if (password.length < 8) {
+    return res.status(400).json({ error: 'Password must be at least 8 characters.' });
+  }
+
+  if (containsUnsafeChars(email)) {
+    return res.status(400).json({ error: 'Email contains unsafe characters.' });
+  }
+
   try {
     const cleanEmail = email.toLowerCase().trim();
     
@@ -139,6 +201,15 @@ app.post('/api/auth/login', async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
     return res.status(400).json({ error: 'Email and password are required.' });
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email.trim())) {
+    return res.status(400).json({ error: 'Please enter a valid email address.' });
+  }
+
+  if (password.length < 8) {
+    return res.status(400).json({ error: 'Password must be at least 8 characters.' });
   }
 
   try {
@@ -341,7 +412,8 @@ app.get('/api/cards', authenticateToken, async (req, res) => {
         .map(c => ({
           name: c.name,
           relationship: c.relationship,
-          phoneNumber: c.phone_number
+          phoneNumber: c.phone_number,
+          email: c.email || ''
         }));
 
       const cardMeds = medsQuery.rows
@@ -428,6 +500,147 @@ app.post('/api/cards', authenticateToken, async (req, res) => {
     }
 
     // 2. Process Updates and Inserts
+    // Input Validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^\+?[0-9\s\-()]+$/;
+
+    for (const card of cards) {
+      const { relationship, profile, emergencyContacts = [], medications = [] } = card;
+      const { fullName = '', age, bloodGroup = '', allergies = '', conditions = '', insurancePolicy = '', insuranceNumber = '', insuranceValidTill = '' } = profile || {};
+
+      // Profile validation
+      if (!fullName || fullName.trim() === '') {
+        return res.status(400).json({ error: 'Full Name is required.' });
+      }
+      if (fullName.length < 2 || fullName.length > 100) {
+        return res.status(400).json({ error: 'Full Name must be between 2 and 100 characters.' });
+      }
+      if (containsUnsafeChars(fullName)) {
+        return res.status(400).json({ error: 'Full Name contains unsafe characters.' });
+      }
+
+      if (!relationship || relationship.trim() === '') {
+        return res.status(400).json({ error: 'Relationship is required.' });
+      }
+
+      if (age === undefined || age === null || String(age).trim() === '') {
+        return res.status(400).json({ error: 'Age is required.' });
+      }
+      const ageNum = Number(age);
+      if (isNaN(ageNum) || !Number.isInteger(ageNum) || ageNum < 0 || ageNum > 130) {
+        return res.status(400).json({ error: 'Age must be an integer between 0 and 130.' });
+      }
+
+      if (!bloodGroup || bloodGroup.trim() === '') {
+        return res.status(400).json({ error: 'Blood Group is required.' });
+      }
+
+      if (conditions && conditions.length > 2000) {
+        return res.status(400).json({ error: 'Conditions cannot exceed 2000 characters.' });
+      }
+      if (containsUnsafeChars(conditions)) {
+        return res.status(400).json({ error: 'Conditions contain unsafe characters.' });
+      }
+
+      if (allergies && allergies.length > 1000) {
+        return res.status(400).json({ error: 'Allergies cannot exceed 1000 characters.' });
+      }
+      if (containsUnsafeChars(allergies)) {
+        return res.status(400).json({ error: 'Allergies contain unsafe characters.' });
+      }
+
+      if (insurancePolicy && insurancePolicy.length > 100) {
+        return res.status(400).json({ error: 'Insurance Provider cannot exceed 100 characters.' });
+      }
+      if (containsUnsafeChars(insurancePolicy)) {
+        return res.status(400).json({ error: 'Insurance Provider contains unsafe characters.' });
+      }
+
+      if (insuranceNumber && insuranceNumber.length > 100) {
+        return res.status(400).json({ error: 'Policy Number cannot exceed 100 characters.' });
+      }
+      if (containsUnsafeChars(insuranceNumber)) {
+        return res.status(400).json({ error: 'Policy Number contains unsafe characters.' });
+      }
+
+      if (insuranceValidTill && insuranceValidTill.trim() !== '') {
+        const expiryVal = validateInsuranceExpiryBackend(insuranceValidTill);
+        if (!expiryVal.valid) {
+          return res.status(400).json({ error: expiryVal.message });
+        }
+      }
+
+      // Emergency Contacts validation
+      if (emergencyContacts.length > 2) {
+        return res.status(400).json({ error: 'Emergency contacts are limited to 2 per card.' });
+      }
+      for (const contact of emergencyContacts) {
+        const { name = '', relationship: cRel = '', phoneNumber = '', email = '' } = contact;
+        if (!name.trim()) {
+          return res.status(400).json({ error: 'Emergency Contact Name is required.' });
+        }
+        if (name.length < 2 || name.length > 100) {
+          return res.status(400).json({ error: 'Emergency Contact Name must be between 2 and 100 characters.' });
+        }
+        if (containsUnsafeChars(name)) {
+          return res.status(400).json({ error: 'Emergency Contact Name contains unsafe characters.' });
+        }
+
+        if (!cRel.trim()) {
+          return res.status(400).json({ error: 'Emergency Contact Relationship is required.' });
+        }
+
+        if (!phoneNumber.trim()) {
+          return res.status(400).json({ error: 'Emergency Contact Phone is required.' });
+        }
+        const digits = phoneNumber.replace(/\D/g, '');
+        if (digits.length < 8 || digits.length > 14) {
+          return res.status(400).json({ error: 'Emergency Contact Phone must contain between 8 and 14 digits.' });
+        }
+        if (!phoneRegex.test(phoneNumber)) {
+          return res.status(400).json({ error: 'Emergency Contact Phone contains invalid characters.' });
+        }
+
+        if (email && email.trim() !== '') {
+          if (!emailRegex.test(email.trim())) {
+            return res.status(400).json({ error: 'Emergency Contact Email is invalid.' });
+          }
+          if (containsUnsafeChars(email)) {
+            return res.status(400).json({ error: 'Emergency Contact Email contains unsafe characters.' });
+          }
+        }
+      }
+
+      // Medications validation
+      for (const med of medications) {
+        const { name = '', dosage = '', frequency = '', instructions = '' } = med;
+        if (!name.trim()) {
+          return res.status(400).json({ error: 'Medication Name is required.' });
+        }
+        if (name.length > 100) {
+          return res.status(400).json({ error: 'Medication Name cannot exceed 100 characters.' });
+        }
+        if (containsUnsafeChars(name)) {
+          return res.status(400).json({ error: 'Medication Name contains unsafe characters.' });
+        }
+
+        if (dosage && dosage.length > 50) {
+          return res.status(400).json({ error: 'Medication Dosage cannot exceed 50 characters.' });
+        }
+        if (containsUnsafeChars(dosage)) {
+          return res.status(400).json({ error: 'Medication Dosage contains unsafe characters.' });
+        }
+
+        if (containsUnsafeChars(frequency)) {
+          return res.status(400).json({ error: 'Medication Frequency contains unsafe characters.' });
+        }
+
+        if (containsUnsafeChars(instructions)) {
+          return res.status(400).json({ error: 'Medication Instructions contain unsafe characters.' });
+        }
+      }
+    }
+
     for (const card of cards) {
       const { id, relationship, profile, emergencyContacts = [], medications = [], updatedAt } = card;
       const { fullName = '', age, bloodGroup = '', allergies = '', conditions = '', insurancePolicy = '', insuranceNumber = '', insuranceValidTill = '' } = profile || {};
@@ -488,9 +701,9 @@ app.post('/api/cards', authenticateToken, async (req, res) => {
       await client.query('DELETE FROM public.emergency_contacts WHERE profile_id = $1', [id]);
       for (const contact of emergencyContacts) {
         await client.query(`
-          INSERT INTO public.emergency_contacts (profile_id, name, relationship, phone_number)
-          VALUES ($1, $2, $3, $4)
-        `, [id, contact.name, contact.relationship, contact.phoneNumber]);
+          INSERT INTO public.emergency_contacts (profile_id, name, relationship, phone_number, email)
+          VALUES ($1, $2, $3, $4, $5)
+        `, [id, contact.name, contact.relationship, contact.phoneNumber, contact.email || '']);
       }
 
       // Sync medications list: clean delete + re-insert

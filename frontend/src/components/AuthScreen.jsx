@@ -13,12 +13,33 @@ export default function AuthScreen({ onAuthSuccess, showStatus }) {
   const [consentChecked, setConsentChecked] = useState(false);
   const [showConsentInfo, setShowConsentInfo] = useState(false);
 
+  const containsUnsafeChars = (text) => {
+    if (!text) return false;
+    return /[<>\\`]/.test(String(text));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
     if (!email || !password) {
       setError('Please fill in all credentials.');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      setError('Please enter a valid email address.');
+      return;
+    }
+
+    if (containsUnsafeChars(email)) {
+      setError('Email contains unsafe characters.');
+      return;
+    }
+
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters.');
       return;
     }
 
@@ -29,11 +50,6 @@ export default function AuthScreen({ onAuthSuccess, showStatus }) {
 
     if (!isLogin && !consentChecked) {
       setError('You must consent to data processing and terms.');
-      return;
-    }
-
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters.');
       return;
     }
 

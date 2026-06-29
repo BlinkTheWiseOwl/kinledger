@@ -72,11 +72,19 @@ export default function EmergencyCard({ profile, emergencyContacts, medications,
                         <span className="contact-relation">
                           {contact.relationship} {index === 0 && '• Primary'}
                         </span>
+                        {contact.email && (
+                          <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.15rem', wordBreak: 'break-all' }}>
+                            {contact.email}
+                          </span>
+                        )}
                       </div>
                       {contact.phoneNumber && (
-                        <a href={`tel:${contact.phoneNumber}`} className="contact-phone-btn">
-                          <Phone size={16} />
-                        </a>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <span style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-primary)' }}>{contact.phoneNumber}</span>
+                          <a href={`tel:${contact.phoneNumber}`} className="contact-phone-btn">
+                            <Phone size={16} />
+                          </a>
+                        </div>
                       )}
                     </div>
                   ))
