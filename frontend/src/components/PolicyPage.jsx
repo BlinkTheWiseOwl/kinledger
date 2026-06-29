@@ -157,7 +157,7 @@ export default function PolicyPage({ type, onClose }) {
 
           <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>12. Contact Us</h2>
           <p style={{ marginBottom: '1.25rem' }}>
-            If you have any questions, concerns, or requests regarding this Privacy Policy or your personal information, please contact us at: <a href="mailto:support@kinledger.app" style={{ color: 'var(--primary)', fontWeight: '600', textDecoration: 'none' }}>support@kinledger.app</a>.
+            If you have any questions, concerns, or requests regarding this Privacy Policy or your personal information, please contact us at: <a href="mailto:support.kinledger@gmail.com" style={{ color: 'var(--primary)', fontWeight: '600', textDecoration: 'none' }}>support.kinledger@gmail.com</a>.
           </p>
         </article>
       ) : (
@@ -264,7 +264,7 @@ export default function PolicyPage({ type, onClose }) {
 
           <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>12. Contact Us</h2>
           <p style={{ marginBottom: '1.25rem' }}>
-            If you have any questions regarding these Terms, please contact us at: <a href="mailto:support@kinledger.app" style={{ color: 'var(--primary)', fontWeight: '600', textDecoration: 'none' }}>support@kinledger.app</a>.
+            If you have any questions regarding these Terms, please contact us at: <a href="mailto:support.kinledger@gmail.com" style={{ color: 'var(--primary)', fontWeight: '600', textDecoration: 'none' }}>support.kinledger@gmail.com</a>.
           </p>
         </article>
       )}

@@ -11,7 +11,7 @@ export default function HelpPage({ onClose, onReplayOnboarding }) {
     },
     {
       q: "Is my family's medical data secure?",
-      a: "Yes. All sensitive medical information—including chronic conditions, allergies, medications, and insurance policy numbers—is fully encrypted at rest on our servers using secure encryption keys. We do not share or sell your medical data with any third parties."
+      a: "Yes. All sensitive medical information - including chronic conditions, allergies, medications, and insurance policy numbers - is fully encrypted at rest on our servers using secure encryption keys. We do not share or sell your medical data with any third parties."
     },
     {
       q: "How do I share a card with a family member?",
