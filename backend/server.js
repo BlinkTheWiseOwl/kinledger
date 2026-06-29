@@ -340,8 +340,11 @@ app.delete('/api/shares', authenticateToken, async (req, res) => {
     if (checkQuery.rows.length === 0) {
       return res.status(404).json({ error: 'Profile card not found.' });
     }
-    if (checkQuery.rows[0].owner_id !== userId) {
-      return res.status(403).json({ error: 'Only the owner can revoke sharing.' });
+    const isOwner = checkQuery.rows[0].owner_id === userId;
+    const isSelfRevocation = req.user.email.toLowerCase().trim() === cleanEmail;
+
+    if (!isOwner && !isSelfRevocation) {
+      return res.status(403).json({ error: 'Only the owner or the shared user themselves can revoke sharing access.' });
     }
 
     await db.query(`

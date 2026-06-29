@@ -457,14 +457,19 @@ export default function App() {
     };
 
     const updated = [...cards, newCard];
-    saveCollection(updated);
+    setCards(updated);
+    try {
+      localStorage.setItem('elder_navigator_cards_collection', JSON.stringify(updated));
+    } catch (err) {
+      console.error('LocalStorage write error:', err);
+    }
     
     // Jump straight to editing this new card
     setSelectedCardId(newCard.id);
     setActiveTab('edit');
     setShowAddMenu(false);
     setCustomRelation('');
-    showStatus(`New card created for ${relation}.`, 'success');
+    showStatus(`New card created for ${relationship}.`, 'success');
   };
 
   // Delete a profile card (revokes access if shared card)
@@ -499,7 +504,7 @@ export default function App() {
           setCards(updated);
           showStatus('Shared card removed from dashboard.', 'info');
         } catch (err) {
-          showStatus('Error revoking shared card access.', 'error');
+          showStatus('Failed to remove shared card from dashboard.', 'error');
         }
       } else {
         saveCollection(updated);
@@ -1514,9 +1519,6 @@ export default function App() {
                       {activeCard.relationship}
                     </span>
                   </div>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                    Selected Card Setup Workspace
-                  </span>
                 </div>
               </div>
               
