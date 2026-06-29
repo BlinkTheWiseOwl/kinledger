@@ -1109,7 +1109,7 @@ textarea {
     text-align: center;
     padding: 1.25rem 1rem;
     position: sticky;
-    top: 130px; /* Keep sticky below the app header on mobile */
+    top: 60px; /* Keep sticky below the app header on mobile */
     z-index: 90;
     margin-bottom: 1rem;
     background-color: white;

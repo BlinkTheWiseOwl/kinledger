@@ -23,7 +23,7 @@ export default function AuthScreen({ onAuthSuccess, showStatus, onShowPolicy }) 
 
   const containsUnsafeChars = (text) => {
     if (!text) return false;
-    return /[<>\\`]/.test(String(text));
+    return /[<>"\\`;|]/.test(String(text));
   };
 
   const handleSubmit = async (e) => {

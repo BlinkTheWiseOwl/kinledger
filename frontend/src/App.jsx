@@ -198,7 +198,7 @@ export default function App() {
 
   const containsUnsafeChars = (text) => {
     if (!text) return false;
-    return /[<>\\`]/.test(String(text));
+    return /[<>"\\`;|]/.test(String(text));
   };
 
   const parseInsuranceExpiry = (dateStr) => {
