@@ -1068,8 +1068,20 @@ export default function App() {
           <div className="onboarding-slides">
             {onboardingSlide === 0 && (
               <div className="onboarding-slide animated">
-                <div className="onboarding-icon-wrap" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100px', marginBottom: '1.5rem' }}>
-                  <ShieldAlert size={80} style={{ color: 'var(--danger)', strokeWidth: 1.5, animation: 'pulse 2s infinite' }} />
+                <div className="onboarding-icon-wrap" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '180px', marginBottom: '1.5rem' }}>
+                  <svg width="180" height="180" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="100" cy="100" r="80" fill="rgba(239, 68, 68, 0.03)" />
+                    <circle cx="100" cy="100" r="60" fill="rgba(239, 68, 68, 0.06)" />
+                    <path d="M30 100H60L72 65L88 135L104 80L116 120L128 100H170" stroke="rgba(239, 68, 68, 0.15)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M100 40C100 40 120 47 150 47V105C150 145 125 170 100 180C75 170 50 145 50 105V47C80 47 100 40 100 40Z" fill="url(#shieldGrad)" stroke="#d4af37" strokeWidth="3" strokeLinejoin="round" />
+                    <path d="M75 105H90L97 85L105 125L112 95L118 115L125 105H140" stroke="#ffffff" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+                    <defs>
+                      <linearGradient id="shieldGrad" x1="50" y1="40" x2="150" y2="180" gradientUnits="userSpaceOnUse">
+                        <stop offset="0%" stopColor="#ef4444" />
+                        <stop offset="100%" stopColor="#b91c1c" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
                 </div>
                 <h2>Be Prepared Before an Emergency Happens</h2>
                 <p>Keep your loved one's essential medical information ready—so you're never scrambling when every second matters.</p>
@@ -1077,8 +1089,18 @@ export default function App() {
             )}
             {onboardingSlide === 1 && (
               <div className="onboarding-slide animated">
-                <div className="onboarding-icon-wrap" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100px', marginBottom: '1.5rem' }}>
-                  <Heart size={80} style={{ color: 'var(--primary)', fill: 'rgba(15, 108, 95, 0.1)', strokeWidth: 1.5 }} />
+                <div className="onboarding-icon-wrap" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '180px', marginBottom: '1.5rem' }}>
+                  <svg width="180" height="180" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="100" cy="100" r="80" fill="rgba(15, 108, 95, 0.03)" />
+                    <circle cx="100" cy="100" r="60" fill="rgba(15, 108, 95, 0.06)" />
+                    <rect x="60" y="45" width="80" height="110" rx="8" fill="#ffffff" stroke="var(--primary)" strokeWidth="3" />
+                    <rect x="85" y="35" width="30" height="15" rx="4" fill="#d4af37" stroke="#b45309" strokeWidth="1.5" />
+                    <line x1="75" y1="75" x2="125" y2="75" stroke="var(--primary-light)" strokeWidth="4" strokeLinecap="round" />
+                    <line x1="75" y1="95" x2="115" y2="95" stroke="var(--primary-light)" strokeWidth="4" strokeLinecap="round" />
+                    <line x1="75" y1="115" x2="125" y2="115" stroke="var(--primary-light)" strokeWidth="4" strokeLinecap="round" />
+                    <circle cx="125" cy="125" r="22" fill="#0f6c5f" stroke="#ffffff" strokeWidth="2.5" />
+                    <path d="M125 131.5C125 131.5 129.5 127.5 131.5 125.5C133.5 123.5 133.5 120.5 131.5 118.5C129.5 116.5 126.5 116.5 125 118.5C123.5 116.5 120.5 116.5 118.5 118.5C116.5 120.5 116.5 123.5 118.5 125.5L125 131.5Z" fill="#ffffff" />
+                  </svg>
                 </div>
                 <h2>One Place for Your Family's Health Records</h2>
                 <p>Store medical conditions, medications, allergies, insurance details, and emergency contacts in a secure, organized profile.</p>
@@ -1086,8 +1108,27 @@ export default function App() {
             )}
             {onboardingSlide === 2 && (
               <div className="onboarding-slide animated">
-                <div className="onboarding-icon-wrap" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100px', marginBottom: '1.5rem' }}>
-                  <Share2 size={80} style={{ color: '#2563eb', strokeWidth: 1.5 }} />
+                <div className="onboarding-icon-wrap" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '180px', marginBottom: '1.5rem' }}>
+                  <svg width="180" height="180" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="100" cy="100" r="80" fill="rgba(37, 99, 235, 0.03)" />
+                    <circle cx="100" cy="100" r="60" fill="rgba(37, 99, 235, 0.06)" />
+                    <line x1="100" y1="100" x2="50" y2="60" stroke="#93c5fd" strokeWidth="2" strokeDasharray="4 4" />
+                    <line x1="100" y1="100" x2="150" y2="60" stroke="#93c5fd" strokeWidth="2" strokeDasharray="4 4" />
+                    <line x1="100" y1="100" x2="100" y2="155" stroke="#93c5fd" strokeWidth="2" strokeDasharray="4 4" />
+                    <circle cx="50" cy="60" r="8" fill="#2563eb" />
+                    <circle cx="150" cy="60" r="8" fill="#2563eb" />
+                    <rect x="65" y="70" width="70" height="45" rx="4" fill="#ffffff" stroke="#2563eb" strokeWidth="3" />
+                    <rect x="75" y="80" width="20" height="5" rx="1" fill="#2563eb" opacity="0.3" />
+                    <rect x="75" y="90" width="35" height="4" rx="1" fill="#2563eb" opacity="0.2" />
+                    <rect x="75" y="98" width="25" height="4" rx="1" fill="#2563eb" opacity="0.2" />
+                    <circle cx="120" cy="85" r="6" fill="#fbbf24" />
+                    <circle cx="100" cy="115" r="22" fill="#2563eb" stroke="#ffffff" strokeWidth="3" />
+                    <circle cx="95" cy="115" r="3" fill="#ffffff" />
+                    <circle cx="105" cy="110" r="3" fill="#ffffff" />
+                    <circle cx="105" cy="120" r="3" fill="#ffffff" />
+                    <line x1="95" y1="115" x2="105" y2="110" stroke="#ffffff" strokeWidth="2" />
+                    <line x1="95" y1="115" x2="105" y2="120" stroke="#ffffff" strokeWidth="2" />
+                  </svg>
                 </div>
                 <h2>Share Critical Information Instantly</h2>
                 <p>Open or share an emergency medical card with family members or healthcare providers in just a few taps.</p>
