@@ -95,9 +95,10 @@ input::-ms-clear {
 }
 
 .logo {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.5rem !important;
   font-family: var(--font-title);
   font-size: 1.4rem;
   font-weight: 800;
@@ -1479,15 +1480,20 @@ textarea {
 }
 
 .splash-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
-  color: #ffffff;
+  color: #ffffff !important;
 }
 
 .splash-logo-icon {
-  font-size: 4.5rem;
-  display: block;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1.5rem;
   animation: splashPulse 1.5s infinite ease-in-out;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .splash-title {
@@ -1496,12 +1502,15 @@ textarea {
   font-weight: 700;
   letter-spacing: -0.02em;
   margin-bottom: 0.5rem;
+  color: #ffffff !important;
+  text-align: center;
 }
 
 .splash-subtitle {
   font-size: 1rem;
-  color: rgba(255, 255, 255, 0.75);
+  color: rgba(255, 255, 255, 0.8) !important;
   font-weight: 500;
+  text-align: center;
 }
 
 @keyframes splashPulse {

@@ -1,6 +1,14 @@
 import React, { useState } from 'react';
-import { Shield, Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { BACKEND_URL } from '../utils/storage';
+
+const BlueShield = ({ size = 24, className = "" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={{ display: 'inline-block', verticalAlign: 'middle' }}>
+    <path d="M12 2C12 2 14.5 3 19 3V11C19 16.5 15.5 20.5 12 22V2Z" fill="#60a5fa"/>
+    <path d="M12 2V22C8.5 20.5 5 16.5 5 11V3C9.5 3 12 2 12 2Z" fill="#2563eb"/>
+    <path d="M12 2C12 2 14.5 3 19 3V11C19 16.5 15.5 20.5 12 22C8.5 20.5 5 16.5 5 11V3C9.5 3 12 2 12 2Z" stroke="#1e3a8a" strokeWidth="1.5" strokeLinejoin="round"/>
+  </svg>
+);
 
 export default function AuthScreen({ onAuthSuccess, showStatus, onShowPolicy }) {
   const [isLogin, setIsLogin] = useState(true);
@@ -91,7 +99,7 @@ export default function AuthScreen({ onAuthSuccess, showStatus, onShowPolicy }) 
       <div className="auth-card">
         <div className="auth-header">
           <div className="auth-logo">
-            <Shield className="logo-icon-svg" size={32} style={{ color: 'var(--primary)', fill: 'var(--primary-light)', strokeWidth: 2.5 }} />
+            <BlueShield size={32} />
             <h1>KinLedger</h1>
           </div>
           <p className="auth-subtitle">

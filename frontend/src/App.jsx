@@ -4,6 +4,15 @@ import { loadCardData, saveCardData, BACKEND_URL } from './utils/storage';
 import EmergencyCard from './components/EmergencyCard';
 import AuthScreen from './components/AuthScreen';
 import PolicyPage from './components/PolicyPage';
+import HelpPage from './components/HelpPage';
+
+const BlueShield = ({ size = 24, className = "" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={{ display: 'inline-block', verticalAlign: 'middle' }}>
+    <path d="M12 2C12 2 14.5 3 19 3V11C19 16.5 15.5 20.5 12 22V2Z" fill="#60a5fa"/>
+    <path d="M12 2V22C8.5 20.5 5 16.5 5 11V3C9.5 3 12 2 12 2Z" fill="#2563eb"/>
+    <path d="M12 2C12 2 14.5 3 19 3V11C19 16.5 15.5 20.5 12 22C8.5 20.5 5 16.5 5 11V3C9.5 3 12 2 12 2Z" stroke="#1e3a8a" strokeWidth="1.5" strokeLinejoin="round"/>
+  </svg>
+);
 
 const UPCOMING_FEATURES = [
   { id: 'emergency', label: 'Have critical health information ready during emergencies' },
@@ -36,6 +45,7 @@ export default function App() {
   const [onboardingSlide, setOnboardingSlide] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
   const [showPolicy, setShowPolicy] = useState(null); // 'privacy' | 'terms' | null
+  const [showHelp, setShowHelp] = useState(false);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
 
   // Handle offline status
@@ -58,7 +68,7 @@ export default function App() {
       if (onboardingCompleted !== 'true') {
         setShowOnboarding(true);
       }
-    }, 3000); // 3 seconds
+    }, 2500); // 2.5 seconds
     return () => clearTimeout(splashTimer);
   }, []);
   const [votedFeature, setVotedFeature] = useState(null);
@@ -1038,7 +1048,7 @@ export default function App() {
     return (
       <div className="splash-screen">
         <div className="splash-content animated">
-          <Shield className="logo-icon-svg splash-logo-icon" size={80} style={{ color: '#ffffff', fill: 'rgba(255, 255, 255, 0.15)', strokeWidth: 2 }} />
+          <BlueShield size={80} className="splash-logo-icon" />
           <h1 className="splash-title">KinLedger</h1>
           <p className="splash-subtitle">Your Family Emergency Shield</p>
         </div>
@@ -1053,7 +1063,7 @@ export default function App() {
           <div className="onboarding-slides">
             {onboardingSlide === 0 && (
               <div className="onboarding-slide animated">
-                <Shield className="logo-icon-svg" size={80} style={{ color: 'var(--primary)', fill: 'var(--primary-light)', strokeWidth: 2, marginBottom: '1rem' }} />
+                <BlueShield size={80} style={{ marginBottom: '1rem' }} />
                 <h2>Secure Emergency Cards</h2>
                 <p>Create digital emergency medical cards for your parents and family members containing critical health profiles.</p>
               </div>
@@ -1104,6 +1114,19 @@ export default function App() {
     return <PolicyPage type={showPolicy} onClose={() => setShowPolicy(null)} />;
   }
 
+  if (showHelp) {
+    return (
+      <HelpPage 
+        onClose={() => setShowHelp(false)} 
+        onReplayOnboarding={() => {
+          setShowOnboarding(true);
+          setOnboardingSlide(0);
+          setShowHelp(false);
+        }} 
+      />
+    );
+  }
+
   if (!token) {
     return <AuthScreen onAuthSuccess={(t, email) => { setToken(t); setUserEmail(email); }} showStatus={showStatus} onShowPolicy={setShowPolicy} />;
   }
@@ -1123,7 +1146,7 @@ export default function App() {
         <div className="header-content">
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <a href="#" className="logo" onClick={() => { setSelectedCardId(null); setMenuOpen(false); }}>
-              <Shield className="logo-icon-svg" size={28} style={{ color: 'var(--primary)', fill: 'var(--primary-light)', strokeWidth: 2.5 }} />
+              <BlueShield size={28} />
               <span>KinLedger</span>
             </a>
             {isOffline && (
@@ -1150,6 +1173,13 @@ export default function App() {
                   <span className="menu-user-email" style={{ fontSize: '0.9rem', fontWeight: '600', color: 'var(--text-primary)', wordBreak: 'break-all' }}>{userEmail}</span>
                 </div>
                 <div className="menu-items" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <button 
+                    onClick={() => { setShowHelp(true); setMenuOpen(false); }} 
+                    style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', textAlign: 'left', cursor: 'pointer', padding: '6px 8px', fontSize: '0.9rem', borderRadius: 'var(--radius-sm)', width: '100%', transition: 'background-color 0.2s' }}
+                    className="menu-item-hover"
+                  >
+                    Help & FAQ
+                  </button>
                   <button 
                     onClick={() => { setShowPolicy('privacy'); setMenuOpen(false); }} 
                     style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', textAlign: 'left', cursor: 'pointer', padding: '6px 8px', fontSize: '0.9rem', borderRadius: 'var(--radius-sm)', width: '100%', transition: 'background-color 0.2s' }}
