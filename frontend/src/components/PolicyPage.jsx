@@ -162,41 +162,109 @@ export default function PolicyPage({ type, onClose }) {
         </article>
       ) : (
         <article style={{ lineHeight: '1.6', color: 'var(--text-primary)' }}>
-          <h1 style={{ fontFamily: 'var(--font-title)', color: 'var(--primary)', fontSize: '2rem', marginBottom: '1rem' }}>Terms of Service</h1>
+          <h1 style={{ fontFamily: 'var(--font-title)', color: 'var(--primary)', fontSize: '2rem', marginBottom: '0.5rem' }}>Terms of Service</h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>Effective Date: June 29, 2026</p>
 
           <p style={{ marginBottom: '1.25rem' }}>
-            Please read these Terms of Service ("Terms") carefully before using the KinLedger application. By accessing or using the service, you agree to be bound by these Terms.
+            Welcome to <strong>KinLedger</strong>. These Terms of Service ("Terms") govern your access to and use of the KinLedger application ("Service"). By creating an account or using KinLedger, you agree to these Terms.
           </p>
 
-          <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>1. Emergency Use Disclaimer (CRITICAL)</h2>
+          <p style={{ marginBottom: '1.25rem' }}>
+            If you do not agree with these Terms, please do not use the Service.
+          </p>
+
+          <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>1. About KinLedger</h2>
+          <p style={{ marginBottom: '1.25rem' }}>
+            KinLedger is a digital tool designed to help individuals and families organize, store, and share personal health information, including emergency medical profiles. KinLedger is intended for informational and organizational purposes only.
+          </p>
+
+          <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>2. Medical Disclaimer</h2>
           <p style={{ marginBottom: '1.25rem', fontWeight: '600', color: 'var(--danger)' }}>
-            KinLedger is an information storage tool designed to help you organize and share family medical details. It is NOT a medical device, nor does it provide professional medical advice, diagnosis, or treatment. In a medical emergency, do not rely solely on this app. Always contact your local emergency services (e.g., 108 or 112 in India) immediately.
+            KinLedger is <strong>not</strong> a medical device and does <strong>not</strong> provide medical advice, diagnosis, treatment, or emergency medical services.
+          </p>
+          <p style={{ marginBottom: '1.25rem' }}>
+            Information displayed within KinLedger is entered by users and is not independently verified.
+          </p>
+          <p style={{ marginBottom: '1.25rem', fontWeight: '600' }}>
+            In a medical emergency, always contact your local emergency services (such as <strong>108</strong> or <strong>112</strong> in India) or seek immediate assistance from qualified healthcare professionals. Do not rely solely on KinLedger during a medical emergency.
           </p>
 
-          <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>2. Accuracy of Information</h2>
+          <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>3. Your Responsibilities</h2>
+          <p style={{ marginBottom: '1rem' }}>
+            You are responsible for:
+          </p>
+          <ul style={{ paddingLeft: '20px', marginBottom: '1.25rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <li>Providing accurate and up-to-date information.</li>
+            <li>Reviewing and updating medical conditions, medications, allergies, insurance details, and emergency contacts when changes occur.</li>
+            <li>Obtaining permission before entering another person's contact information, including emergency contacts.</li>
+            <li>Using KinLedger only for lawful purposes.</li>
+          </ul>
+
+          <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>4. Account Security</h2>
           <p style={{ marginBottom: '1.25rem' }}>
-            You are solely responsible for ensuring the accuracy, completeness, and timeliness of the medical information, dosages, allergies, and emergency contact numbers entered into the application.
+            To synchronize your information across devices, you must create an account. You are responsible for maintaining the confidentiality of your login credentials and for all activities that occur under your account.
+          </p>
+          <p style={{ marginBottom: '1.25rem' }}>
+            If you believe your account has been accessed without authorization, please notify us as soon as reasonably possible.
           </p>
 
-          <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>3. Account Registration & Security</h2>
+          <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>5. Your Data</h2>
           <p style={{ marginBottom: '1.25rem' }}>
-            To synchronize your data across devices, you must register an account. You are responsible for safeguarding your password and credentials. KinLedger cannot and will not be liable for any loss or damage arising from your failure to protect your account.
+            You retain ownership of the information you enter into KinLedger. You may update, modify, or delete your information at any time.
+          </p>
+          <p style={{ marginBottom: '1.25rem' }}>
+            Deleting your account will permanently remove your account and associated data from our systems, subject to reasonable technical processing time and any legal obligations that may apply.
           </p>
 
-          <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>4. Data Ownership & Deletion</h2>
+          <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>6. Service Availability</h2>
           <p style={{ marginBottom: '1.25rem' }}>
-            You retain full ownership of all data you input. You may delete your account and purge all data from our servers at any time. We do not maintain backups of deleted accounts.
+            We strive to keep KinLedger available and reliable, but we cannot guarantee uninterrupted or error-free operation. The Service may occasionally be unavailable due to maintenance, technical issues, security updates, or circumstances beyond our reasonable control.
           </p>
 
-          <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>5. Limitation of Liability</h2>
+          <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>7. Future Features</h2>
           <p style={{ marginBottom: '1.25rem' }}>
-            To the maximum extent permitted by law, KinLedger and its developers shall not be liable for any direct, indirect, incidental, special, or consequential damages resulting from the use or the inability to use the service, including but not limited to medical complications, data loss, or reliance on incorrect information.
+            KinLedger may introduce new features, including document storage, family collaboration, reminders, and AI-assisted summaries. Where required, additional notices or consent requests will be presented before such features become available.
           </p>
 
-          <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>6. Modifications to Terms</h2>
+          <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>8. Acceptable Use</h2>
+          <p style={{ marginBottom: '1rem' }}>
+            You agree not to:
+          </p>
+          <ul style={{ paddingLeft: '20px', marginBottom: '1.25rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <li>Attempt to gain unauthorized access to KinLedger or its systems.</li>
+            <li>Interfere with the operation or security of the Service.</li>
+            <li>Upload malicious software or harmful content.</li>
+            <li>Use the Service in violation of applicable laws.</li>
+          </ul>
+
+          <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>9. Limitation of Liability</h2>
+          <p style={{ marginBottom: '1rem' }}>
+            To the maximum extent permitted by applicable law, KinLedger and its owners, developers, and service providers shall not be liable for any indirect, incidental, consequential, special, or punitive damages arising from:
+          </p>
+          <ul style={{ paddingLeft: '20px', marginBottom: '1.25rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <li>Use or inability to use the Service.</li>
+            <li>Inaccurate, incomplete, or outdated information entered by users.</li>
+            <li>Delays or interruptions in service.</li>
+            <li>Data loss or unauthorized access despite reasonable security measures.</li>
+            <li>Reliance on information stored within KinLedger.</li>
+          </ul>
           <p style={{ marginBottom: '1.25rem' }}>
-            We reserve the right to modify these Terms at any time. We will notify users of any significant changes by posting the new Terms within the application.
+            Nothing in these Terms limits any rights that cannot legally be excluded under applicable law.
+          </p>
+
+          <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>10. Changes to These Terms</h2>
+          <p style={{ marginBottom: '1.25rem' }}>
+            We may update these Terms from time to time. If significant changes are made, the revised Terms will be made available within the application and the Effective Date will be updated. Continued use of KinLedger after the revised Terms become effective constitutes acceptance of the updated Terms.
+          </p>
+
+          <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>11. Governing Law</h2>
+          <p style={{ marginBottom: '1.25rem' }}>
+            These Terms shall be governed by and interpreted in accordance with the laws of India. Any disputes arising from these Terms shall be subject to the jurisdiction of the competent courts located in India.
+          </p>
+
+          <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>12. Contact Us</h2>
+          <p style={{ marginBottom: '1.25rem' }}>
+            If you have any questions regarding these Terms, please contact us at: <a href="mailto:support@kinledger.app" style={{ color: 'var(--primary)', fontWeight: '600', textDecoration: 'none' }}>support@kinledger.app</a>.
           </p>
         </article>
       )}
