@@ -8,9 +8,9 @@ import HelpPage from './components/HelpPage';
 
 const BlueShield = ({ size = 24, className = "" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={{ display: 'inline-block', verticalAlign: 'middle' }}>
-    <path d="M12 2C12 2 14.5 3 19 3V11C19 16.5 15.5 20.5 12 22V2Z" fill="#60a5fa"/>
-    <path d="M12 2V22C8.5 20.5 5 16.5 5 11V3C9.5 3 12 2 12 2Z" fill="#2563eb"/>
-    <path d="M12 2C12 2 14.5 3 19 3V11C19 16.5 15.5 20.5 12 22C8.5 20.5 5 16.5 5 11V3C9.5 3 12 2 12 2Z" stroke="#d4af37" strokeWidth="1.5" strokeLinejoin="round"/>
+    <path d="M12 2C12 2 14.5 3 19 3V11C19 16.5 15.5 20.5 12 22V2Z" fill="#60a5fa" />
+    <path d="M12 2V22C8.5 20.5 5 16.5 5 11V3C9.5 3 12 2 12 2Z" fill="#2563eb" />
+    <path d="M12 2C12 2 14.5 3 19 3V11C19 16.5 15.5 20.5 12 22C8.5 20.5 5 16.5 5 11V3C9.5 3 12 2 12 2Z" stroke="#d4af37" strokeWidth="1.5" strokeLinejoin="round" />
   </svg>
 );
 
@@ -31,7 +31,7 @@ export default function App() {
   const [cards, setCards] = useState([]);
   const [selectedCardId, setSelectedCardId] = useState(null); // null = Dashboard view
   const [activeTab, setActiveTab] = useState('edit'); // 'edit' or 'view' for the selected card
-  
+
   const [loading, setLoading] = useState(true);
   const [synced, setSynced] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
@@ -120,7 +120,7 @@ export default function App() {
           if (Array.isArray(parsed) && parsed.length > 0) {
             userVoted = parsed[0];
           }
-        } catch (e) {}
+        } catch (e) { }
       }
       setJoinedWaitlist(userJoined);
       setVotedFeature(userVoted);
@@ -151,7 +151,7 @@ export default function App() {
     if (!card) return { status: 'incomplete', label: 'Emergency Profile Incomplete', color: '#ef4444' };
     const { profile, emergencyContacts = [], medications = [] } = card;
     const { fullName, age, bloodGroup, conditions, allergies, insurancePolicy, insuranceNumber } = profile || {};
-    
+
     // Red: if missing primary details or contacts/medications
     if (!fullName || !age || !bloodGroup || !conditions || !allergies || emergencyContacts.length === 0 || medications.length === 0) {
       return {
@@ -160,7 +160,7 @@ export default function App() {
         color: '#ef4444'
       };
     }
-    
+
     // Yellow: if complete on primary but missing insurance
     if (!insurancePolicy || !insuranceNumber) {
       return {
@@ -169,7 +169,7 @@ export default function App() {
         color: '#f59e0b'
       };
     }
-    
+
     // Green: complete
     return {
       status: 'complete',
@@ -208,9 +208,9 @@ export default function App() {
       aug: 8, august: 8, sep: 9, september: 9, oct: 10, october: 10,
       nov: 11, november: 11, dec: 12, december: 12
     };
-    
+
     const trimmed = dateStr.trim();
-    
+
     // Try MM/YYYY or MM/YY
     const mmyyyy = trimmed.match(/^([0-9]{1,2})\/([0-9]{4}|[0-9]{2})$/);
     if (mmyyyy) {
@@ -221,7 +221,7 @@ export default function App() {
       }
       return { month: m, year: y };
     }
-    
+
     // Try Month YYYY
     const parts = trimmed.split(/\s+/);
     if (parts.length === 2) {
@@ -236,40 +236,40 @@ export default function App() {
 
   const validateInsuranceExpiryWithDate = (dateStr) => {
     if (!dateStr || !dateStr.trim()) return { valid: true };
-    
+
     if (!validateInsuranceExpiry(dateStr)) {
       return { valid: false, message: "Invalid format. Use MM/YYYY (e.g., 12/2028) or Month YYYY (e.g., Dec 2028)." };
     }
-    
+
     const parsed = parseInsuranceExpiry(dateStr);
     if (!parsed) {
       return { valid: false, message: "Invalid format. Use MM/YYYY (e.g., 12/2028) or Month YYYY (e.g., Dec 2028)." };
     }
-    
+
     const { month, year } = parsed;
     const now = new Date();
     const curYear = now.getFullYear();
     const curMonth = now.getMonth() + 1;
-    
+
     if (year < curYear || (year === curYear && month < curMonth)) {
       return { valid: false, message: "Valid Till date cannot be in the past." };
     }
-    
+
     if (year > curYear + 10 || (year === curYear + 10 && month > curMonth)) {
       return { valid: false, message: "Valid Till date cannot be more than 10 years in the future." };
     }
-    
+
     return { valid: true };
   };
 
   // Validate insurance valid till date format
   const validateInsuranceExpiry = (dateStr) => {
     if (!dateStr || !dateStr.trim()) return true; // Optional field is valid when empty
-    
+
     // 1. Matches MM/YYYY (e.g. 12/2028) or MM/YY (e.g. 12/28)
     const slashRegex = /^(0[1-9]|1[0-2])\/([0-9]{4}|[0-9]{2})$/;
     if (slashRegex.test(dateStr)) return true;
-    
+
     // 2. Matches "Dec 2028" or "December 2028" (case-insensitive)
     const months = [
       'jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec',
@@ -284,7 +284,7 @@ export default function App() {
         return true;
       }
     }
-    
+
     return false;
   };
 
@@ -298,7 +298,7 @@ export default function App() {
       const activeUpdate = updatedCards.find(c => c.id === selectedCardId);
       if (activeUpdate) {
         const errors = {};
-        
+
         // 1. Full Name
         const name = activeUpdate.profile.fullName || '';
         if (!name.trim()) {
@@ -308,7 +308,7 @@ export default function App() {
         } else if (containsUnsafeChars(name)) {
           errors.fullName = "Full Name cannot contain unsafe characters (<, >, \\, `).";
         }
-        
+
         // 2. Relationship Tag
         const rel = activeUpdate.relationship || '';
         if (!rel || rel.trim() === '') {
@@ -316,7 +316,7 @@ export default function App() {
         } else if (containsUnsafeChars(rel)) {
           errors.relationship = "Relationship cannot contain unsafe characters (<, >, \\, `).";
         }
-        
+
         // 3. Age
         const ageVal = activeUpdate.profile.age;
         if (ageVal === undefined || ageVal === null || String(ageVal).trim() === '') {
@@ -327,13 +327,13 @@ export default function App() {
             errors.age = "Age must be an integer between 0 and 130.";
           }
         }
-        
+
         // 4. Blood Group
         const bg = activeUpdate.profile.bloodGroup || '';
         if (!bg || bg.trim() === '') {
           errors.bloodGroup = "Blood Group is required.";
         }
-        
+
         // 5. Conditions
         const cond = activeUpdate.profile.conditions || '';
         if (cond.length > 5000) {
@@ -341,7 +341,7 @@ export default function App() {
         } else if (containsUnsafeChars(cond)) {
           errors.conditions = "Conditions cannot contain unsafe characters (<, >, \\, `).";
         }
-        
+
         // 6. Allergies
         const allg = activeUpdate.profile.allergies || '';
         if (allg.length > 1000) {
@@ -349,7 +349,7 @@ export default function App() {
         } else if (containsUnsafeChars(allg)) {
           errors.allergies = "Allergies cannot contain unsafe characters (<, >, \\, `).";
         }
-        
+
         // 7. Insurance Provider
         const insPol = activeUpdate.profile.insurancePolicy || '';
         if (insPol.length > 100) {
@@ -357,7 +357,7 @@ export default function App() {
         } else if (containsUnsafeChars(insPol)) {
           errors.insurancePolicy = "Insurance Provider cannot contain unsafe characters (<, >, \\, `).";
         }
-        
+
         // 8. Policy Number
         const insNum = activeUpdate.profile.insuranceNumber || '';
         if (insNum.length > 100) {
@@ -365,7 +365,7 @@ export default function App() {
         } else if (containsUnsafeChars(insNum)) {
           errors.insuranceNumber = "Policy Number cannot contain unsafe characters (<, >, \\, `).";
         }
-        
+
         // 9. Valid Till
         const expiry = activeUpdate.profile.insuranceValidTill || '';
         if (expiry && expiry.trim() !== '') {
@@ -374,7 +374,7 @@ export default function App() {
             errors.insuranceValidTill = expiryVal.message;
           }
         }
-        
+
         // 10. Emergency Contacts
         (activeUpdate.emergencyContacts || []).forEach((contact, idx) => {
           if (containsUnsafeChars(contact.name)) {
@@ -434,7 +434,7 @@ export default function App() {
   // Add a new profile card
   const handleCreateCard = (relation) => {
     if (!relation) return;
-    
+
     const newCard = {
       id: 'card-' + Date.now(),
       relationship: relation,
@@ -463,7 +463,7 @@ export default function App() {
     } catch (err) {
       console.error('LocalStorage write error:', err);
     }
-    
+
     // Jump straight to editing this new card
     setSelectedCardId(newCard.id);
     setActiveTab('edit');
@@ -475,22 +475,22 @@ export default function App() {
   // Delete a profile card (revokes access if shared card)
   const handleDeleteCard = async (id, event) => {
     if (event) event.stopPropagation(); // prevent opening card if clicked from dashboard
-    
+
     const cardToDelete = cards.find(c => c.id === id);
     const name = cardToDelete?.profile?.fullName || cardToDelete?.relationship || 'Family Member';
-    
-    const confirmMsg = cardToDelete?.isShared 
-      ? `Are you sure you want to remove the shared card for ${name}? You will lose access.` 
+
+    const confirmMsg = cardToDelete?.isShared
+      ? `Are you sure you want to remove the shared card for ${name}? You will lose access.`
       : `Are you sure you want to delete the emergency card for ${name}? This will delete it for everyone.`;
 
     if (window.confirm(confirmMsg)) {
       const updated = cards.filter(c => c.id !== id);
-      
+
       if (cardToDelete?.isShared) {
         try {
           const response = await fetch(`${BACKEND_URL}/shares`, {
             method: 'DELETE',
-            headers: { 
+            headers: {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${token}`
             },
@@ -525,7 +525,7 @@ export default function App() {
     // Real-time validation
     setValidationErrors(prev => {
       const copy = { ...prev };
-      
+
       if (name === 'fullName') {
         if (!value.trim()) {
           copy.fullName = "Full Name is required.";
@@ -537,7 +537,7 @@ export default function App() {
           delete copy.fullName;
         }
       }
-      
+
       if (name === 'age') {
         if (value === undefined || value === null || String(value).trim() === '') {
           copy.age = "Age is required.";
@@ -550,7 +550,7 @@ export default function App() {
           }
         }
       }
-      
+
       if (name === 'bloodGroup') {
         if (!value || value.trim() === '') {
           copy.bloodGroup = "Blood Group is required.";
@@ -558,7 +558,7 @@ export default function App() {
           delete copy.bloodGroup;
         }
       }
-      
+
       if (name === 'conditions') {
         if (value.length > 5000) {
           copy.conditions = "Conditions cannot exceed 5000 characters.";
@@ -568,7 +568,7 @@ export default function App() {
           delete copy.conditions;
         }
       }
-      
+
       if (name === 'allergies') {
         if (value.length > 1000) {
           copy.allergies = "Allergies cannot exceed 1000 characters.";
@@ -578,7 +578,7 @@ export default function App() {
           delete copy.allergies;
         }
       }
-      
+
       if (name === 'insurancePolicy') {
         if (value.length > 100) {
           copy.insurancePolicy = "Insurance Provider cannot exceed 100 characters.";
@@ -588,7 +588,7 @@ export default function App() {
           delete copy.insurancePolicy;
         }
       }
-      
+
       if (name === 'insuranceNumber') {
         if (value.length > 100) {
           copy.insuranceNumber = "Policy Number cannot exceed 100 characters.";
@@ -598,7 +598,7 @@ export default function App() {
           delete copy.insuranceNumber;
         }
       }
-      
+
       if (name === 'insuranceValidTill') {
         if (!value || value.trim() === '' || validateInsuranceExpiry(value)) {
           const expiryVal = validateInsuranceExpiryWithDate(value);
@@ -611,7 +611,7 @@ export default function App() {
           copy.insuranceValidTill = "Invalid format. Use MM/YYYY (e.g., 12/2028) or Month YYYY (e.g., Dec 2028).";
         }
       }
-      
+
       return copy;
     });
 
@@ -660,7 +660,7 @@ export default function App() {
 
     setValidationErrors(prev => {
       const copy = { ...prev };
-      
+
       if (field === 'name') {
         if (!value.trim()) {
           copy.contactName = "Contact Name is required.";
@@ -672,7 +672,7 @@ export default function App() {
           delete copy.contactName;
         }
       }
-      
+
       if (field === 'relationship') {
         if (!value) {
           copy.contactRelationship = "Relationship is required.";
@@ -680,7 +680,7 @@ export default function App() {
           delete copy.contactRelationship;
         }
       }
-      
+
       if (field === 'phoneNumber') {
         if (!value.trim()) {
           copy.contactPhone = "Phone Number is required.";
@@ -690,7 +690,7 @@ export default function App() {
           delete copy.contactPhone;
         }
       }
-      
+
       if (field === 'email') {
         if (value && value.trim()) {
           const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -705,7 +705,7 @@ export default function App() {
           delete copy.contactEmail;
         }
       }
-      
+
       return copy;
     });
   };
@@ -714,9 +714,9 @@ export default function App() {
   const addContactToActiveCard = (e) => {
     e.preventDefault();
     if (!selectedCardId) return;
-    
+
     const { name, relationship, phoneNumber, email = '' } = newContact;
-    
+
     const errors = {};
     if (!name.trim()) {
       errors.contactName = "Contact Name is required.";
@@ -725,17 +725,17 @@ export default function App() {
     } else if (containsUnsafeChars(name)) {
       errors.contactName = "Contact Name cannot contain unsafe characters (<, >, \\, `).";
     }
-    
+
     if (!relationship) {
       errors.contactRelationship = "Relationship is required.";
     }
-    
+
     if (!phoneNumber.trim()) {
       errors.contactPhone = "Phone Number is required.";
     } else if (!/^[0-9]{8,14}$/.test(phoneNumber.trim())) {
       errors.contactPhone = "Phone Number must contain exactly 8 to 14 digits with no special characters.";
     }
-    
+
     if (email && email.trim() !== '') {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email.trim())) {
@@ -768,7 +768,7 @@ export default function App() {
 
     setCards(updated);
     setNewContact({ name: '', relationship: '', phoneNumber: '', email: '' });
-    
+
     // Clear contact errors
     setValidationErrors(prev => {
       const copy = { ...prev };
@@ -802,9 +802,9 @@ export default function App() {
   const addMedicationToActiveCard = (e) => {
     e.preventDefault();
     if (!selectedCardId) return;
-    
+
     const { name, dosage = '', frequency = '', instructions = '' } = newMed;
-    
+
     if (!name.trim()) {
       showStatus('Medication Name is required.', 'error');
       return;
@@ -817,7 +817,7 @@ export default function App() {
       showStatus('Medication Name cannot contain unsafe characters (<, >, \\, `).', 'error');
       return;
     }
-    
+
     if (dosage && dosage.length > 50) {
       showStatus('Dosage cannot exceed 50 characters.', 'error');
       return;
@@ -826,12 +826,12 @@ export default function App() {
       showStatus('Dosage cannot contain unsafe characters (<, >, \\, `).', 'error');
       return;
     }
-    
+
     if (containsUnsafeChars(frequency)) {
       showStatus('Frequency cannot contain unsafe characters (<, >, \\, `).', 'error');
       return;
     }
-    
+
     if (containsUnsafeChars(instructions)) {
       showStatus('Instructions cannot contain unsafe characters (<, >, \\, `).', 'error');
       return;
@@ -877,7 +877,7 @@ export default function App() {
   const handleShareCard = async () => {
     if (!shareEmail) return;
     const cleanEmail = shareEmail.toLowerCase().trim();
-    
+
     if (cleanEmail === userEmail) {
       showStatus("You cannot share a card with yourself.", "error");
       return;
@@ -886,7 +886,7 @@ export default function App() {
     try {
       const response = await fetch(`${BACKEND_URL}/shares`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
@@ -900,7 +900,7 @@ export default function App() {
 
       showStatus(`Card successfully shared with ${cleanEmail}!`, 'success');
       setShareEmail('');
-      
+
       // Update local share state
       setCards(prev => prev.map(c => {
         if (c.id === selectedCardId) {
@@ -921,7 +921,7 @@ export default function App() {
     try {
       const response = await fetch(`${BACKEND_URL}/shares`, {
         method: 'DELETE',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
@@ -934,7 +934,7 @@ export default function App() {
       }
 
       showStatus(`Access revoked for ${emailToRevoke}.`, 'info');
-      
+
       // Update local state share list
       setCards(prev => prev.map(c => {
         if (c.id === selectedCardId) {
@@ -970,7 +970,7 @@ export default function App() {
     try {
       const response = await fetch(`${BACKEND_URL}/auth/account`, {
         method: 'DELETE',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
@@ -983,7 +983,7 @@ export default function App() {
       }
 
       showStatus("Your account and all family records have been permanently deleted.", "success");
-      
+
       // Purge credentials and return to auth screen
       localStorage.removeItem('kinledger_jwt_token');
       localStorage.removeItem('kinledger_user_email');
@@ -1005,7 +1005,7 @@ export default function App() {
       showStatus("Please select a feature to vote on.", "error");
       return;
     }
-    
+
     const keySuffix = userEmail ? `_${userEmail.toLowerCase().trim()}` : '';
     localStorage.setItem(`kinledger_waitlist_joined${keySuffix}`, 'true');
     localStorage.setItem(`kinledger_waitlist_features${keySuffix}`, JSON.stringify([selectedFeature]));
@@ -1016,7 +1016,7 @@ export default function App() {
       await fetch(`${BACKEND_URL}/waitlist`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           timestamp: new Date(),
           feature: selectedFeature,
           email: userEmail
@@ -1090,7 +1090,7 @@ export default function App() {
                   </svg>
                 </div>
                 <h2>Be Prepared Before an Emergency Happens</h2>
-                <p>Keep your loved one's essential medical information ready—so you're never scrambling when every second matters.</p>
+                <p>Keep your loved one's essential medical information ready - so you're never scrambling when every second matters.</p>
               </div>
             )}
             {onboardingSlide === 1 && (
@@ -1148,17 +1148,17 @@ export default function App() {
               <span className={`dot ${onboardingSlide === 1 ? 'active' : ''}`} onClick={() => setOnboardingSlide(1)}></span>
               <span className={`dot ${onboardingSlide === 2 ? 'active' : ''}`} onClick={() => setOnboardingSlide(2)}></span>
             </div>
-            
+
             <div style={{ display: 'flex', gap: '1rem', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
-              <button 
-                className="btn btn-outline" 
+              <button
+                className="btn btn-outline"
                 style={{ flex: 1, borderColor: 'var(--border)', color: 'var(--text-secondary)' }}
                 onClick={handleCompleteOnboarding}
               >
                 Skip
               </button>
-              <button 
-                className="btn btn-primary" 
+              <button
+                className="btn btn-primary"
                 style={{ flex: 1 }}
                 onClick={() => {
                   if (onboardingSlide < 2) {
@@ -1183,13 +1183,13 @@ export default function App() {
 
   if (showHelp) {
     return (
-      <HelpPage 
-        onClose={() => setShowHelp(false)} 
+      <HelpPage
+        onClose={() => setShowHelp(false)}
         onReplayOnboarding={() => {
           setShowOnboarding(true);
           setOnboardingSlide(0);
           setShowHelp(false);
-        }} 
+        }}
       />
     );
   }
@@ -1222,33 +1222,33 @@ export default function App() {
               </span>
             )}
           </div>
-          
+
           <div className="header-actions" style={{ display: 'flex', alignItems: 'center', gap: '12px', position: 'relative' }}>
-                <button 
-                  className="coming-up-btn" 
-                  onClick={() => setShowVoteModal(true)}
-                  style={{ 
-                    padding: '6px 12px', 
-                    borderRadius: '9999px', 
-                    fontSize: '0.825rem', 
-                    fontWeight: '600', 
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    border: 'none'
-                  }}
-                >
-                  Coming Up Next ✨
-                </button>
-                <button 
-                  className="hamburger-btn" 
-                  onClick={() => setMenuOpen(!menuOpen)}
-                  aria-label="Toggle Menu"
-                >
-                  {menuOpen ? <X size={24} /> : <Menu size={24} />}
-                </button>
-            
+            <button
+              className="coming-up-btn"
+              onClick={() => setShowVoteModal(true)}
+              style={{
+                padding: '6px 12px',
+                borderRadius: '9999px',
+                fontSize: '0.825rem',
+                fontWeight: '600',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                border: 'none'
+              }}
+            >
+              Coming Up Next ✨
+            </button>
+            <button
+              className="hamburger-btn"
+              onClick={() => setMenuOpen(!menuOpen)}
+              aria-label="Toggle Menu"
+            >
+              {menuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+
             {menuOpen && (
               <div className="menu-dropdown animated" style={{ position: 'absolute', right: 0, top: '100%', marginTop: '8px', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-lg)', padding: '1rem', width: '240px', zIndex: 99999 }}>
                 <div className="menu-header" style={{ borderBottom: '1px solid var(--border)', paddingBottom: '0.75rem', marginBottom: '0.75rem' }}>
@@ -1256,37 +1256,37 @@ export default function App() {
                   <span className="menu-user-email" style={{ fontSize: '0.9rem', fontWeight: '600', color: 'var(--text-primary)', wordBreak: 'break-all' }}>{userEmail}</span>
                 </div>
                 <div className="menu-items" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <button 
-                    onClick={() => { setShowHelp(true); setMenuOpen(false); }} 
+                  <button
+                    onClick={() => { setShowHelp(true); setMenuOpen(false); }}
                     style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', textAlign: 'left', cursor: 'pointer', padding: '6px 8px', fontSize: '0.9rem', borderRadius: 'var(--radius-sm)', width: '100%', transition: 'background-color 0.2s' }}
                     className="menu-item-hover"
                   >
                     Help & FAQ
                   </button>
-                  <button 
-                    onClick={() => { setShowPolicy('privacy'); setMenuOpen(false); }} 
+                  <button
+                    onClick={() => { setShowPolicy('privacy'); setMenuOpen(false); }}
                     style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', textAlign: 'left', cursor: 'pointer', padding: '6px 8px', fontSize: '0.9rem', borderRadius: 'var(--radius-sm)', width: '100%', transition: 'background-color 0.2s' }}
                     className="menu-item-hover"
                   >
                     Privacy Policy
                   </button>
-                  <button 
-                    onClick={() => { setShowPolicy('terms'); setMenuOpen(false); }} 
+                  <button
+                    onClick={() => { setShowPolicy('terms'); setMenuOpen(false); }}
                     style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', textAlign: 'left', cursor: 'pointer', padding: '6px 8px', fontSize: '0.9rem', borderRadius: 'var(--radius-sm)', width: '100%', transition: 'background-color 0.2s' }}
                     className="menu-item-hover"
                   >
                     Terms of Service
                   </button>
                   <hr className="menu-separator" style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '4px 0' }} />
-                  <button 
-                    className="menu-btn-logout" 
+                  <button
+                    className="menu-btn-logout"
                     onClick={() => { handleLogout(); setMenuOpen(false); }}
                     style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', textAlign: 'left', cursor: 'pointer', padding: '6px 8px', fontSize: '0.9rem', borderRadius: 'var(--radius-sm)', width: '100%', display: 'flex', alignItems: 'center', gap: '8px', transition: 'background-color 0.2s' }}
                   >
                     <LogOut size={16} /> Sign Out
                   </button>
-                  <button 
-                    className="menu-btn-delete" 
+                  <button
+                    className="menu-btn-delete"
                     onClick={() => { handleDeleteAccount(); setMenuOpen(false); }}
                     style={{ background: 'none', border: 'none', color: 'var(--danger)', textAlign: 'left', cursor: 'pointer', padding: '6px 8px', fontSize: '0.9rem', borderRadius: 'var(--radius-sm)', width: '100%', fontWeight: '500', transition: 'background-color 0.2s' }}
                   >
@@ -1324,9 +1324,9 @@ export default function App() {
             <div className="dashboard-grid">
               {/* Profile Card List */}
               {cards.map(card => (
-                <div 
-                  key={card.id} 
-                  className="member-summary-card" 
+                <div
+                  key={card.id}
+                  className="member-summary-card"
                   onClick={() => {
                     setSelectedCardId(card.id);
                     setActiveTab('view');
@@ -1352,8 +1352,8 @@ export default function App() {
                       </div>
                     </div>
                     {/* Delete/Remove card directly from dashboard */}
-                    <button 
-                      className="btn-icon-only danger" 
+                    <button
+                      className="btn-icon-only danger"
                       onClick={(e) => handleDeleteCard(card.id, e)}
                       title={card.isShared ? "Remove card from dashboard" : "Delete card"}
                     >
@@ -1386,8 +1386,8 @@ export default function App() {
                     </div>
                     <div>
                       <strong>Meds:</strong>{' '}
-                      {card.medications.length > 0 
-                        ? `${card.medications.length} active medication(s)` 
+                      {card.medications.length > 0
+                        ? `${card.medications.length} active medication(s)`
                         : <span style={{ color: 'var(--text-muted)' }}>None listed</span>
                       }
                     </div>
@@ -1405,10 +1405,10 @@ export default function App() {
                       {formatLastUpdated(card.updatedAt)}
                     </div>
                   </div>
- 
+
                   <div className="member-card-footer">
-                    <button 
-                      className="btn btn-secondary btn-sm" 
+                    <button
+                      className="btn btn-secondary btn-sm"
                       style={{ flex: 1 }}
                       onClick={(e) => {
                         e.stopPropagation();
@@ -1418,7 +1418,7 @@ export default function App() {
                     >
                       {getReadinessStatus(card).status === 'complete' ? 'Edit Profile' : 'Complete Profile'}
                     </button>
-                    <button 
+                    <button
                       className="btn btn-outline btn-sm"
                       style={{ display: 'flex', gap: '0.25rem', alignItems: 'center' }}
                       onClick={(e) => {
@@ -1447,7 +1447,7 @@ export default function App() {
                     <div style={{ fontWeight: 'bold', color: 'var(--primary)', fontFamily: 'var(--font-title)' }}>
                       Select Relationship
                     </div>
-                    <select 
+                    <select
                       onChange={(e) => {
                         if (e.target.value === 'custom') {
                           // keep menu open, let user input custom relation
@@ -1471,13 +1471,13 @@ export default function App() {
                     {/* Show input if custom relation selected */}
                     {customRelation !== null && (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginTop: '0.2rem' }}>
-                        <input 
-                          type="text" 
-                          placeholder="e.g., Grandfather, Aunt" 
+                        <input
+                          type="text"
+                          placeholder="e.g., Grandfather, Aunt"
                           value={customRelation}
                           onChange={(e) => setCustomRelation(e.target.value)}
                         />
-                        <button 
+                        <button
                           className="btn btn-primary btn-sm"
                           onClick={() => handleCreateCard(customRelation || 'Family Member')}
                         >
@@ -1486,8 +1486,8 @@ export default function App() {
                       </div>
                     )}
 
-                    <button 
-                      className="btn btn-danger btn-sm" 
+                    <button
+                      className="btn btn-danger btn-sm"
                       style={{ marginTop: 'auto', alignSelf: 'flex-start' }}
                       onClick={() => {
                         setShowAddMenu(false);
@@ -1521,7 +1521,7 @@ export default function App() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="workspace-actions">
                 <button className="btn btn-secondary" onClick={() => setSelectedCardId(null)}>
                   Dashboard
@@ -1535,14 +1535,14 @@ export default function App() {
 
             {/* Sub Tabs Inside Workspace */}
             <div className="nav-tabs">
-              <button 
+              <button
                 className={`tab-btn ${activeTab === 'edit' ? 'active' : ''}`}
                 onClick={() => setActiveTab('edit')}
               >
                 <User size={16} />
                 {getReadinessStatus(activeCard).status === 'complete' ? 'Edit Profile' : 'Complete Profile'}
               </button>
-              <button 
+              <button
                 className={`tab-btn ${activeTab === 'view' ? 'active' : ''}`}
                 onClick={() => setActiveTab('view')}
               >
@@ -1563,12 +1563,12 @@ export default function App() {
                   <div className="form-grid">
                     <div className="form-group">
                       <label htmlFor="fullName">Full Name</label>
-                      <input 
-                        type="text" 
-                        id="fullName" 
-                        name="fullName" 
+                      <input
+                        type="text"
+                        id="fullName"
+                        name="fullName"
                         placeholder="e.g., Ramachandra Gowda"
-                        value={activeCard.profile.fullName} 
+                        value={activeCard.profile.fullName}
                         onChange={updateActiveCardProfile}
                         style={validationErrors.fullName ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
                       />
@@ -1580,12 +1580,12 @@ export default function App() {
                     </div>
                     <div className="form-group">
                       <label htmlFor="age">Age</label>
-                      <input 
-                        type="number" 
-                        id="age" 
-                        name="age" 
+                      <input
+                        type="number"
+                        id="age"
+                        name="age"
                         placeholder="e.g., 68"
-                        value={activeCard.profile.age} 
+                        value={activeCard.profile.age}
                         onChange={updateActiveCardProfile}
                         style={validationErrors.age ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
                       />
@@ -1597,10 +1597,10 @@ export default function App() {
                     </div>
                     <div className="form-group">
                       <label htmlFor="bloodGroup">Blood Group</label>
-                      <select 
-                        id="bloodGroup" 
-                        name="bloodGroup" 
-                        value={activeCard.profile.bloodGroup} 
+                      <select
+                        id="bloodGroup"
+                        name="bloodGroup"
+                        value={activeCard.profile.bloodGroup}
                         onChange={updateActiveCardProfile}
                         style={validationErrors.bloodGroup ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
                       >
@@ -1622,8 +1622,8 @@ export default function App() {
                     </div>
                     <div className="form-group">
                       <label>Relationship Tag</label>
-                      <select 
-                        value={activeCard.relationship} 
+                      <select
+                        value={activeCard.relationship}
                         onChange={(e) => updateActiveCardRelationship(e.target.value)}
                         style={validationErrors.relationship ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
                       >
@@ -1645,11 +1645,11 @@ export default function App() {
                     </div>
                     <div className="form-group full-width">
                       <label htmlFor="conditions">Medical Conditions / Diagnosis (Optional)</label>
-                      <textarea 
-                        id="conditions" 
-                        name="conditions" 
+                      <textarea
+                        id="conditions"
+                        name="conditions"
                         placeholder="e.g., Type 2 Diabetes, Hypertension. Undergoing treatment."
-                        value={activeCard.profile.conditions} 
+                        value={activeCard.profile.conditions}
                         onChange={updateActiveCardProfile}
                         style={validationErrors.conditions ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
                       />
@@ -1661,11 +1661,11 @@ export default function App() {
                     </div>
                     <div className="form-group full-width">
                       <label htmlFor="allergies">Critical Allergies (Optional)</label>
-                      <textarea 
-                        id="allergies" 
-                        name="allergies" 
+                      <textarea
+                        id="allergies"
+                        name="allergies"
                         placeholder="e.g., Penicillin (Anaphylaxis), Peanuts."
-                        value={activeCard.profile.allergies} 
+                        value={activeCard.profile.allergies}
                         onChange={updateActiveCardProfile}
                         style={validationErrors.allergies ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
                       />
@@ -1687,12 +1687,12 @@ export default function App() {
                   <div className="form-grid">
                     <div className="form-group">
                       <label htmlFor="insurancePolicy">Insurance Policy / Issuer Name (Optional)</label>
-                      <input 
-                        type="text" 
-                        id="insurancePolicy" 
-                        name="insurancePolicy" 
+                      <input
+                        type="text"
+                        id="insurancePolicy"
+                        name="insurancePolicy"
                         placeholder="e.g., Star Health Senior Citizens Policy"
-                        value={activeCard.profile.insurancePolicy} 
+                        value={activeCard.profile.insurancePolicy}
                         onChange={updateActiveCardProfile}
                         style={validationErrors.insurancePolicy ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
                       />
@@ -1704,12 +1704,12 @@ export default function App() {
                     </div>
                     <div className="form-group">
                       <label htmlFor="insuranceNumber">Policy Number / Member ID (Optional)</label>
-                      <input 
-                        type="text" 
-                        id="insuranceNumber" 
-                        name="insuranceNumber" 
+                      <input
+                        type="text"
+                        id="insuranceNumber"
+                        name="insuranceNumber"
                         placeholder="e.g., POL-8849-002"
-                        value={activeCard.profile.insuranceNumber} 
+                        value={activeCard.profile.insuranceNumber}
                         onChange={updateActiveCardProfile}
                         style={validationErrors.insuranceNumber ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
                       />
@@ -1721,12 +1721,12 @@ export default function App() {
                     </div>
                     <div className="form-group">
                       <label htmlFor="insuranceValidTill">Valid Till / Expiry Date</label>
-                      <input 
-                        type="text" 
-                        id="insuranceValidTill" 
-                        name="insuranceValidTill" 
+                      <input
+                        type="text"
+                        id="insuranceValidTill"
+                        name="insuranceValidTill"
                         placeholder="e.g., 12/2028 or Dec 2028"
-                        value={activeCard.profile.insuranceValidTill || ''} 
+                        value={activeCard.profile.insuranceValidTill || ''}
                         onChange={updateActiveCardProfile}
                         style={validationErrors.insuranceValidTill ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
                       />
@@ -1781,9 +1781,9 @@ export default function App() {
                       <div className="form-grid" style={{ gap: '1rem' }}>
                         <div className="form-group">
                           <label>Contact Name</label>
-                          <input 
-                            type="text" 
-                            placeholder="e.g., Sunitha Gowda" 
+                          <input
+                            type="text"
+                            placeholder="e.g., Sunitha Gowda"
                             value={newContact.name}
                             onChange={e => updateNewContact('name', e.target.value)}
                             style={validationErrors.contactName ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
@@ -1796,7 +1796,7 @@ export default function App() {
                         </div>
                         <div className="form-group">
                           <label>Relationship</label>
-                          <select 
+                          <select
                             value={newContact.relationship}
                             onChange={e => updateNewContact('relationship', e.target.value)}
                             style={validationErrors.contactRelationship ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
@@ -1822,9 +1822,9 @@ export default function App() {
                         </div>
                         <div className="form-group">
                           <label>Phone Number</label>
-                          <input 
-                            type="tel" 
-                            placeholder="e.g., 9886012345" 
+                          <input
+                            type="tel"
+                            placeholder="e.g., 9886012345"
                             value={newContact.phoneNumber}
                             onChange={e => updateNewContact('phoneNumber', e.target.value)}
                             style={validationErrors.contactPhone ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
@@ -1837,9 +1837,9 @@ export default function App() {
                         </div>
                         <div className="form-group">
                           <label>Email Address (Optional)</label>
-                          <input 
-                            type="email" 
-                            placeholder="e.g., sunitha@email.com" 
+                          <input
+                            type="email"
+                            placeholder="e.g., sunitha@email.com"
                             value={newContact.email || ''}
                             onChange={e => updateNewContact('email', e.target.value)}
                             style={validationErrors.contactEmail ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
@@ -1904,25 +1904,25 @@ export default function App() {
                     <div className="form-grid" style={{ gap: '1rem' }}>
                       <div className="form-group">
                         <label>Medication Name</label>
-                        <input 
-                          type="text" 
-                          placeholder="e.g., Metformin" 
+                        <input
+                          type="text"
+                          placeholder="e.g., Metformin"
                           value={newMed.name}
                           onChange={e => setNewMed(prev => ({ ...prev, name: e.target.value }))}
                         />
                       </div>
                       <div className="form-group">
                         <label>Dosage (Optional)</label>
-                        <input 
-                          type="text" 
-                          placeholder="e.g., 500mg, 1 tab" 
+                        <input
+                          type="text"
+                          placeholder="e.g., 500mg, 1 tab"
                           value={newMed.dosage}
                           onChange={e => setNewMed(prev => ({ ...prev, dosage: e.target.value }))}
                         />
                       </div>
                       <div className="form-group">
                         <label>Frequency (Optional)</label>
-                        <select 
+                        <select
                           value={newMed.frequency}
                           onChange={e => setNewMed(prev => ({ ...prev, frequency: e.target.value }))}
                         >
@@ -1940,9 +1940,9 @@ export default function App() {
                       </div>
                       <div className="form-group">
                         <label>Instructions (Optional)</label>
-                        <input 
-                          type="text" 
-                          placeholder="e.g., After meals" 
+                        <input
+                          type="text"
+                          placeholder="e.g., After meals"
                           value={newMed.instructions}
                           onChange={e => setNewMed(prev => ({ ...prev, instructions: e.target.value }))}
                         />
@@ -1962,10 +1962,10 @@ export default function App() {
                     <Share2 size={20} className="text-primary" />
                     5. Share Card with Family
                   </h3>
-                  
+
                   {activeCard.isShared ? (
                     <div className="item-list-empty" style={{ backgroundColor: 'var(--bg-app)', color: 'var(--text-secondary)' }}>
-                      This profile is owned by <strong>{activeCard.ownerEmail}</strong>. 
+                      This profile is owned by <strong>{activeCard.ownerEmail}</strong>.
                       Only the owner can manage sharing permissions for this card.
                     </div>
                   ) : (
@@ -1973,12 +1973,12 @@ export default function App() {
                       <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1.25rem' }}>
                         Share this medical card with family members' email addresses. They will be able to view and update details jointly on their dashboards.
                       </p>
-                      
+
                       <div className="share-input-group">
-                        <input 
-                          type="email" 
-                          placeholder="family.member@email.com" 
-                          value={shareEmail} 
+                        <input
+                          type="email"
+                          placeholder="family.member@email.com"
+                          value={shareEmail}
                           onChange={(e) => setShareEmail(e.target.value)}
                           style={{ flex: 1 }}
                         />
@@ -2013,7 +2013,7 @@ export default function App() {
             )}
 
             {activeTab === 'view' && (
-              <EmergencyCard 
+              <EmergencyCard
                 profile={activeCard.profile}
                 emergencyContacts={activeCard.emergencyContacts}
                 medications={activeCard.medications}
@@ -2034,16 +2034,16 @@ export default function App() {
                 <X size={20} />
               </button>
             </div>
-            
+
             <div className="modal-body" style={{ padding: '1.5rem 0' }}>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: '1.6', margin: '0 0 1.5rem 0' }}>
                 You're one of our early users. We appreciate that! Tell us which feature would make the biggest difference for your family, and we'll prioritize our next release based on your feedback.
               </p>
-              
+
               {joinedWaitlist ? (
                 <div className="waitlist-voted-area">
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '1rem 1.25rem', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--primary-light)', border: '1.5px solid rgba(15, 108, 95, 0.15)', color: 'var(--primary)', fontWeight: '600', fontSize: '1rem', marginBottom: '1.5rem' }}>
-                    <span style={{ fontSize: '1.25rem' }}>🎯</span> 
+                    <span style={{ fontSize: '1.25rem' }}>🎯</span>
                     <span>{UPCOMING_FEATURES.find(f => f.id === votedFeature)?.label || 'General Interest'}</span>
                   </div>
                   <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', fontStyle: 'italic', margin: 0 }}>
@@ -2056,17 +2056,17 @@ export default function App() {
                     {UPCOMING_FEATURES.map(feature => {
                       const isChecked = selectedFeature === feature.id;
                       return (
-                        <div 
-                          key={feature.id} 
+                        <div
+                          key={feature.id}
                           className={`checklist-item-card ${isChecked ? 'active' : ''}`}
                           onClick={() => handleFeatureSelect(feature.id)}
                           style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 14px', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', cursor: 'pointer', backgroundColor: isChecked ? 'var(--primary-light)' : 'var(--bg-card)', transition: 'all 0.2s' }}
                         >
-                          <input 
-                            type="radio" 
+                          <input
+                            type="radio"
                             name="waitlist-feature-choice"
                             checked={isChecked}
-                            onChange={() => {}}
+                            onChange={() => { }}
                             style={{ cursor: 'pointer' }}
                           />
                           <span style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: isChecked ? '600' : '400' }}>{feature.label}</span>
@@ -2077,7 +2077,7 @@ export default function App() {
                 </div>
               )}
             </div>
-            
+
             <div className="modal-footer" style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', borderTop: '1px solid var(--border)', paddingTop: '1rem' }}>
               {joinedWaitlist ? (
                 <>
@@ -2093,8 +2093,8 @@ export default function App() {
                   <button className="btn btn-outline" onClick={() => setShowVoteModal(false)}>
                     Cancel
                   </button>
-                  <button 
-                    className="btn btn-primary" 
+                  <button
+                    className="btn btn-primary"
                     onClick={async () => {
                       await handleJoinWaitlist();
                       if (selectedFeature) {
