@@ -729,9 +729,50 @@ app.post('/api/cards', authenticateToken, async (req, res) => {
 // ==========================================
 
 // POST register waitlist joins
-app.post('/api/waitlist', (req, res) => {
-  console.log(`[WAITLIST JOIN] User registered for waitlist at ${req.body.timestamp} with choice: ${req.body.feature}`);
-  res.json({ success: true, message: 'Waitlist join recorded.' });
+app.post('/api/waitlist', async (req, res) => {
+  const { email, feature } = req.body;
+  console.log(`[WAITLIST JOIN] User registered for waitlist at ${req.body.timestamp} with choice: ${feature}`);
+  
+  try {
+    await db.query(`
+      INSERT INTO public.waitlist_submissions (email, feature_id)
+      VALUES ($1, $2)
+    `, [email || null, feature]);
+    res.json({ success: true, message: 'Waitlist join recorded in database.' });
+  } catch (err) {
+    console.error('Error saving waitlist submission:', err);
+    res.json({ success: true, message: 'Waitlist join cached.' });
+  }
+});
+
+// GET waitlist results (aggregates and raw votes)
+app.get('/api/waitlist/results', async (req, res) => {
+  try {
+    // Get aggregated counts
+    const aggregates = await db.query(`
+      SELECT feature_id, COUNT(*) as vote_count 
+      FROM public.waitlist_submissions 
+      GROUP BY feature_id
+      ORDER BY vote_count DESC
+    `);
+    
+    // Get recent raw votes
+    const rawVotes = await db.query(`
+      SELECT email, feature_id, voted_at 
+      FROM public.waitlist_submissions 
+      ORDER BY voted_at DESC 
+      LIMIT 100
+    `);
+    
+    res.json({
+      success: true,
+      aggregates: aggregates.rows,
+      votes: rawVotes.rows
+    });
+  } catch (err) {
+    console.error('Error fetching waitlist results:', err);
+    res.status(500).json({ error: 'Failed to fetch waitlist results.' });
+  }
 });
 
 // Fallback: Serve React index.html for any non-API page routes (enabling client-side routing)

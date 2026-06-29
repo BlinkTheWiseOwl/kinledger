@@ -108,6 +108,16 @@ const initDb = async () => {
       );
     `);
 
+    // 7. Create Waitlist Submissions Table to persist feature votes
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS public.waitlist_submissions (
+        id SERIAL PRIMARY KEY,
+        email VARCHAR(255),
+        feature_id VARCHAR(100) NOT NULL,
+        voted_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
+      );
+    `);
+
     console.log('Database tables successfully verified / created.');
   } catch (error) {
     console.error('\n==================================================================');
