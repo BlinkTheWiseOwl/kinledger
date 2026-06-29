@@ -532,23 +532,48 @@ textarea {
 
 /* Banner details */
 .sync-banner {
+  position: fixed;
+  top: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 99999;
   background-color: var(--warning-light);
   color: var(--warning);
-  padding: 0.75rem 1rem;
+  padding: 0.75rem 1.5rem;
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1.5rem;
   font-size: 0.9rem;
-  font-weight: 500;
-  border: 1px solid rgba(217, 119, 6, 0.15);
+  font-weight: 600;
+  border: 1px solid rgba(217, 119, 6, 0.2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  width: max-content;
+  max-width: 90%;
+  animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .sync-banner.success {
   background-color: var(--primary-light);
   color: var(--primary);
-  border-color: rgba(15, 108, 95, 0.15);
+  border-color: rgba(15, 108, 95, 0.2);
+}
+
+.sync-banner.danger {
+  background-color: var(--danger-light);
+  color: var(--danger);
+  border-color: rgba(220, 38, 38, 0.2);
+}
+
+@keyframes slideDown {
+  from {
+    transform: translate(-50%, -2rem);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
 }
 
 /* Floating Emergency Medical Card (View screen) */

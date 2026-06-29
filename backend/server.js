@@ -535,8 +535,8 @@ app.post('/api/cards', authenticateToken, async (req, res) => {
         return res.status(400).json({ error: 'Blood Group is required.' });
       }
 
-      if (conditions && conditions.length > 2000) {
-        return res.status(400).json({ error: 'Conditions cannot exceed 2000 characters.' });
+      if (conditions && conditions.length > 5000) {
+        return res.status(400).json({ error: 'Conditions cannot exceed 5000 characters.' });
       }
       if (containsUnsafeChars(conditions)) {
         return res.status(400).json({ error: 'Conditions contain unsafe characters.' });
@@ -593,12 +593,8 @@ app.post('/api/cards', authenticateToken, async (req, res) => {
         if (!phoneNumber.trim()) {
           return res.status(400).json({ error: 'Emergency Contact Phone is required.' });
         }
-        const digits = phoneNumber.replace(/\D/g, '');
-        if (digits.length < 8 || digits.length > 14) {
-          return res.status(400).json({ error: 'Emergency Contact Phone must contain between 8 and 14 digits.' });
-        }
-        if (!phoneRegex.test(phoneNumber)) {
-          return res.status(400).json({ error: 'Emergency Contact Phone contains invalid characters.' });
+        if (!/^[0-9]{8,14}$/.test(phoneNumber)) {
+          return res.status(400).json({ error: 'Emergency Contact Phone must contain exactly 8 to 14 digits with no special characters.' });
         }
 
         if (email && email.trim() !== '') {

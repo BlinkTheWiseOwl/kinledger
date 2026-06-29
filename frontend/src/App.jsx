@@ -290,8 +290,8 @@ export default function App() {
         
         // 5. Conditions
         const cond = activeUpdate.profile.conditions || '';
-        if (cond.length > 2000) {
-          errors.conditions = "Conditions cannot exceed 2000 characters.";
+        if (cond.length > 5000) {
+          errors.conditions = "Conditions cannot exceed 5000 characters.";
         } else if (containsUnsafeChars(cond)) {
           errors.conditions = "Conditions cannot contain unsafe characters (<, >, \\, `).";
         }
@@ -484,8 +484,8 @@ export default function App() {
       }
       
       if (name === 'conditions') {
-        if (value.length > 2000) {
-          copy.conditions = "Conditions cannot exceed 2000 characters.";
+        if (value.length > 5000) {
+          copy.conditions = "Conditions cannot exceed 5000 characters.";
         } else if (containsUnsafeChars(value)) {
           copy.conditions = "Conditions cannot contain unsafe characters (<, >, \\, `).";
         } else {
@@ -578,6 +578,62 @@ export default function App() {
     setCards(updated);
   };
 
+  // Real-time validation helper for emergency contact form fields
+  const updateNewContact = (field, value) => {
+    setNewContact(prev => ({ ...prev, [field]: value }));
+
+    setValidationErrors(prev => {
+      const copy = { ...prev };
+      
+      if (field === 'name') {
+        if (!value.trim()) {
+          copy.contactName = "Contact Name is required.";
+        } else if (value.length < 2 || value.length > 100) {
+          copy.contactName = "Contact Name must be between 2 and 100 characters.";
+        } else if (containsUnsafeChars(value)) {
+          copy.contactName = "Contact Name cannot contain unsafe characters (<, >, \\, `).";
+        } else {
+          delete copy.contactName;
+        }
+      }
+      
+      if (field === 'relationship') {
+        if (!value) {
+          copy.contactRelationship = "Relationship is required.";
+        } else {
+          delete copy.contactRelationship;
+        }
+      }
+      
+      if (field === 'phoneNumber') {
+        if (!value.trim()) {
+          copy.contactPhone = "Phone Number is required.";
+        } else if (!/^[0-9]{8,14}$/.test(value.trim())) {
+          copy.contactPhone = "Phone Number must contain exactly 8 to 14 digits with no special characters.";
+        } else {
+          delete copy.contactPhone;
+        }
+      }
+      
+      if (field === 'email') {
+        if (value && value.trim()) {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(value.trim())) {
+            copy.contactEmail = "Please enter a valid email address.";
+          } else if (containsUnsafeChars(value)) {
+            copy.contactEmail = "Email cannot contain unsafe characters (<, >, \\, `).";
+          } else {
+            delete copy.contactEmail;
+          }
+        } else {
+          delete copy.contactEmail;
+        }
+      }
+      
+      return copy;
+    });
+  };
+
   // Add contact to selected card
   const addContactToActiveCard = (e) => {
     e.preventDefault();
@@ -585,48 +641,38 @@ export default function App() {
     
     const { name, relationship, phoneNumber, email = '' } = newContact;
     
+    const errors = {};
     if (!name.trim()) {
-      showStatus('Contact Name is required.', 'error');
-      return;
-    }
-    if (name.length < 2 || name.length > 100) {
-      showStatus('Contact Name must be between 2 and 100 characters.', 'error');
-      return;
-    }
-    if (containsUnsafeChars(name)) {
-      showStatus('Contact Name cannot contain unsafe characters (<, >, \\, `).', 'error');
-      return;
+      errors.contactName = "Contact Name is required.";
+    } else if (name.length < 2 || name.length > 100) {
+      errors.contactName = "Contact Name must be between 2 and 100 characters.";
+    } else if (containsUnsafeChars(name)) {
+      errors.contactName = "Contact Name cannot contain unsafe characters (<, >, \\, `).";
     }
     
     if (!relationship) {
-      showStatus('Relationship is required.', 'error');
-      return;
+      errors.contactRelationship = "Relationship is required.";
     }
     
     if (!phoneNumber.trim()) {
-      showStatus('Phone Number is required.', 'error');
-      return;
-    }
-    const digits = phoneNumber.replace(/\D/g, '');
-    if (digits.length < 8 || digits.length > 14) {
-      showStatus('Phone Number must contain between 8 and 14 digits.', 'error');
-      return;
-    }
-    if (!/^\+?[0-9\s\-()]+$/.test(phoneNumber)) {
-      showStatus('Phone Number contains invalid characters.', 'error');
-      return;
+      errors.contactPhone = "Phone Number is required.";
+    } else if (!/^[0-9]{8,14}$/.test(phoneNumber.trim())) {
+      errors.contactPhone = "Phone Number must contain exactly 8 to 14 digits with no special characters.";
     }
     
     if (email && email.trim() !== '') {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email.trim())) {
-        showStatus('Contact Email is invalid.', 'error');
-        return;
+        errors.contactEmail = "Please enter a valid email address.";
+      } else if (containsUnsafeChars(email)) {
+        errors.contactEmail = "Email cannot contain unsafe characters (<, >, \\, `).";
       }
-      if (containsUnsafeChars(email)) {
-        showStatus('Contact Email contains unsafe characters.', 'error');
-        return;
-      }
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(prev => ({ ...prev, ...errors }));
+      showStatus('Please correct the contact form errors.', 'error');
+      return;
     }
 
     if (activeCard.emergencyContacts.length >= 2) {
@@ -646,6 +692,17 @@ export default function App() {
 
     setCards(updated);
     setNewContact({ name: '', relationship: '', phoneNumber: '', email: '' });
+    
+    // Clear contact errors
+    setValidationErrors(prev => {
+      const copy = { ...prev };
+      delete copy.contactName;
+      delete copy.contactRelationship;
+      delete copy.contactPhone;
+      delete copy.contactEmail;
+      return copy;
+    });
+
     showStatus('Emergency contact added (unsaved). Click Save.', 'info');
   };
 
@@ -1512,14 +1569,21 @@ export default function App() {
                             type="text" 
                             placeholder="e.g., Sunitha Gowda" 
                             value={newContact.name}
-                            onChange={e => setNewContact(prev => ({ ...prev, name: e.target.value }))}
+                            onChange={e => updateNewContact('name', e.target.value)}
+                            style={validationErrors.contactName ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
                           />
+                          {validationErrors.contactName && (
+                            <span style={{ color: 'var(--danger)', fontSize: '0.8rem', fontWeight: '600', marginTop: '0.25rem' }}>
+                              {validationErrors.contactName}
+                            </span>
+                          )}
                         </div>
                         <div className="form-group">
                           <label>Relationship</label>
                           <select 
                             value={newContact.relationship}
-                            onChange={e => setNewContact(prev => ({ ...prev, relationship: e.target.value }))}
+                            onChange={e => updateNewContact('relationship', e.target.value)}
+                            style={validationErrors.contactRelationship ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
                           >
                             <option value="">Select Relationship</option>
                             <option value="Daughter">Daughter</option>
@@ -1534,6 +1598,11 @@ export default function App() {
                             <option value="Neighbor">Neighbor</option>
                             <option value="Other">Other</option>
                           </select>
+                          {validationErrors.contactRelationship && (
+                            <span style={{ color: 'var(--danger)', fontSize: '0.8rem', fontWeight: '600', marginTop: '0.25rem' }}>
+                              {validationErrors.contactRelationship}
+                            </span>
+                          )}
                         </div>
                         <div className="form-group">
                           <label>Phone Number</label>
@@ -1541,8 +1610,14 @@ export default function App() {
                             type="tel" 
                             placeholder="e.g., 9886012345" 
                             value={newContact.phoneNumber}
-                            onChange={e => setNewContact(prev => ({ ...prev, phoneNumber: e.target.value }))}
+                            onChange={e => updateNewContact('phoneNumber', e.target.value)}
+                            style={validationErrors.contactPhone ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
                           />
+                          {validationErrors.contactPhone && (
+                            <span style={{ color: 'var(--danger)', fontSize: '0.8rem', fontWeight: '600', marginTop: '0.25rem' }}>
+                              {validationErrors.contactPhone}
+                            </span>
+                          )}
                         </div>
                         <div className="form-group">
                           <label>Email Address (Optional)</label>
@@ -1550,8 +1625,14 @@ export default function App() {
                             type="email" 
                             placeholder="e.g., sunitha@email.com" 
                             value={newContact.email || ''}
-                            onChange={e => setNewContact(prev => ({ ...prev, email: e.target.value }))}
+                            onChange={e => updateNewContact('email', e.target.value)}
+                            style={validationErrors.contactEmail ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
                           />
+                          {validationErrors.contactEmail && (
+                            <span style={{ color: 'var(--danger)', fontSize: '0.8rem', fontWeight: '600', marginTop: '0.25rem' }}>
+                              {validationErrors.contactEmail}
+                            </span>
+                          )}
                         </div>
                         <div className="form-group" style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
                           <button type="submit" className="btn btn-secondary" style={{ width: 'fit-content' }}>
