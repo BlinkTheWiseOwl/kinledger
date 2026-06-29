@@ -1589,7 +1589,7 @@ export default function App() {
                         type="text"
                         id="fullName"
                         name="fullName"
-                        placeholder="e.g., Rajesh Kumar"
+                        placeholder="e.g., Aditya Kumar"
                         value={activeCard.profile.fullName}
                         onChange={updateActiveCardProfile}
                         style={validationErrors.fullName ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
@@ -1805,7 +1805,7 @@ export default function App() {
                           <label>Contact Name</label>
                           <input
                             type="text"
-                            placeholder="e.g., Sunita Kumar"
+                            placeholder="e.g., Shloka Kumar"
                             value={newContact.name}
                             onChange={e => updateNewContact('name', e.target.value)}
                             style={validationErrors.contactName ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
