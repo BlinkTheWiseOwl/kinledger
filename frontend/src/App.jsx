@@ -46,6 +46,7 @@ export default function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [showPolicy, setShowPolicy] = useState(null); // 'privacy' | 'terms' | null
   const [showHelp, setShowHelp] = useState(false);
+  const [showVoteModal, setShowVoteModal] = useState(false);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
 
   // Handle offline status
@@ -1217,15 +1218,31 @@ export default function App() {
             )}
           </div>
           
-          <div className="header-actions" style={{ position: 'relative' }}>
-            <button 
-              className="btn-menu-toggle" 
-              onClick={() => setMenuOpen(!menuOpen)} 
-              aria-label="Toggle Menu"
-              style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', transition: 'background-color 0.2s' }}
-            >
-              {menuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
+          <div className="header-actions" style={{ display: 'flex', alignItems: 'center', gap: '12px', position: 'relative' }}>
+                <button 
+                  className="coming-up-btn" 
+                  onClick={() => setShowVoteModal(true)}
+                  style={{ 
+                    padding: '6px 12px', 
+                    borderRadius: '9999px', 
+                    fontSize: '0.825rem', 
+                    fontWeight: '600', 
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    border: 'none'
+                  }}
+                >
+                  Coming Up Next ✨
+                </button>
+                <button 
+                  className="hamburger-btn" 
+                  onClick={() => setMenuOpen(!menuOpen)}
+                  aria-label="Toggle Menu"
+                >
+                  {menuOpen ? <X size={24} /> : <Menu size={24} />}
+                </button>
             
             {menuOpen && (
               <div className="menu-dropdown animated" style={{ position: 'absolute', right: 0, top: '100%', marginTop: '8px', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-lg)', padding: '1rem', width: '240px', zIndex: 99999 }}>
@@ -1477,78 +1494,6 @@ export default function App() {
                   </div>
                 </div>
               )}
-            </div>
-
-            {/* Waitlist Banner for Upcoming Features */}
-            <div className="waitlist-banner card">
-              <div className="waitlist-header-row">
-                <span className="waitlist-tag">🚀 Coming soon</span>
-                {joinedWaitlist ? (
-                  <div className="waitlist-joined-container">
-                    <div className="waitlist-joined-badge">
-                      <span className="logo-icon">✓</span>
-                      <span>You're on the Waitlist!</span>
-                    </div>
-                    <button className="btn btn-outline btn-sm" onClick={handleResetWaitlist}>
-                      Reset Vote
-                    </button>
-                  </div>
-                ) : (
-                  <button className="btn btn-primary" onClick={handleJoinWaitlist}>
-                    Vote & Join the Waitlist
-                  </button>
-                )}
-              </div>
-              
-              <div className="waitlist-body-section">
-                {joinedWaitlist ? (
-                  <div className="waitlist-voted-area">
-                    <p style={{ marginBottom: '1rem', color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
-                      Thank you for helping us shape KinLedger! We have recorded your choice:
-                    </p>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '1rem 1.25rem', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--primary-light)', border: '1.5px solid rgba(15, 108, 95, 0.15)', color: 'var(--primary)', fontWeight: '600', fontSize: '1rem', marginBottom: '1.5rem', animation: 'fadeIn 0.3s ease' }}>
-                      <span style={{ fontSize: '1.25rem' }}>🎯</span> 
-                      <span>{UPCOMING_FEATURES.find(f => f.id === votedFeature)?.label || 'General Interest'}</span>
-                    </div>
-                    <div style={{ borderTop: '1px solid var(--border)', paddingTop: '1.25rem' }}>
-                      <button className="btn btn-secondary btn-sm" onClick={handleResetWaitlist}>
-                        Change Selection / Reset Vote
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="waitlist-voting-area">
-                    <p style={{ marginBottom: '1.25rem', color: 'var(--text-primary)', fontFamily: 'var(--font-title)', fontWeight: '600', fontSize: '1.1rem', lineHeight: '1.4' }}>
-                      Which of these would make the biggest difference for your family right now?
-                    </p>
-                    <div className="features-checklist-grid">
-                      {UPCOMING_FEATURES.map(feature => {
-                        const isChecked = selectedFeature === feature.id;
-                        return (
-                          <div 
-                            key={feature.id} 
-                            className={`checklist-item-card ${isChecked ? 'active' : ''}`}
-                            onClick={() => handleFeatureSelect(feature.id)}
-                          >
-                            <div className="checkbox-wrap">
-                              <input 
-                                type="radio" 
-                                name="waitlist-feature-choice"
-                                checked={isChecked}
-                                onChange={() => {}} // handled by card onClick
-                                style={{ pointerEvents: 'none', cursor: 'pointer' }}
-                              />
-                            </div>
-                            <div className="checklist-text-wrap">
-                              <span className="checklist-label">{feature.label}</span>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-              </div>
             </div>
           </div>
         ) : (
@@ -2076,6 +2021,93 @@ export default function App() {
           </div>
         )}
       </main>
+
+      {/* Vote Modal Dialog */}
+      {showVoteModal && (
+        <div className="modal-overlay" onClick={() => setShowVoteModal(false)}>
+          <div className="modal-card animated" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2 style={{ fontFamily: 'var(--font-title)', color: 'var(--primary)', margin: 0, fontSize: '1.4rem' }}>Help Shape KinLedger</h2>
+              <button className="modal-close-btn" onClick={() => setShowVoteModal(false)} aria-label="Close dialog">
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="modal-body" style={{ padding: '1.5rem 0' }}>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: '1.6', margin: '0 0 1.5rem 0' }}>
+                You're one of our early users. We appreciate that! Tell us which feature would make the biggest difference for your family, and we'll prioritize our next release based on your feedback.
+              </p>
+              
+              {joinedWaitlist ? (
+                <div className="waitlist-voted-area">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '1rem 1.25rem', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--primary-light)', border: '1.5px solid rgba(15, 108, 95, 0.15)', color: 'var(--primary)', fontWeight: '600', fontSize: '1rem', marginBottom: '1.5rem' }}>
+                    <span style={{ fontSize: '1.25rem' }}>🎯</span> 
+                    <span>{UPCOMING_FEATURES.find(f => f.id === votedFeature)?.label || 'General Interest'}</span>
+                  </div>
+                  <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', fontStyle: 'italic', margin: 0 }}>
+                    Thank you! We've recorded your vote. You can change your choice below if needed.
+                  </p>
+                </div>
+              ) : (
+                <div className="waitlist-voting-area">
+                  <div className="features-checklist-grid" style={{ display: 'grid', gap: '10px', maxHeight: '300px', overflowY: 'auto', paddingRight: '4px' }}>
+                    {UPCOMING_FEATURES.map(feature => {
+                      const isChecked = selectedFeature === feature.id;
+                      return (
+                        <div 
+                          key={feature.id} 
+                          className={`checklist-item-card ${isChecked ? 'active' : ''}`}
+                          onClick={() => handleFeatureSelect(feature.id)}
+                          style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 14px', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', cursor: 'pointer', backgroundColor: isChecked ? 'var(--primary-light)' : 'var(--bg-card)', transition: 'all 0.2s' }}
+                        >
+                          <input 
+                            type="radio" 
+                            name="waitlist-feature-choice"
+                            checked={isChecked}
+                            onChange={() => {}}
+                            style={{ cursor: 'pointer' }}
+                          />
+                          <span style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: isChecked ? '600' : '400' }}>{feature.label}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            <div className="modal-footer" style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', borderTop: '1px solid var(--border)', paddingTop: '1rem' }}>
+              {joinedWaitlist ? (
+                <>
+                  <button className="btn btn-outline" onClick={handleResetWaitlist}>
+                    Reset Vote
+                  </button>
+                  <button className="btn btn-primary" onClick={() => setShowVoteModal(false)}>
+                    Close
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button className="btn btn-outline" onClick={() => setShowVoteModal(false)}>
+                    Cancel
+                  </button>
+                  <button 
+                    className="btn btn-primary" 
+                    onClick={async () => {
+                      await handleJoinWaitlist();
+                      if (selectedFeature) {
+                        setShowVoteModal(false);
+                      }
+                    }}
+                  >
+                    Submit
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
