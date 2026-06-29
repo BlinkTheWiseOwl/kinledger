@@ -884,14 +884,13 @@ textarea {
   .emergency-badge-card {
     display: block !important;
     width: 6.5in !important; /* Optimal printable card width */
-    max-height: 8.5in !important; /* Constrain height to guarantee single page fit */
-    margin: 25mm auto !important; /* Position centered on the sheet */
+    margin: 10mm auto !important; /* Position centered on the sheet */
     border: 3px solid #dc2626 !important;
     box-shadow: none !important;
-    overflow: hidden !important;
-    page-break-inside: avoid !important;
-    page-break-after: avoid !important;
-    page-break-before: avoid !important;
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+    page-break-inside: auto !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }

@@ -54,7 +54,7 @@ export default function EmergencyCard({ profile, emergencyContacts, medications,
           <div className="badge-section">
             <h4 className="badge-section-title">Critical Allergies</h4>
             <div className="badge-section-content allergies">
-              {profile.allergies || 'No known drug or food allergies.'}
+              {profile.allergies || 'No drug or food allergies mentioned.'}
             </div>
           </div>
 
