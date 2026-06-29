@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, FileText, Plus, Trash2, Save, User, Heart, ShieldAlert, Award, Phone, ArrowLeft, Printer, Eye, Share2, LogOut } from 'lucide-react';
+import { Shield, FileText, Plus, Trash2, Save, User, Heart, ShieldAlert, Award, Phone, ArrowLeft, Printer, Eye, Share2, LogOut, Menu, X } from 'lucide-react';
 import { loadCardData, saveCardData, BACKEND_URL } from './utils/storage';
 import EmergencyCard from './components/EmergencyCard';
 import AuthScreen from './components/AuthScreen';
+import PolicyPage from './components/PolicyPage';
 
 const UPCOMING_FEATURES = [
   { id: 'emergency', label: 'Have critical health information ready during emergencies' },
@@ -28,6 +29,38 @@ export default function App() {
   const [statusMessage, setStatusMessage] = useState('');
   const [statusType, setStatusType] = useState(''); // 'success' or 'info' or 'error'
   const [joinedWaitlist, setJoinedWaitlist] = useState(false);
+
+  // New UX States
+  const [showSplash, setShowSplash] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [onboardingSlide, setOnboardingSlide] = useState(0);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [showPolicy, setShowPolicy] = useState(null); // 'privacy' | 'terms' | null
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+
+  // Handle offline status
+  useEffect(() => {
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  // Handle splash and onboarding timers
+  useEffect(() => {
+    const splashTimer = setTimeout(() => {
+      setShowSplash(false);
+      const onboardingCompleted = localStorage.getItem('kinledger_onboarding_completed');
+      if (onboardingCompleted !== 'true') {
+        setShowOnboarding(true);
+      }
+    }, 1000);
+    return () => clearTimeout(splashTimer);
+  }, []);
   const [votedFeature, setVotedFeature] = useState(null);
   const [selectedFeature, setSelectedFeature] = useState(null);
 
@@ -974,8 +1007,78 @@ export default function App() {
     return 'badge-other';
   };
 
+  if (showSplash) {
+    return (
+      <div className="splash-screen">
+        <div className="splash-content animated">
+          <span className="splash-logo-icon">🛡️</span>
+          <h1 className="splash-title">KinLedger</h1>
+          <p className="splash-subtitle">Your Family Emergency Shield</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (showOnboarding) {
+    return (
+      <div className="onboarding-screen">
+        <div className="onboarding-card animated">
+          <div className="onboarding-slides">
+            {onboardingSlide === 0 && (
+              <div className="onboarding-slide animated">
+                <div className="onboarding-icon">🛡️</div>
+                <h2>Secure Emergency Cards</h2>
+                <p>Create digital emergency medical cards for your parents and family members containing critical health profiles.</p>
+              </div>
+            )}
+            {onboardingSlide === 1 && (
+              <div className="onboarding-slide animated">
+                <div className="onboarding-icon">🖨️</div>
+                <h2>Instant Access & Printing</h2>
+                <p>Keep medical details, allergies, and contacts ready for doctors. Print or save the card as a PDF for quick offline reference.</p>
+              </div>
+            )}
+            {onboardingSlide === 2 && (
+              <div className="onboarding-slide animated">
+                <div className="onboarding-icon">👥</div>
+                <h2>Offline Access & Family Sharing</h2>
+                <p>All emergency profiles are stored securely on your device and are fully accessible offline. Share edit access with family members to manage details collaboratively.</p>
+              </div>
+            )}
+          </div>
+
+          <div className="onboarding-footer">
+            <div className="onboarding-dots">
+              <span className={`dot ${onboardingSlide === 0 ? 'active' : ''}`} onClick={() => setOnboardingSlide(0)}></span>
+              <span className={`dot ${onboardingSlide === 1 ? 'active' : ''}`} onClick={() => setOnboardingSlide(1)}></span>
+              <span className={`dot ${onboardingSlide === 2 ? 'active' : ''}`} onClick={() => setOnboardingSlide(2)}></span>
+            </div>
+            
+            <button 
+              className="btn btn-primary" 
+              onClick={() => {
+                if (onboardingSlide < 2) {
+                  setOnboardingSlide(onboardingSlide + 1);
+                } else {
+                  localStorage.setItem('kinledger_onboarding_completed', 'true');
+                  setShowOnboarding(false);
+                }
+              }}
+            >
+              {onboardingSlide === 2 ? 'Get Started' : 'Next'}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (showPolicy) {
+    return <PolicyPage type={showPolicy} onClose={() => setShowPolicy(null)} />;
+  }
+
   if (!token) {
-    return <AuthScreen onAuthSuccess={(t, email) => { setToken(t); setUserEmail(email); }} showStatus={showStatus} />;
+    return <AuthScreen onAuthSuccess={(t, email) => { setToken(t); setUserEmail(email); }} showStatus={showStatus} onShowPolicy={setShowPolicy} />;
   }
 
   if (loading) {
@@ -991,19 +1094,67 @@ export default function App() {
       {/* Header Banner */}
       <header className="app-header">
         <div className="header-content">
-          <a href="#" className="logo" onClick={() => setSelectedCardId(null)}>
-            <span className="logo-icon">🛡️</span>
-            <span>KinLedger</span>
-          </a>
-          <div className="header-auth-badge">
-            <span className="user-email-text">{userEmail}</span>
-            <button className="btn-logout" onClick={handleLogout} title="Log Out">
-              <LogOut size={16} />
-              <span>Sign Out</span>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <a href="#" className="logo" onClick={() => { setSelectedCardId(null); setMenuOpen(false); }}>
+              <span className="logo-icon">🛡️</span>
+              <span>KinLedger</span>
+            </a>
+            {isOffline && (
+              <span className="offline-badge animated">
+                Offline Mode
+              </span>
+            )}
+          </div>
+          
+          <div className="header-actions" style={{ position: 'relative' }}>
+            <button 
+              className="btn-menu-toggle" 
+              onClick={() => setMenuOpen(!menuOpen)} 
+              aria-label="Toggle Menu"
+              style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', transition: 'background-color 0.2s' }}
+            >
+              {menuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
-            <button className="btn-delete-account" onClick={handleDeleteAccount} title="Permanently Delete Account">
-              <span>Delete Account</span>
-            </button>
+            
+            {menuOpen && (
+              <div className="menu-dropdown animated" style={{ position: 'absolute', right: 0, top: '100%', marginTop: '8px', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-lg)', padding: '1rem', width: '240px', zIndex: 99999 }}>
+                <div className="menu-header" style={{ borderBottom: '1px solid var(--border)', paddingBottom: '0.75rem', marginBottom: '0.75rem' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Signed in as</div>
+                  <span className="menu-user-email" style={{ fontSize: '0.9rem', fontWeight: '600', color: 'var(--text-primary)', wordBreak: 'break-all' }}>{userEmail}</span>
+                </div>
+                <div className="menu-items" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <button 
+                    onClick={() => { setShowPolicy('privacy'); setMenuOpen(false); }} 
+                    style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', textAlign: 'left', cursor: 'pointer', padding: '6px 8px', fontSize: '0.9rem', borderRadius: 'var(--radius-sm)', width: '100%', transition: 'background-color 0.2s' }}
+                    className="menu-item-hover"
+                  >
+                    Privacy Policy
+                  </button>
+                  <button 
+                    onClick={() => { setShowPolicy('terms'); setMenuOpen(false); }} 
+                    style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', textAlign: 'left', cursor: 'pointer', padding: '6px 8px', fontSize: '0.9rem', borderRadius: 'var(--radius-sm)', width: '100%', transition: 'background-color 0.2s' }}
+                    className="menu-item-hover"
+                  >
+                    Terms of Service
+                  </button>
+                  <hr className="menu-separator" style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '4px 0' }} />
+                  <button 
+                    className="menu-btn-logout" 
+                    onClick={() => { handleLogout(); setMenuOpen(false); }}
+                    style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', textAlign: 'left', cursor: 'pointer', padding: '6px 8px', fontSize: '0.9rem', borderRadius: 'var(--radius-sm)', width: '100%', display: 'flex', alignItems: 'center', gap: '8px', transition: 'background-color 0.2s' }}
+                  >
+                    <LogOut size={16} /> Sign Out
+                  </button>
+                  <button 
+                    className="menu-btn-delete" 
+                    onClick={() => { handleDeleteAccount(); setMenuOpen(false); }}
+                    style={{ background: 'none', border: 'none', color: 'var(--danger)', textAlign: 'left', cursor: 'pointer', padding: '6px 8px', fontSize: '0.9rem', borderRadius: 'var(--radius-sm)', width: '100%', fontWeight: '500', transition: 'background-color 0.2s' }}
+                  >
+                    Delete Account
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </header>

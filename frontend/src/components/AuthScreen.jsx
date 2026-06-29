@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Shield, Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { BACKEND_URL } from '../utils/storage';
 
-export default function AuthScreen({ onAuthSuccess, showStatus }) {
+export default function AuthScreen({ onAuthSuccess, showStatus, onShowPolicy }) {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -225,6 +225,26 @@ export default function AuthScreen({ onAuthSuccess, showStatus }) {
             {isLogin ? 'Register / Sign Up' : 'Sign In / Log In'}
           </button>
         </div>
+
+        {onShowPolicy && (
+          <div style={{ marginTop: '20px', display: 'flex', gap: '15px', justifyContent: 'center', fontSize: '0.8rem', borderTop: '1px solid var(--border)', paddingTop: '15px' }}>
+            <button 
+              type="button" 
+              onClick={() => onShowPolicy('privacy')} 
+              style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}
+            >
+              Privacy Policy
+            </button>
+            <span style={{ color: 'var(--text-muted)' }}>|</span>
+            <button 
+              type="button" 
+              onClick={() => onShowPolicy('terms')} 
+              style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}
+            >
+              Terms of Service
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
