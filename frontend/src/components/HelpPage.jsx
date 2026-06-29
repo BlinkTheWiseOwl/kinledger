@@ -7,7 +7,7 @@ export default function HelpPage({ onClose, onReplayOnboarding }) {
   const faqs = [
     {
       q: "How does offline access work?",
-      a: "KinLedger automatically caches all your family cards on your device's local storage. You can view, open, and print them even without an internet connection. Any changes you make offline will automatically synchronize with the server once your connection is restored."
+      a: "KinLedger caches your family cards in your browser's local storage so you can view them offline while logged in. However, if you log out, this cache is cleared for security. To guarantee instant access during an emergency, even if you are logged out or offline, we highly recommend using the 'Print / Save PDF' option on the card view to download and save each card directly to your phone or device."
     },
     {
       q: "Is my family's medical data secure?",
