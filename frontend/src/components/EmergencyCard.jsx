@@ -33,21 +33,6 @@ function buildCardPdf(profile, emergencyContacts, medications) {
   doc.setFont('helvetica', 'bold');
   doc.text('EMERGENCY MEDICAL CARD', cx + 6, cy + 11.5);
 
-  // Top-right: Shield with "!" (outlined)
-  const alertCx = cx + cw - 10;
-  const alertCy = cy + 9;
-  doc.setDrawColor(255, 255, 255);
-  doc.setLineWidth(0.4);
-  doc.lines([
-    [6, 0],     
-    [0, 3],     
-    [-3, 4],  
-    [-3, -4], 
-    [0, -3]     
-  ], alertCx - 3, alertCy - 4, [1, 1], 'D', true);
-  
-  doc.setFontSize(7);
-  doc.text('!', alertCx, alertCy + 1.5, { align: 'center' });
 
   // --- CONTENT START ---
   let y = cy + 28;

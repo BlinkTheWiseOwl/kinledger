@@ -686,6 +686,7 @@ textarea {
   text-transform: uppercase;
   font-weight: 700;
   letter-spacing: 0.5px;
+  white-space: nowrap;
 }
 
 .blood-type {
