@@ -10,19 +10,20 @@ function buildCardPdf(profile, emergencyContacts, medications) {
   // Custom card-sized page
   const doc = new jsPDF({ unit: 'mm', format: [160, 220], orientation: 'portrait' });
 
-  // --- PAGE BACKGROUND ---
-  doc.setFillColor(255, 255, 255);
-  doc.rect(0, 0, 160, 220, 'F');
-
   // Card coordinates
   const cx = 10, cy = 10, cw = 140, ch = 200;
+  const col = cx + 6;
+  const contentW = cw - 12;
+  const maxY = cy + ch - 18; // 192mm
 
-  // Outer red border
+  // Initialize Page 1
+  doc.setFillColor(255, 255, 255);
+  doc.rect(0, 0, 160, 220, 'F');
   doc.setDrawColor(220, 38, 38);
   doc.setLineWidth(0.8);
   doc.roundedRect(cx, cy, cw, ch, 4, 4, 'D');
 
-  // --- RED HEADER BAND ---
+  // --- RED HEADER BAND (Only on first page) ---
   doc.setFillColor(220, 38, 38);
   doc.roundedRect(cx, cy, cw, 18, 4, 4, 'F');
   doc.rect(cx, cy + 9, cw, 9, 'F'); // square bottom
@@ -33,11 +34,68 @@ function buildCardPdf(profile, emergencyContacts, medications) {
   doc.setFont('helvetica', 'bold');
   doc.text('EMERGENCY MEDICAL CARD', cx + 6, cy + 11.5);
 
-
-  // --- CONTENT START ---
   let y = cy + 28;
-  const col = cx + 6;
-  const contentW = cw - 12;
+
+  // --- HELPERS ---
+  const createNewPage = () => {
+    doc.addPage();
+    doc.setFillColor(255, 255, 255);
+    doc.rect(0, 0, 160, 220, 'F');
+    doc.setDrawColor(220, 38, 38);
+    doc.setLineWidth(0.8);
+    doc.roundedRect(cx, cy, cw, ch, 4, 4, 'D');
+    y = cy + 12;
+  };
+
+  const sectionTitle = (title) => {
+    if (y + 10 > maxY) {
+      createNewPage();
+    }
+    doc.setTextColor(15, 118, 110); // Teal 700
+    doc.setFontSize(7.5);
+    doc.setFont('helvetica', 'bold');
+    doc.text(title.toUpperCase(), col, y);
+    y += 3.5;
+  };
+
+  const drawBox = (height, isRed = false) => {
+    if (isRed) {
+      doc.setFillColor(254, 242, 242);
+      doc.setDrawColor(252, 165, 165);
+    } else {
+      doc.setFillColor(248, 250, 252);
+      doc.setDrawColor(226, 232, 240);
+    }
+    doc.setLineWidth(0.3);
+    doc.roundedRect(col, y, contentW, height, 1.5, 1.5, 'FD');
+  };
+
+  const drawTextWithPagination = (title, text, isRed = false) => {
+    sectionTitle(title);
+    
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    const lines = doc.splitTextToSize(text, contentW - 6);
+    
+    let lineIndex = 0;
+    while (lineIndex < lines.length) {
+      const spaceLeft = maxY - y;
+      const maxLinesOnPage = Math.max(1, Math.floor((spaceLeft - 6) / 4.5));
+      const linesToDraw = lines.slice(lineIndex, lineIndex + maxLinesOnPage);
+      const boxH = linesToDraw.length * 4.5 + 4;
+      
+      drawBox(boxH, isRed);
+      doc.setTextColor(isRed ? 220 : 15, isRed ? 38 : 23, isRed ? 38 : 42);
+      doc.text(linesToDraw, col + 3, y + 4.5);
+      
+      y += boxH + 5;
+      lineIndex += linesToDraw.length;
+      
+      if (lineIndex < lines.length) {
+        createNewPage();
+      }
+    }
+  };
 
   // --- BLOOD GROUP BADGE ---
   if (profile.bloodGroup) {
@@ -77,54 +135,18 @@ function buildCardPdf(profile, emergencyContacts, medications) {
   doc.line(col, y, col + contentW, y);
   y += 6;
 
-  // --- HELPERS ---
-  const sectionTitle = (title) => {
-    doc.setTextColor(15, 118, 110); // Teal 700
-    doc.setFontSize(7.5);
-    doc.setFont('helvetica', 'bold');
-    doc.text(title.toUpperCase(), col, y);
-    y += 3.5;
-  };
-
-  const drawBox = (height, isRed = false) => {
-    if (isRed) {
-      doc.setFillColor(254, 242, 242);
-      doc.setDrawColor(252, 165, 165);
-    } else {
-      doc.setFillColor(248, 250, 252);
-      doc.setDrawColor(226, 232, 240);
-    }
-    doc.setLineWidth(0.3);
-    doc.roundedRect(col, y, contentW, height, 1.5, 1.5, 'FD');
-  };
-
   // --- CONDITIONS ---
-  sectionTitle('Medical Conditions / Diagnosis');
   const condText = profile.conditions || 'No medical conditions reported.';
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  const condLines = doc.splitTextToSize(condText, contentW - 6);
-  const condH = condLines.length * 4.5 + 4;
-  drawBox(condH, false);
-  doc.setTextColor(15, 23, 42);
-  doc.text(condLines, col + 3, y + 4.5);
-  y += condH + 5;
+  drawTextWithPagination('Medical Conditions / Diagnosis', condText, false);
 
   // --- ALLERGIES ---
-  sectionTitle('Critical Allergies');
   const algText = profile.allergies || 'No known drug or food allergies.';
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  const algLines = doc.splitTextToSize(algText, contentW - 6);
-  const algH = algLines.length * 4.5 + 4;
-  drawBox(algH, true);
-  doc.setTextColor(220, 38, 38);
-  doc.text(algLines, col + 3, y + 4.5);
-  y += algH + 5;
+  drawTextWithPagination('Critical Allergies', algText, true);
 
   // --- EMERGENCY CONTACTS ---
   sectionTitle('Emergency Contacts');
   if (emergencyContacts.length === 0) {
+    if (y + 13 > maxY) createNewPage();
     drawBox(8, false);
     doc.setTextColor(15, 23, 42);
     doc.setFontSize(9);
@@ -134,6 +156,10 @@ function buildCardPdf(profile, emergencyContacts, medications) {
     emergencyContacts.forEach((c, i) => {
       let h = 10;
       if (c.email) h += 4;
+      
+      if (y + h + 5 > maxY) {
+        createNewPage();
+      }
       
       drawBox(h, false);
       
@@ -166,6 +192,7 @@ function buildCardPdf(profile, emergencyContacts, medications) {
   // --- MEDICATIONS ---
   sectionTitle('Current Medications');
   if (medications.length === 0) {
+    if (y + 13 > maxY) createNewPage();
     drawBox(8, false);
     doc.setTextColor(15, 23, 42);
     doc.setFontSize(9);
@@ -178,6 +205,10 @@ function buildCardPdf(profile, emergencyContacts, medications) {
       doc.setFontSize(7.5);
       const detailLines = doc.splitTextToSize(detail, contentW - 30);
       const h = Math.max(10, detailLines.length * 3.5 + 6);
+      
+      if (y + h + 5 > maxY) {
+        createNewPage();
+      }
       
       drawBox(h, false);
       
@@ -210,12 +241,13 @@ function buildCardPdf(profile, emergencyContacts, medications) {
   }
 
   // --- INSURANCE FOOTER ---
-  y += 2;
   if (profile.insurancePolicy || profile.insuranceNumber) {
+    // Draw footer divider line at bottom of the last page
     doc.setDrawColor(226, 232, 240);
     doc.setLineWidth(0.4);
-    doc.line(col, y, col + contentW, y);
-    y += 6;
+    doc.line(col, cy + ch - 14, col + contentW, cy + ch - 14);
+    
+    y = cy + ch - 9;
 
     const drawFooterPart = (label, value, align) => {
       if (!value) return;
