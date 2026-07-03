@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Shield, FileText, Plus, Trash2, Save, User, Heart, ShieldAlert, Award, Phone, ArrowLeft, Printer, Eye, Share2, LogOut, Menu, X } from 'lucide-react';
 import { loadCardData, saveCardData, BACKEND_URL } from './utils/storage';
 import EmergencyCard from './components/EmergencyCard';
@@ -60,6 +60,37 @@ export default function App() {
       window.removeEventListener('offline', handleOffline);
     };
   }, []);
+
+  const touchStartRef = useRef(null);
+  const touchEndRef = useRef(null);
+
+  const handleTouchStart = (e) => {
+    touchStartRef.current = e.targetTouches[0].clientX;
+    touchEndRef.current = null;
+  };
+
+  const handleTouchMove = (e) => {
+    touchEndRef.current = e.targetTouches[0].clientX;
+  };
+
+  const handleTouchEnd = (handleComplete) => {
+    if (touchStartRef.current === null || touchEndRef.current === null) return;
+    const distance = touchStartRef.current - touchEndRef.current;
+    const minDistance = 50;
+    if (distance > minDistance) {
+      if (onboardingSlide < 2) {
+        setOnboardingSlide(prev => prev + 1);
+      } else {
+        handleComplete();
+      }
+    } else if (distance < -minDistance) {
+      if (onboardingSlide > 0) {
+        setOnboardingSlide(prev => prev - 1);
+      }
+    }
+    touchStartRef.current = null;
+    touchEndRef.current = null;
+  };
 
   // Handle splash and onboarding timers
   useEffect(() => {
@@ -1092,11 +1123,16 @@ export default function App() {
 
     return (
       <div className="onboarding-screen">
-        <div className="onboarding-card animated">
+        <div 
+          className="onboarding-card animated"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={() => handleTouchEnd(handleCompleteOnboarding)}
+        >
           <div className="onboarding-slides">
             {onboardingSlide === 0 && (
               <div className="onboarding-slide animated">
-                <div className="onboarding-icon-wrap" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '180px', marginBottom: '1.5rem' }}>
+                <div className="onboarding-icon-wrap" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <svg width="180" height="180" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <circle cx="100" cy="100" r="80" fill="rgba(239, 68, 68, 0.03)" />
                     <circle cx="100" cy="100" r="60" fill="rgba(239, 68, 68, 0.06)" />
@@ -1117,7 +1153,7 @@ export default function App() {
             )}
             {onboardingSlide === 1 && (
               <div className="onboarding-slide animated">
-                <div className="onboarding-icon-wrap" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '180px', marginBottom: '1.5rem' }}>
+                <div className="onboarding-icon-wrap" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <svg width="180" height="180" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <circle cx="100" cy="100" r="80" fill="rgba(15, 108, 95, 0.03)" />
                     <circle cx="100" cy="100" r="60" fill="rgba(15, 108, 95, 0.06)" />
@@ -1136,7 +1172,7 @@ export default function App() {
             )}
             {onboardingSlide === 2 && (
               <div className="onboarding-slide animated">
-                <div className="onboarding-icon-wrap" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '180px', marginBottom: '1.5rem' }}>
+                <div className="onboarding-icon-wrap" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <svg width="180" height="180" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <circle cx="100" cy="100" r="80" fill="rgba(37, 99, 235, 0.03)" />
                     <circle cx="100" cy="100" r="60" fill="rgba(37, 99, 235, 0.06)" />

@@ -1155,6 +1155,15 @@ textarea {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+  .app-header {
+    padding: 0.75rem 1rem !important;
+  }
+
+  .main-content {
+    padding: 1rem 0.75rem !important;
+    padding-bottom: 2rem !important;
+  }
+
   .header-content {
     flex-direction: row;
     justify-content: space-between;
@@ -1181,7 +1190,7 @@ textarea {
     text-align: center;
     padding: 1.25rem 1rem;
     position: sticky;
-    top: 60px;
+    top: 50px;
     /* Keep sticky below the app header on mobile */
     z-index: 90;
     margin-bottom: 1rem;
@@ -1208,8 +1217,26 @@ textarea {
     justify-content: center;
   }
 
-  .main-content {
-    padding-bottom: 2rem !important;
+  /* Scrollable tabs navigation for small screen/zoomed displays */
+  .nav-tabs {
+    width: 100% !important;
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+    display: flex !important;
+    justify-content: flex-start !important;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    padding: 0.25rem !important;
+  }
+  
+  .nav-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tab-btn {
+    flex-shrink: 0 !important;
+    padding: 0.5rem 1rem !important;
+    font-size: 0.85rem !important;
   }
 
   /* Responsive layout for header auth section */
@@ -1279,21 +1306,37 @@ textarea {
     width: 100%;
   }
 
+  /* Full vertical stack for item list rows */
   .item-row {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr !important;
     gap: 0.75rem;
   }
 
-  .item-row> :nth-last-child(2) {
-    grid-column: span 2;
+  .item-row> * {
+    grid-column: auto !important;
   }
 
   .item-row-contact {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
   }
 
   .badge-split-two {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+
+  .badge-row-top {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+
+  .blood-badge {
+    align-items: flex-start !important;
+    padding: 0.6rem 0.8rem !important;
+  }
+
+  .blood-type {
+    font-size: 1.5rem !important;
   }
 }
 
@@ -1612,24 +1655,26 @@ textarea {
   align-items: center;
   justify-content: center;
   z-index: 99999;
-  padding: 1.5rem;
+  padding: clamp(0.75rem, 3vw, 1.5rem);
 }
 
 .onboarding-card {
   background-color: var(--bg-card);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
-  padding: 2.5rem;
+  padding: clamp(1.25rem, 5vw, 2.5rem);
   max-width: 500px;
   width: 100%;
+  max-height: 95vh;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: clamp(1rem, 4vh, 2rem);
   border: 1px solid var(--border);
 }
 
 .onboarding-slides {
-  min-height: 380px;
+  min-height: clamp(200px, 45vh, 380px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1640,25 +1685,45 @@ textarea {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
+  gap: clamp(0.5rem, 2vh, 1rem);
+  width: 100%;
+}
+
+.onboarding-icon-wrap {
+  width: 100%;
+  height: clamp(100px, 20vh, 180px);
+  margin-bottom: clamp(0.5rem, 2.5vh, 1.5rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.onboarding-icon-wrap svg {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
 }
 
 .onboarding-icon {
-  font-size: 4.5rem;
+  font-size: clamp(3rem, 10vw, 4.5rem);
   margin-bottom: 0.5rem;
 }
 
 .onboarding-slide h2 {
   font-family: var(--font-title);
   color: var(--primary);
-  font-size: 1.6rem;
+  font-size: clamp(1.2rem, 5vw, 1.6rem);
   font-weight: 700;
+  margin: 0;
+  line-height: 1.3;
 }
 
 .onboarding-slide p {
   color: var(--text-secondary);
-  font-size: 0.95rem;
-  line-height: 1.6;
+  font-size: clamp(0.85rem, 3.5vw, 0.95rem);
+  line-height: 1.5;
+  margin: 0;
 }
 
 .onboarding-footer {
@@ -1666,7 +1731,7 @@ textarea {
   align-items: center;
   justify-content: space-between;
   border-top: 1px solid var(--border);
-  padding-top: 1.5rem;
+  padding-top: clamp(1rem, 3vh, 1.5rem);
 }
 
 .onboarding-dots {
@@ -1742,6 +1807,8 @@ textarea {
   box-shadow: var(--shadow-lg);
   width: 90%;
   max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
   padding: 1.75rem;
   border: 1px solid var(--border);
   display: flex;
