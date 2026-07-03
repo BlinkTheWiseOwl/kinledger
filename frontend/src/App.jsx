@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Shield, FileText, Plus, Trash2, Save, User, Heart, ShieldAlert, Award, Phone, ArrowLeft, Printer, Eye, Share2, LogOut, Menu, X } from 'lucide-react';
+import { Shield, FileText, Plus, Trash2, Save, User, Heart, ShieldAlert, Award, Phone, ArrowLeft, Printer, Eye, Share2, LogOut, Menu, X, ChevronDown, ChevronRight } from 'lucide-react';
 import { loadCardData, saveCardData, BACKEND_URL } from './utils/storage';
 import EmergencyCard from './components/EmergencyCard';
 import AuthScreen from './components/AuthScreen';
@@ -48,6 +48,16 @@ export default function App() {
   const [showHelp, setShowHelp] = useState(false);
   const [showVoteModal, setShowVoteModal] = useState(false);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
+
+  const [newMemberName, setNewMemberName] = useState('');
+  const [expandedSections, setExpandedSections] = useState({ profile: true, insurance: false, contacts: false, meds: false, share: false });
+
+  const toggleSection = (section) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
 
   // Handle offline status
   useEffect(() => {
@@ -485,14 +495,14 @@ export default function App() {
   };
 
   // Add a new profile card
-  const handleCreateCard = (relation) => {
+  const handleCreateCard = (relation, name) => {
     if (!relation) return;
 
     const newCard = {
       id: 'card-' + Date.now(),
       relationship: relation,
       profile: {
-        fullName: '',
+        fullName: name || '',
         age: '',
         bloodGroup: '',
         allergies: '',
@@ -522,7 +532,8 @@ export default function App() {
     setActiveTab('edit');
     setShowAddMenu(false);
     setCustomRelation('');
-    showStatus(`New card created for ${relationship}.`, 'success');
+    setNewMemberName('');
+    showStatus(`New card created for ${relation}.`, 'success');
   };
 
   // Delete a profile card (revokes access if shared card)
@@ -1503,19 +1514,28 @@ export default function App() {
                 <div className="member-summary-card" style={{ borderStyle: 'solid', borderColor: 'var(--primary)', backgroundColor: 'var(--primary-light)' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', width: '100%', height: '100%' }}>
                     <div style={{ fontWeight: 'bold', color: 'var(--primary)', fontFamily: 'var(--font-title)' }}>
-                      Select Relationship
+                      New Family Member
                     </div>
+                    
+                    <input
+                      type="text"
+                      placeholder="Name (Required)"
+                      value={newMemberName}
+                      onChange={(e) => setNewMemberName(e.target.value)}
+                      style={{ marginBottom: '0.2rem' }}
+                    />
+                    
                     <select
                       onChange={(e) => {
                         if (e.target.value === 'custom') {
                           // keep menu open, let user input custom relation
                         } else {
-                          handleCreateCard(e.target.value);
+                          setCustomRelation(e.target.value);
                         }
                       }}
-                      defaultValue=""
+                      value={customRelation && ['Father', 'Mother', 'Spouse', 'Son', 'Daughter', 'Father-in-law', 'Mother-in-law'].includes(customRelation) ? customRelation : (customRelation ? 'custom' : '')}
                     >
-                      <option value="" disabled>Choose relationship...</option>
+                      <option value="" disabled>Choose relationship (Required)...</option>
                       <option value="Father">Father</option>
                       <option value="Mother">Mother</option>
                       <option value="Spouse">Spouse</option>
@@ -1527,7 +1547,7 @@ export default function App() {
                     </select>
 
                     {/* Show input if custom relation selected */}
-                    {customRelation !== null && (
+                    {customRelation !== null && customRelation !== '' && !['Father', 'Mother', 'Spouse', 'Son', 'Daughter', 'Father-in-law', 'Mother-in-law'].includes(customRelation) && (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginTop: '0.2rem' }}>
                         <input
                           type="text"
@@ -1535,25 +1555,31 @@ export default function App() {
                           value={customRelation}
                           onChange={(e) => setCustomRelation(e.target.value)}
                         />
-                        <button
-                          className="btn btn-primary btn-sm"
-                          onClick={() => handleCreateCard(customRelation || 'Family Member')}
-                        >
-                          Confirm
-                        </button>
                       </div>
                     )}
 
-                    <button
-                      className="btn btn-danger btn-sm"
-                      style={{ marginTop: 'auto', alignSelf: 'flex-start' }}
-                      onClick={() => {
-                        setShowAddMenu(false);
-                        setCustomRelation('');
-                      }}
-                    >
-                      Cancel
-                    </button>
+                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto' }}>
+                        <button
+                          className="btn btn-primary btn-sm"
+                          style={{ flex: 1 }}
+                          disabled={!newMemberName.trim() || !customRelation?.trim()}
+                          onClick={() => {
+                              handleCreateCard(customRelation, newMemberName);
+                          }}
+                        >
+                          Confirm
+                        </button>
+                        <button
+                          className="btn btn-danger btn-sm"
+                          onClick={() => {
+                            setShowAddMenu(false);
+                            setCustomRelation('');
+                            setNewMemberName('');
+                          }}
+                        >
+                          Cancel
+                        </button>
+                    </div>
                   </div>
                 </div>
               )}
@@ -1614,11 +1640,15 @@ export default function App() {
               <div>
                 {/* Profile Form */}
                 <div className="card">
-                  <h3 className="card-title">
-                    <User size={20} className="text-primary" />
-                    1. Card Profile Details
-                  </h3>
-                  <div className="form-grid">
+                  <div className="section-header" onClick={() => toggleSection('profile')}>
+                    <h3 className="card-title" style={{ margin: 0 }}>
+                      <User size={20} className="text-primary" />
+                      1. Card Profile Details
+                    </h3>
+                    {expandedSections.profile ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+                  </div>
+                  {expandedSections.profile && (
+                  <div className="section-content form-grid" style={{ marginTop: '1rem' }}>
                     <div className="form-group">
                       <label htmlFor="fullName">Full Name</label>
                       <input
@@ -1734,15 +1764,20 @@ export default function App() {
                       )}
                     </div>
                   </div>
+                  )}
                 </div>
 
                 {/* Insurance Form */}
                 <div className="card">
-                  <h3 className="card-title">
-                    <Award size={20} className="text-primary" />
-                    2. Insurance Card details
-                  </h3>
-                  <div className="form-grid">
+                  <div className="section-header" onClick={() => toggleSection('insurance')}>
+                    <h3 className="card-title" style={{ margin: 0 }}>
+                      <Award size={20} className="text-primary" />
+                      2. Insurance Card details
+                    </h3>
+                    {expandedSections.insurance ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+                  </div>
+                  {expandedSections.insurance && (
+                  <div className="section-content form-grid" style={{ marginTop: '1rem' }}>
                     <div className="form-group">
                       <label htmlFor="insurancePolicy">Insurance Policy / Issuer Name (Optional)</label>
                       <input
@@ -1795,15 +1830,20 @@ export default function App() {
                       )}
                     </div>
                   </div>
+                  )}
                 </div>
 
                 {/* Contacts Section */}
                 <div className="card">
-                  <h3 className="card-title">
-                    <Phone size={20} className="text-primary" />
-                    3. Emergency Contacts ({activeCard.emergencyContacts.length}/2)
-                  </h3>
-
+                  <div className="section-header" onClick={() => toggleSection('contacts')}>
+                    <h3 className="card-title" style={{ margin: 0 }}>
+                      <Phone size={20} className="text-primary" />
+                      3. Emergency Contacts ({activeCard.emergencyContacts.length}/2)
+                    </h3>
+                    {expandedSections.contacts ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+                  </div>
+                  {expandedSections.contacts && (
+                  <div className="section-content" style={{ marginTop: '1rem' }}>
                   {activeCard.emergencyContacts.length > 0 ? (
                     <div>
                       {activeCard.emergencyContacts.map((contact, index) => (
@@ -1916,15 +1956,21 @@ export default function App() {
                       </div>
                     </form>
                   )}
+                  </div>
+                  )}
                 </div>
 
                 {/* Medications Section */}
                 <div className="card">
-                  <h3 className="card-title">
-                    <Heart size={20} className="text-primary" />
-                    4. Medications List
-                  </h3>
-
+                  <div className="section-header" onClick={() => toggleSection('meds')}>
+                    <h3 className="card-title" style={{ margin: 0 }}>
+                      <Heart size={20} className="text-primary" />
+                      4. Medications List
+                    </h3>
+                    {expandedSections.meds ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+                  </div>
+                  {expandedSections.meds && (
+                  <div className="section-content" style={{ marginTop: '1rem' }}>
                   {activeCard.medications.length > 0 ? (
                     <div>
                       {activeCard.medications.map((med, index) => (
@@ -2012,15 +2058,21 @@ export default function App() {
                       </div>
                     </div>
                   </form>
+                  </div>
+                  )}
                 </div>
 
                 {/* Collaborative Joint Sharing Section */}
                 <div className="card">
-                  <h3 className="card-title">
-                    <Share2 size={20} className="text-primary" />
-                    5. Share Card with Family
-                  </h3>
-
+                  <div className="section-header" onClick={() => toggleSection('share')}>
+                    <h3 className="card-title" style={{ margin: 0 }}>
+                      <Share2 size={20} className="text-primary" />
+                      5. Share Card with Family
+                    </h3>
+                    {expandedSections.share ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+                  </div>
+                  {expandedSections.share && (
+                  <div className="section-content" style={{ marginTop: '1rem' }}>
                   {activeCard.isShared ? (
                     <div className="item-list-empty" style={{ backgroundColor: 'var(--bg-app)', color: 'var(--text-secondary)' }}>
                       This profile is owned by <strong>{activeCard.ownerEmail}</strong>.
@@ -2065,6 +2117,8 @@ export default function App() {
                         </div>
                       )}
                     </div>
+                  )}
+                  </div>
                   )}
                 </div>
               </div>
