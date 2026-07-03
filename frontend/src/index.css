@@ -497,6 +497,11 @@ textarea:focus {
   box-shadow: 0 0 0 3px rgba(15, 108, 95, 0.1);
 }
 
+.required-asterisk {
+  color: var(--danger);
+  margin-left: 0.2rem;
+}
+
 textarea {
   resize: vertical;
   min-height: 80px;
@@ -514,7 +519,12 @@ textarea {
   font-weight: 600;
   cursor: pointer;
   transition: var(--transition);
-  border: none;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 .btn-primary {

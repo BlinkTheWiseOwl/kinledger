@@ -1519,7 +1519,7 @@ export default function App() {
                     
                     <input
                       type="text"
-                      placeholder="Name (Required)"
+                      placeholder="Name * (Required)"
                       value={newMemberName}
                       onChange={(e) => setNewMemberName(e.target.value)}
                       style={{ marginBottom: '0.2rem' }}
@@ -1535,7 +1535,7 @@ export default function App() {
                       }}
                       value={customRelation && ['Father', 'Mother', 'Spouse', 'Son', 'Daughter', 'Father-in-law', 'Mother-in-law'].includes(customRelation) ? customRelation : (customRelation ? 'custom' : '')}
                     >
-                      <option value="" disabled>Choose relationship (Required)...</option>
+                      <option value="" disabled>Choose relationship * (Required)...</option>
                       <option value="Father">Father</option>
                       <option value="Mother">Mother</option>
                       <option value="Spouse">Spouse</option>
@@ -1650,7 +1650,7 @@ export default function App() {
                   {expandedSections.profile && (
                   <div className="section-content form-grid" style={{ marginTop: '1rem' }}>
                     <div className="form-group">
-                      <label htmlFor="fullName">Full Name</label>
+                      <label htmlFor="fullName">Full Name <span className="required-asterisk">*</span></label>
                       <input
                         type="text"
                         id="fullName"
@@ -1667,7 +1667,7 @@ export default function App() {
                       )}
                     </div>
                     <div className="form-group">
-                      <label htmlFor="age">Age</label>
+                      <label htmlFor="age">Age <span className="required-asterisk">*</span></label>
                       <input
                         type="number"
                         id="age"
@@ -1684,7 +1684,7 @@ export default function App() {
                       )}
                     </div>
                     <div className="form-group">
-                      <label htmlFor="bloodGroup">Blood Group</label>
+                      <label htmlFor="bloodGroup">Blood Group <span className="required-asterisk">*</span></label>
                       <select
                         id="bloodGroup"
                         name="bloodGroup"
@@ -1709,7 +1709,7 @@ export default function App() {
                       )}
                     </div>
                     <div className="form-group">
-                      <label>Relationship Tag</label>
+                      <label>Relationship Tag <span className="required-asterisk">*</span></label>
                       <select
                         value={activeCard.relationship}
                         onChange={(e) => updateActiveCardRelationship(e.target.value)}
