@@ -1485,7 +1485,7 @@ export default function App() {
                         setActiveTab('edit');
                       }}
                     >
-                      {getReadinessStatus(card).status === 'complete' ? 'Edit Profile' : 'Complete Profile'}
+                      {getReadinessStatus(card).status === 'complete' ? 'Edit' : 'Complete'}
                     </button>
                     <button
                       className="btn btn-outline btn-sm"
@@ -1496,7 +1496,7 @@ export default function App() {
                         setActiveTab('view');
                       }}
                     >
-                      <Eye size={14} /> Open Card
+                      <Eye size={13} /> View
                     </button>
                   </div>
                 </div>
@@ -1506,15 +1506,15 @@ export default function App() {
               {!showAddMenu ? (
                 <button className="add-member-card" onClick={() => setShowAddMenu(true)}>
                   <div className="add-member-icon-wrap">
-                    <Plus size={24} />
+                    <Plus size={22} />
                   </div>
-                  Add Family Member
+                  Add New Member
                 </button>
               ) : (
                 <div className="member-summary-card" style={{ borderStyle: 'solid', borderColor: 'var(--primary)', backgroundColor: 'var(--primary-light)' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', width: '100%', height: '100%' }}>
                     <div style={{ fontWeight: 'bold', color: 'var(--primary)', fontFamily: 'var(--font-title)' }}>
-                      New Family Member
+                      New Member
                     </div>
                     
                     <input
@@ -1608,11 +1608,11 @@ export default function App() {
 
               <div className="workspace-actions">
                 <button className="btn btn-secondary" onClick={() => setSelectedCardId(null)}>
-                  Dashboard
+                  Home
                 </button>
                 <button className="btn btn-primary" onClick={handleSaveActiveCard}>
-                  <Save size={18} />
-                  Save Card Information
+                  <Save size={16} />
+                  Save
                 </button>
               </div>
             </div>
@@ -1623,15 +1623,15 @@ export default function App() {
                 className={`tab-btn ${activeTab === 'edit' ? 'active' : ''}`}
                 onClick={() => setActiveTab('edit')}
               >
-                <User size={16} />
-                {getReadinessStatus(activeCard).status === 'complete' ? 'Edit Profile' : 'Complete Profile'}
+                <User size={15} />
+                {getReadinessStatus(activeCard).status === 'complete' ? 'Edit' : 'Complete'}
               </button>
               <button
                 className={`tab-btn ${activeTab === 'view' ? 'active' : ''}`}
                 onClick={() => setActiveTab('view')}
               >
-                <FileText size={16} />
-                View & Share Printable Card
+                <FileText size={15} />
+                View Card
               </button>
             </div>
 
@@ -1642,15 +1642,15 @@ export default function App() {
                 <div className="card">
                   <div className="section-header" onClick={() => toggleSection('profile')}>
                     <h3 className="card-title" style={{ margin: 0 }}>
-                      <User size={20} className="text-primary" />
-                      1. Card Profile Details
+                      <User size={18} className="text-primary" />
+                      Profile
                     </h3>
                     {expandedSections.profile ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
                   </div>
                   {expandedSections.profile && (
                   <div className="section-content form-grid" style={{ marginTop: '1rem' }}>
                     <div className="form-group">
-                      <label htmlFor="fullName">Full Name <span className="required-asterisk">*</span></label>
+                      <label htmlFor="fullName">Name <span className="required-asterisk">*</span></label>
                       <input
                         type="text"
                         id="fullName"
@@ -1709,7 +1709,7 @@ export default function App() {
                       )}
                     </div>
                     <div className="form-group">
-                      <label>Relationship Tag <span className="required-asterisk">*</span></label>
+                      <label>Relationship <span className="required-asterisk">*</span></label>
                       <select
                         value={activeCard.relationship}
                         onChange={(e) => updateActiveCardRelationship(e.target.value)}
@@ -1732,7 +1732,7 @@ export default function App() {
                       )}
                     </div>
                     <div className="form-group full-width">
-                      <label htmlFor="conditions">Medical Conditions / Diagnosis (Optional)</label>
+                      <label htmlFor="conditions">Conditions (Optional)</label>
                       <textarea
                         id="conditions"
                         name="conditions"
@@ -1748,7 +1748,7 @@ export default function App() {
                       )}
                     </div>
                     <div className="form-group full-width">
-                      <label htmlFor="allergies">Critical Allergies (Optional)</label>
+                      <label htmlFor="allergies">Allergies (Optional)</label>
                       <textarea
                         id="allergies"
                         name="allergies"
@@ -1771,15 +1771,15 @@ export default function App() {
                 <div className="card">
                   <div className="section-header" onClick={() => toggleSection('insurance')}>
                     <h3 className="card-title" style={{ margin: 0 }}>
-                      <Award size={20} className="text-primary" />
-                      2. Insurance Card details
+                      <Award size={18} className="text-primary" />
+                      Insurance
                     </h3>
                     {expandedSections.insurance ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
                   </div>
                   {expandedSections.insurance && (
                   <div className="section-content form-grid" style={{ marginTop: '1rem' }}>
                     <div className="form-group">
-                      <label htmlFor="insurancePolicy">Insurance Policy / Issuer Name (Optional)</label>
+                      <label htmlFor="insurancePolicy">Insurer (Optional)</label>
                       <input
                         type="text"
                         id="insurancePolicy"
@@ -1796,7 +1796,7 @@ export default function App() {
                       )}
                     </div>
                     <div className="form-group">
-                      <label htmlFor="insuranceNumber">Policy Number / Member ID (Optional)</label>
+                      <label htmlFor="insuranceNumber">Policy / Member ID</label>
                       <input
                         type="text"
                         id="insuranceNumber"
@@ -1813,7 +1813,7 @@ export default function App() {
                       )}
                     </div>
                     <div className="form-group">
-                      <label htmlFor="insuranceValidTill">Valid Till / Expiry Date</label>
+                      <label htmlFor="insuranceValidTill">Valid Till</label>
                       <input
                         type="text"
                         id="insuranceValidTill"
@@ -1837,8 +1837,8 @@ export default function App() {
                 <div className="card">
                   <div className="section-header" onClick={() => toggleSection('contacts')}>
                     <h3 className="card-title" style={{ margin: 0 }}>
-                      <Phone size={20} className="text-primary" />
-                      3. Emergency Contacts ({activeCard.emergencyContacts.length}/2)
+                      <Phone size={18} className="text-primary" />
+                      Contacts ({activeCard.emergencyContacts.length}/2)
                     </h3>
                     {expandedSections.contacts ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
                   </div>
@@ -1869,16 +1869,16 @@ export default function App() {
                     </div>
                   ) : (
                     <div className="item-list-empty">
-                      No emergency contacts registered yet. Please add up to 2 contacts below.
+                      No emergency contacts registered. Please add up to 2 contacts below.
                     </div>
                   )}
 
                   {activeCard.emergencyContacts.length < 2 && (
-                    <form onSubmit={addContactToActiveCard} style={{ borderTop: '1px solid var(--border)', paddingTop: '1.5rem', marginTop: '1rem' }}>
-                      <h4 style={{ marginBottom: '1rem', fontSize: '0.95rem', color: 'var(--text-secondary)' }}>Add Emergency Contact</h4>
-                      <div className="form-grid" style={{ gap: '1rem' }}>
+                    <form onSubmit={addContactToActiveCard} style={{ borderTop: '1px solid var(--border)', paddingTop: '1.25rem', marginTop: '0.75rem' }}>
+                      <h4 style={{ marginBottom: '0.75rem', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Add Contact</h4>
+                      <div className="form-grid" style={{ gap: '0.875rem' }}>
                         <div className="form-group">
-                          <label>Contact Name</label>
+                          <label>Name</label>
                           <input
                             type="text"
                             placeholder="e.g., Shloka Kumar"
@@ -1919,7 +1919,7 @@ export default function App() {
                           )}
                         </div>
                         <div className="form-group">
-                          <label>Phone Number</label>
+                          <label>Phone</label>
                           <input
                             type="tel"
                             placeholder="e.g., 9886012345"
@@ -1934,7 +1934,7 @@ export default function App() {
                           )}
                         </div>
                         <div className="form-group">
-                          <label>Email Address (Optional)</label>
+                          <label>Email (Optional)</label>
                           <input
                             type="email"
                             placeholder="e.g., shloka@email.com"
@@ -1948,9 +1948,9 @@ export default function App() {
                             </span>
                           )}
                         </div>
-                        <div className="form-group" style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
+                        <div className="form-group" style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end', marginTop: '0.25rem' }}>
                           <button type="submit" className="btn btn-secondary" style={{ width: 'fit-content' }}>
-                            <Plus size={16} /> Add Contact
+                            <Plus size={15} /> Add
                           </button>
                         </div>
                       </div>
@@ -1964,8 +1964,8 @@ export default function App() {
                 <div className="card">
                   <div className="section-header" onClick={() => toggleSection('meds')}>
                     <h3 className="card-title" style={{ margin: 0 }}>
-                      <Heart size={20} className="text-primary" />
-                      4. Medications List
+                      <Heart size={18} className="text-primary" />
+                      Medications
                     </h3>
                     {expandedSections.meds ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
                   </div>
@@ -2003,11 +2003,11 @@ export default function App() {
                     </div>
                   )}
 
-                  <form onSubmit={addMedicationToActiveCard} style={{ borderTop: '1px solid var(--border)', paddingTop: '1.5rem', marginTop: '1rem' }}>
-                    <h4 style={{ marginBottom: '1rem', fontSize: '0.95rem', color: 'var(--text-secondary)' }}>Add Chronic Medication</h4>
-                    <div className="form-grid" style={{ gap: '1rem' }}>
+                  <form onSubmit={addMedicationToActiveCard} style={{ borderTop: '1px solid var(--border)', paddingTop: '1.25rem', marginTop: '0.75rem' }}>
+                    <h4 style={{ marginBottom: '0.75rem', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Add Medication</h4>
+                    <div className="form-grid" style={{ gap: '0.875rem' }}>
                       <div className="form-group">
-                        <label>Medication Name</label>
+                        <label>Med Name</label>
                         <input
                           type="text"
                           placeholder="e.g., Metformin"
@@ -2016,7 +2016,7 @@ export default function App() {
                         />
                       </div>
                       <div className="form-group">
-                        <label>Dosage (Optional)</label>
+                        <label>Dosage</label>
                         <input
                           type="text"
                           placeholder="e.g., 500mg, 1 tab"
@@ -2025,7 +2025,7 @@ export default function App() {
                         />
                       </div>
                       <div className="form-group">
-                        <label>Frequency (Optional)</label>
+                        <label>Frequency</label>
                         <select
                           value={newMed.frequency}
                           onChange={e => setNewMed(prev => ({ ...prev, frequency: e.target.value }))}
@@ -2043,7 +2043,7 @@ export default function App() {
                         </select>
                       </div>
                       <div className="form-group">
-                        <label>Instructions (Optional)</label>
+                        <label>Instructions</label>
                         <input
                           type="text"
                           placeholder="e.g., After meals"
@@ -2051,9 +2051,9 @@ export default function App() {
                           onChange={e => setNewMed(prev => ({ ...prev, instructions: e.target.value }))}
                         />
                       </div>
-                      <div className="form-group" style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
+                      <div className="form-group" style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end', marginTop: '0.25rem' }}>
                         <button type="submit" className="btn btn-secondary" style={{ width: 'fit-content' }}>
-                          <Plus size={16} /> Add Medication
+                          <Plus size={15} /> Add
                         </button>
                       </div>
                     </div>
@@ -2066,8 +2066,8 @@ export default function App() {
                 <div className="card">
                   <div className="section-header" onClick={() => toggleSection('share')}>
                     <h3 className="card-title" style={{ margin: 0 }}>
-                      <Share2 size={20} className="text-primary" />
-                      5. Share Card with Family
+                      <Share2 size={18} className="text-primary" />
+                      Share
                     </h3>
                     {expandedSections.share ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
                   </div>
@@ -2093,7 +2093,7 @@ export default function App() {
                           style={{ flex: 1 }}
                         />
                         <button className="btn btn-primary btn-sm" onClick={handleShareCard}>
-                          Add Share
+                          Share
                         </button>
                       </div>
 
@@ -2135,6 +2135,19 @@ export default function App() {
           </div>
         )}
       </main>
+
+      {/* Mobile Sticky Save Footer — only when editing a card */}
+      {selectedCardId !== null && activeTab === 'edit' && (
+        <div className="sticky-save-footer">
+          <button
+            className="btn btn-primary"
+            style={{ flex: 1 }}
+            onClick={handleSaveActiveCard}
+          >
+            <Save size={16} /> Save
+          </button>
+        </div>
+      )}
 
       {/* Vote Modal Dialog */}
       {showVoteModal && (
