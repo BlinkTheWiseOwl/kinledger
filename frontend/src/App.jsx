@@ -51,6 +51,7 @@ export default function App() {
 
   const [newMemberName, setNewMemberName] = useState('');
   const [expandedSections, setExpandedSections] = useState({ profile: true, insurance: false, contacts: false, meds: false, share: false });
+  const [activeSheet, setActiveSheet] = useState(null);
 
   const toggleSection = (section) => {
     setExpandedSections(prev => ({
@@ -1308,7 +1309,7 @@ export default function App() {
                 border: 'none'
               }}
             >
-              Coming Up Next ✨
+              Coming Up Next âœ¨
             </button>
             <button
               className="hamburger-btn"
@@ -1416,8 +1417,8 @@ export default function App() {
                         <span className={`relationship-badge ${getRelationBadgeClass(card.relationship)}`}>
                           {card.relationship}
                         </span>
-                        {card.profile.age && <span>• {card.profile.age} yrs</span>}
-                        {card.profile.bloodGroup && <span>• {card.profile.bloodGroup}</span>}
+                        {card.profile.age && <span>â€¢ {card.profile.age} yrs</span>}
+                        {card.profile.bloodGroup && <span>â€¢ {card.profile.bloodGroup}</span>}
                       </div>
                     </div>
                     {/* Delete/Remove card directly from dashboard */}
@@ -1637,492 +1638,87 @@ export default function App() {
 
             {/* Sub Tab Content */}
             {activeTab === 'edit' && (
-              <div>
-                {/* Profile Form */}
-                <div className="card">
-                  <div className="section-header" onClick={() => toggleSection('profile')}>
-                    <h3 className="card-title" style={{ margin: 0 }}>
-                      <User size={18} className="text-primary" />
-                      Profile
-                    </h3>
-                    {expandedSections.profile ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
-                  </div>
-                  {expandedSections.profile && (
-                  <div className="section-content form-grid" style={{ marginTop: '1rem' }}>
-                    <div className="form-group">
-                      <label htmlFor="fullName">Name <span className="required-asterisk">*</span></label>
-                      <input
-                        type="text"
-                        id="fullName"
-                        name="fullName"
-                        placeholder="e.g., Aditya Kumar"
-                        value={activeCard.profile.fullName}
-                        onChange={updateActiveCardProfile}
-                        style={validationErrors.fullName ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
-                      />
-                      {validationErrors.fullName && (
-                        <span style={{ color: 'var(--danger)', fontSize: '0.8rem', fontWeight: '600', marginTop: '0.25rem' }}>
-                          {validationErrors.fullName}
-                        </span>
-                      )}
-                    </div>
-                    <div className="form-group">
-                      <label htmlFor="age">Age <span className="required-asterisk">*</span></label>
-                      <input
-                        type="number"
-                        id="age"
-                        name="age"
-                        placeholder="e.g., 68"
-                        value={activeCard.profile.age}
-                        onChange={updateActiveCardProfile}
-                        style={validationErrors.age ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
-                      />
-                      {validationErrors.age && (
-                        <span style={{ color: 'var(--danger)', fontSize: '0.8rem', fontWeight: '600', marginTop: '0.25rem' }}>
-                          {validationErrors.age}
-                        </span>
-                      )}
-                    </div>
-                    <div className="form-group">
-                      <label htmlFor="bloodGroup">Blood Group <span className="required-asterisk">*</span></label>
-                      <select
-                        id="bloodGroup"
-                        name="bloodGroup"
-                        value={activeCard.profile.bloodGroup}
-                        onChange={updateActiveCardProfile}
-                        style={validationErrors.bloodGroup ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
-                      >
-                        <option value="">Select Blood Group</option>
-                        <option value="A+">A+</option>
-                        <option value="A-">A-</option>
-                        <option value="B+">B+</option>
-                        <option value="B-">B-</option>
-                        <option value="AB+">AB+</option>
-                        <option value="AB-">AB-</option>
-                        <option value="O+">O+</option>
-                        <option value="O-">O-</option>
-                      </select>
-                      {validationErrors.bloodGroup && (
-                        <span style={{ color: 'var(--danger)', fontSize: '0.8rem', fontWeight: '600', marginTop: '0.25rem' }}>
-                          {validationErrors.bloodGroup}
-                        </span>
-                      )}
-                    </div>
-                    <div className="form-group">
-                      <label>Relationship <span className="required-asterisk">*</span></label>
-                      <select
-                        value={activeCard.relationship}
-                        onChange={(e) => updateActiveCardRelationship(e.target.value)}
-                        style={validationErrors.relationship ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
-                      >
-                        <option value="">Select Relationship</option>
-                        <option value="Father">Father</option>
-                        <option value="Mother">Mother</option>
-                        <option value="Spouse">Spouse</option>
-                        <option value="Son">Son</option>
-                        <option value="Daughter">Daughter</option>
-                        <option value="Father-in-law">Father-in-law</option>
-                        <option value="Mother-in-law">Mother-in-law</option>
-                        <option value="Other">Other</option>
-                      </select>
-                      {validationErrors.relationship && (
-                        <span style={{ color: 'var(--danger)', fontSize: '0.8rem', fontWeight: '600', marginTop: '0.25rem' }}>
-                          {validationErrors.relationship}
-                        </span>
-                      )}
-                    </div>
-                    <div className="form-group full-width">
-                      <label htmlFor="conditions">Conditions (Optional)</label>
-                      <textarea
-                        id="conditions"
-                        name="conditions"
-                        placeholder="e.g., Type 2 Diabetes, Hypertension. Undergoing treatment."
-                        value={activeCard.profile.conditions}
-                        onChange={updateActiveCardProfile}
-                        style={validationErrors.conditions ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
-                      />
-                      {validationErrors.conditions && (
-                        <span style={{ color: 'var(--danger)', fontSize: '0.8rem', fontWeight: '600', marginTop: '0.25rem' }}>
-                          {validationErrors.conditions}
-                        </span>
-                      )}
-                    </div>
-                    <div className="form-group full-width">
-                      <label htmlFor="allergies">Allergies (Optional)</label>
-                      <textarea
-                        id="allergies"
-                        name="allergies"
-                        placeholder="e.g., Penicillin (Anaphylaxis), Peanuts."
-                        value={activeCard.profile.allergies}
-                        onChange={updateActiveCardProfile}
-                        style={validationErrors.allergies ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
-                      />
-                      {validationErrors.allergies && (
-                        <span style={{ color: 'var(--danger)', fontSize: '0.8rem', fontWeight: '600', marginTop: '0.25rem' }}>
-                          {validationErrors.allergies}
-                        </span>
-                      )}
+              <div className="section-list card">
+                {/* Profile row */}
+                <button className="section-row" onClick={() => setActiveSheet('profile')}>
+                  <div className="section-row-left">
+                    <div className="section-row-icon-wrap"><User size={18} /></div>
+                    <div className="section-row-info">
+                      <span className="section-row-label">Profile</span>
+                      <span className="section-row-status">
+                        {activeCard.profile.fullName
+                          ? `${activeCard.profile.fullName}${activeCard.relationship ? ` Â· ${activeCard.relationship}` : ''}`
+                          : 'Tap to fill in details'}
+                      </span>
                     </div>
                   </div>
-                  )}
-                </div>
+                  <ChevronRight size={18} className="section-row-chevron" />
+                </button>
 
-                {/* Insurance Form */}
-                <div className="card">
-                  <div className="section-header" onClick={() => toggleSection('insurance')}>
-                    <h3 className="card-title" style={{ margin: 0 }}>
-                      <Award size={18} className="text-primary" />
-                      Insurance
-                    </h3>
-                    {expandedSections.insurance ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
-                  </div>
-                  {expandedSections.insurance && (
-                  <div className="section-content form-grid" style={{ marginTop: '1rem' }}>
-                    <div className="form-group">
-                      <label htmlFor="insurancePolicy">Insurer (Optional)</label>
-                      <input
-                        type="text"
-                        id="insurancePolicy"
-                        name="insurancePolicy"
-                        placeholder="e.g., Star Health Senior Citizens Policy"
-                        value={activeCard.profile.insurancePolicy}
-                        onChange={updateActiveCardProfile}
-                        style={validationErrors.insurancePolicy ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
-                      />
-                      {validationErrors.insurancePolicy && (
-                        <span style={{ color: 'var(--danger)', fontSize: '0.8rem', fontWeight: '600', marginTop: '0.25rem' }}>
-                          {validationErrors.insurancePolicy}
-                        </span>
-                      )}
-                    </div>
-                    <div className="form-group">
-                      <label htmlFor="insuranceNumber">Policy / Member ID</label>
-                      <input
-                        type="text"
-                        id="insuranceNumber"
-                        name="insuranceNumber"
-                        placeholder="e.g., POL-8849-002"
-                        value={activeCard.profile.insuranceNumber}
-                        onChange={updateActiveCardProfile}
-                        style={validationErrors.insuranceNumber ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
-                      />
-                      {validationErrors.insuranceNumber && (
-                        <span style={{ color: 'var(--danger)', fontSize: '0.8rem', fontWeight: '600', marginTop: '0.25rem' }}>
-                          {validationErrors.insuranceNumber}
-                        </span>
-                      )}
-                    </div>
-                    <div className="form-group">
-                      <label htmlFor="insuranceValidTill">Valid Till</label>
-                      <input
-                        type="text"
-                        id="insuranceValidTill"
-                        name="insuranceValidTill"
-                        placeholder="e.g., 12/2028 or Dec 2028"
-                        value={activeCard.profile.insuranceValidTill || ''}
-                        onChange={updateActiveCardProfile}
-                        style={validationErrors.insuranceValidTill ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
-                      />
-                      {validationErrors.insuranceValidTill && (
-                        <span style={{ color: 'var(--danger)', fontSize: '0.8rem', fontWeight: '600', marginTop: '0.25rem' }}>
-                          {validationErrors.insuranceValidTill}
-                        </span>
-                      )}
+                {/* Insurance row */}
+                <button className="section-row" onClick={() => setActiveSheet('insurance')}>
+                  <div className="section-row-left">
+                    <div className="section-row-icon-wrap"><Award size={18} /></div>
+                    <div className="section-row-info">
+                      <span className="section-row-label">Insurance</span>
+                      <span className="section-row-status">
+                        {activeCard.profile.insurancePolicy || 'Not set'}
+                      </span>
                     </div>
                   </div>
-                  )}
-                </div>
+                  <ChevronRight size={18} className="section-row-chevron" />
+                </button>
 
-                {/* Contacts Section */}
-                <div className="card">
-                  <div className="section-header" onClick={() => toggleSection('contacts')}>
-                    <h3 className="card-title" style={{ margin: 0 }}>
-                      <Phone size={18} className="text-primary" />
-                      Contacts ({activeCard.emergencyContacts.length}/2)
-                    </h3>
-                    {expandedSections.contacts ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+                {/* Contacts row */}
+                <button className="section-row" onClick={() => setActiveSheet('contacts')}>
+                  <div className="section-row-left">
+                    <div className="section-row-icon-wrap"><Phone size={18} /></div>
+                    <div className="section-row-info">
+                      <span className="section-row-label">Contacts</span>
+                      <span className="section-row-status">
+                        {activeCard.emergencyContacts.length > 0
+                          ? activeCard.emergencyContacts.map(c => c.name).join(', ')
+                          : 'None added'}
+                      </span>
+                    </div>
                   </div>
-                  {expandedSections.contacts && (
-                  <div className="section-content" style={{ marginTop: '1rem' }}>
-                  {activeCard.emergencyContacts.length > 0 ? (
-                    <div>
-                      {activeCard.emergencyContacts.map((contact, index) => (
-                        <div key={index} className="item-row item-row-contact" style={{ gridTemplateColumns: '1.5fr 1fr 2fr auto' }}>
-                          <div>
-                            <strong>{contact.name}</strong>
-                            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Name</div>
-                          </div>
-                          <div>
-                            <strong>{contact.relationship}</strong>
-                            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Relationship</div>
-                          </div>
-                          <div>
-                            <strong>{contact.phoneNumber}</strong>
-                            {contact.email && <div style={{ fontSize: '0.85rem', color: 'var(--primary)', wordBreak: 'break-all' }}>{contact.email}</div>}
-                            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Contact Info</div>
-                          </div>
-                          <button className="btn btn-danger btn-sm" onClick={() => removeContactFromActiveCard(index)}>
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="item-list-empty">
-                      No emergency contacts registered. Please add up to 2 contacts below.
-                    </div>
-                  )}
+                  <ChevronRight size={18} className="section-row-chevron" />
+                </button>
 
-                  {activeCard.emergencyContacts.length < 2 && (
-                    <form onSubmit={addContactToActiveCard} style={{ borderTop: '1px solid var(--border)', paddingTop: '1.25rem', marginTop: '0.75rem' }}>
-                      <h4 style={{ marginBottom: '0.75rem', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Add Contact</h4>
-                      <div className="form-grid" style={{ gap: '0.875rem' }}>
-                        <div className="form-group">
-                          <label>Name</label>
-                          <input
-                            type="text"
-                            placeholder="e.g., Shloka Kumar"
-                            value={newContact.name}
-                            onChange={e => updateNewContact('name', e.target.value)}
-                            style={validationErrors.contactName ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
-                          />
-                          {validationErrors.contactName && (
-                            <span style={{ color: 'var(--danger)', fontSize: '0.8rem', fontWeight: '600', marginTop: '0.25rem' }}>
-                              {validationErrors.contactName}
-                            </span>
-                          )}
-                        </div>
-                        <div className="form-group">
-                          <label>Relationship</label>
-                          <select
-                            value={newContact.relationship}
-                            onChange={e => updateNewContact('relationship', e.target.value)}
-                            style={validationErrors.contactRelationship ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
-                          >
-                            <option value="">Select Relationship</option>
-                            <option value="Daughter">Daughter</option>
-                            <option value="Son">Son</option>
-                            <option value="Spouse">Spouse</option>
-                            <option value="Father">Father</option>
-                            <option value="Mother">Mother</option>
-                            <option value="Brother">Brother</option>
-                            <option value="Sister">Sister</option>
-                            <option value="Friend">Friend</option>
-                            <option value="Guardian">Guardian</option>
-                            <option value="Neighbor">Neighbor</option>
-                            <option value="Other">Other</option>
-                          </select>
-                          {validationErrors.contactRelationship && (
-                            <span style={{ color: 'var(--danger)', fontSize: '0.8rem', fontWeight: '600', marginTop: '0.25rem' }}>
-                              {validationErrors.contactRelationship}
-                            </span>
-                          )}
-                        </div>
-                        <div className="form-group">
-                          <label>Phone</label>
-                          <input
-                            type="tel"
-                            placeholder="e.g., 9886012345"
-                            value={newContact.phoneNumber}
-                            onChange={e => updateNewContact('phoneNumber', e.target.value)}
-                            style={validationErrors.contactPhone ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
-                          />
-                          {validationErrors.contactPhone && (
-                            <span style={{ color: 'var(--danger)', fontSize: '0.8rem', fontWeight: '600', marginTop: '0.25rem' }}>
-                              {validationErrors.contactPhone}
-                            </span>
-                          )}
-                        </div>
-                        <div className="form-group">
-                          <label>Email (Optional)</label>
-                          <input
-                            type="email"
-                            placeholder="e.g., shloka@email.com"
-                            value={newContact.email || ''}
-                            onChange={e => updateNewContact('email', e.target.value)}
-                            style={validationErrors.contactEmail ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
-                          />
-                          {validationErrors.contactEmail && (
-                            <span style={{ color: 'var(--danger)', fontSize: '0.8rem', fontWeight: '600', marginTop: '0.25rem' }}>
-                              {validationErrors.contactEmail}
-                            </span>
-                          )}
-                        </div>
-                        <div className="form-group" style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end', marginTop: '0.25rem' }}>
-                          <button type="submit" className="btn btn-secondary" style={{ width: 'fit-content' }}>
-                            <Plus size={15} /> Add
-                          </button>
-                        </div>
-                      </div>
-                    </form>
-                  )}
+                {/* Medications row */}
+                <button className="section-row" onClick={() => setActiveSheet('meds')}>
+                  <div className="section-row-left">
+                    <div className="section-row-icon-wrap"><Heart size={18} /></div>
+                    <div className="section-row-info">
+                      <span className="section-row-label">Medications</span>
+                      <span className="section-row-status">
+                        {activeCard.medications.length > 0
+                          ? `${activeCard.medications.length} medication${activeCard.medications.length > 1 ? 's' : ''}`
+                          : 'None added'}
+                      </span>
+                    </div>
                   </div>
-                  )}
-                </div>
+                  <ChevronRight size={18} className="section-row-chevron" />
+                </button>
 
-                {/* Medications Section */}
-                <div className="card">
-                  <div className="section-header" onClick={() => toggleSection('meds')}>
-                    <h3 className="card-title" style={{ margin: 0 }}>
-                      <Heart size={18} className="text-primary" />
-                      Medications
-                    </h3>
-                    {expandedSections.meds ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+                {/* Share row */}
+                <button className="section-row section-row-last" onClick={() => setActiveSheet('share')}>
+                  <div className="section-row-left">
+                    <div className="section-row-icon-wrap"><Share2 size={18} /></div>
+                    <div className="section-row-info">
+                      <span className="section-row-label">Share</span>
+                      <span className="section-row-status">
+                        {activeCard.sharedWith && activeCard.sharedWith.length > 0
+                          ? `Shared with ${activeCard.sharedWith.length}`
+                          : 'Private'}
+                      </span>
+                    </div>
                   </div>
-                  {expandedSections.meds && (
-                  <div className="section-content" style={{ marginTop: '1rem' }}>
-                  {activeCard.medications.length > 0 ? (
-                    <div>
-                      {activeCard.medications.map((med, index) => (
-                        <div key={index} className="item-row">
-                          <div>
-                            <strong>{med.name}</strong>
-                            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Name</div>
-                          </div>
-                          <div>
-                            <strong>{med.dosage}</strong>
-                            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Dosage</div>
-                          </div>
-                          <div>
-                            <strong>{med.frequency}</strong>
-                            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Frequency</div>
-                          </div>
-                          <div>
-                            <strong>{med.instructions || 'None'}</strong>
-                            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Instructions</div>
-                          </div>
-                          <button className="btn btn-danger btn-sm" onClick={() => removeMedicationFromActiveCard(index)}>
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="item-list-empty">
-                      No medications documented. Add chronic medications below.
-                    </div>
-                  )}
-
-                  <form onSubmit={addMedicationToActiveCard} style={{ borderTop: '1px solid var(--border)', paddingTop: '1.25rem', marginTop: '0.75rem' }}>
-                    <h4 style={{ marginBottom: '0.75rem', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Add Medication</h4>
-                    <div className="form-grid" style={{ gap: '0.875rem' }}>
-                      <div className="form-group">
-                        <label>Med Name</label>
-                        <input
-                          type="text"
-                          placeholder="e.g., Metformin"
-                          value={newMed.name}
-                          onChange={e => setNewMed(prev => ({ ...prev, name: e.target.value }))}
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label>Dosage</label>
-                        <input
-                          type="text"
-                          placeholder="e.g., 500mg, 1 tab"
-                          value={newMed.dosage}
-                          onChange={e => setNewMed(prev => ({ ...prev, dosage: e.target.value }))}
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label>Frequency</label>
-                        <select
-                          value={newMed.frequency}
-                          onChange={e => setNewMed(prev => ({ ...prev, frequency: e.target.value }))}
-                        >
-                          <option value="">Select Frequency</option>
-                          <option value="Once daily (morning)">Once daily (morning)</option>
-                          <option value="Once daily (night)">Once daily (night)</option>
-                          <option value="Twice daily (morning & night)">Twice daily (morning & night)</option>
-                          <option value="Three times daily">Three times daily</option>
-                          <option value="Four times daily">Four times daily</option>
-                          <option value="Once a week">Once a week</option>
-                          <option value="Twice a week">Twice a week</option>
-                          <option value="As needed (SOS)">As needed (SOS)</option>
-                          <option value="Other">Other</option>
-                        </select>
-                      </div>
-                      <div className="form-group">
-                        <label>Instructions</label>
-                        <input
-                          type="text"
-                          placeholder="e.g., After meals"
-                          value={newMed.instructions}
-                          onChange={e => setNewMed(prev => ({ ...prev, instructions: e.target.value }))}
-                        />
-                      </div>
-                      <div className="form-group" style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end', marginTop: '0.25rem' }}>
-                        <button type="submit" className="btn btn-secondary" style={{ width: 'fit-content' }}>
-                          <Plus size={15} /> Add
-                        </button>
-                      </div>
-                    </div>
-                  </form>
-                  </div>
-                  )}
-                </div>
-
-                {/* Collaborative Joint Sharing Section */}
-                <div className="card">
-                  <div className="section-header" onClick={() => toggleSection('share')}>
-                    <h3 className="card-title" style={{ margin: 0 }}>
-                      <Share2 size={18} className="text-primary" />
-                      Share
-                    </h3>
-                    {expandedSections.share ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
-                  </div>
-                  {expandedSections.share && (
-                  <div className="section-content" style={{ marginTop: '1rem' }}>
-                  {activeCard.isShared ? (
-                    <div className="item-list-empty" style={{ backgroundColor: 'var(--bg-app)', color: 'var(--text-secondary)' }}>
-                      This profile is owned by <strong>{activeCard.ownerEmail}</strong>.
-                      Only the owner can manage sharing permissions for this card.
-                    </div>
-                  ) : (
-                    <div>
-                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1.25rem' }}>
-                        Share this medical card with family members' email addresses. They will be able to view and update details jointly on their dashboards.
-                      </p>
-
-                      <div className="share-input-group" style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.25rem' }}>
-                        <input
-                          type="email"
-                          placeholder="family.member@email.com"
-                          value={shareEmail}
-                          onChange={(e) => setShareEmail(e.target.value)}
-                          style={{ flex: 1 }}
-                        />
-                        <button className="btn btn-primary btn-sm" onClick={handleShareCard}>
-                          Share
-                        </button>
-                      </div>
-
-                      {activeCard.sharedWith && activeCard.sharedWith.length > 0 ? (
-                        <div>
-                          <h4 style={{ fontSize: '0.9rem', color: 'var(--text-primary)', marginBottom: '0.5rem' }}>Currently Shared With:</h4>
-                          <div className="shares-list">
-                            {activeCard.sharedWith.map(email => (
-                              <div key={email} className="item-row" style={{ gridTemplateColumns: '1fr auto', padding: '0.5rem 1rem', background: 'var(--bg-app)', borderRadius: 'var(--radius-sm)', marginBottom: '0.5rem', alignItems: 'center' }}>
-                                <span style={{ fontSize: '0.9rem', fontWeight: '500' }}>{email}</span>
-                                <button className="btn btn-danger btn-sm" onClick={() => handleRevokeShare(email)}>
-                                  Revoke
-                                </button>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="item-list-empty">
-                          This card is private. Share with family to enable collaborative editing.
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  </div>
-                  )}
-                </div>
+                  <ChevronRight size={18} className="section-row-chevron" />
+                </button>
               </div>
             )}
+
 
             {activeTab === 'view' && (
               <EmergencyCard
@@ -2135,6 +1731,296 @@ export default function App() {
           </div>
         )}
       </main>
+
+      {/* ── Bottom Sheet: Edit section forms ── */}
+      {activeSheet !== null && selectedCardId !== null && (
+        <div className="bottom-sheet-overlay" onClick={() => setActiveSheet(null)}>
+          <div className="bottom-sheet" onClick={e => e.stopPropagation()}>
+            <div className="bottom-sheet-handle-bar" />
+
+            {/* Header */}
+            <div className="bottom-sheet-header">
+              <h3 className="bottom-sheet-title">
+                {activeSheet === 'profile' && <><User size={18} /> Profile</>}
+                {activeSheet === 'insurance' && <><Award size={18} /> Insurance</>}
+                {activeSheet === 'contacts' && <><Phone size={18} /> Emergency Contacts</>}
+                {activeSheet === 'meds' && <><Heart size={18} /> Medications</>}
+                {activeSheet === 'share' && <><Share2 size={18} /> Share Card</>}
+              </h3>
+              <button className="modal-close-btn" onClick={() => setActiveSheet(null)} aria-label="Close">
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Scrollable form body */}
+            <div className="bottom-sheet-content">
+
+              {/* ── Profile ── */}
+              {activeSheet === 'profile' && (
+                <div className="form-grid">
+                  <div className="form-group">
+                    <label htmlFor="bs-fullName">Name <span className="required-asterisk">*</span></label>
+                    <input type="text" id="bs-fullName" name="fullName" placeholder="e.g., Aditya Kumar"
+                      value={activeCard.profile.fullName} onChange={updateActiveCardProfile}
+                      style={validationErrors.fullName ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}} />
+                    {validationErrors.fullName && <span className="field-error">{validationErrors.fullName}</span>}
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="bs-age">Age <span className="required-asterisk">*</span></label>
+                    <input type="number" id="bs-age" name="age" placeholder="e.g., 68"
+                      value={activeCard.profile.age} onChange={updateActiveCardProfile}
+                      style={validationErrors.age ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}} />
+                    {validationErrors.age && <span className="field-error">{validationErrors.age}</span>}
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="bs-bloodGroup">Blood Group <span className="required-asterisk">*</span></label>
+                    <select id="bs-bloodGroup" name="bloodGroup" value={activeCard.profile.bloodGroup} onChange={updateActiveCardProfile}
+                      style={validationErrors.bloodGroup ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}>
+                      <option value="">Select Blood Group</option>
+                      <option value="A+">A+</option><option value="A-">A-</option>
+                      <option value="B+">B+</option><option value="B-">B-</option>
+                      <option value="AB+">AB+</option><option value="AB-">AB-</option>
+                      <option value="O+">O+</option><option value="O-">O-</option>
+                    </select>
+                    {validationErrors.bloodGroup && <span className="field-error">{validationErrors.bloodGroup}</span>}
+                  </div>
+                  <div className="form-group">
+                    <label>Relationship <span className="required-asterisk">*</span></label>
+                    <select value={activeCard.relationship} onChange={(e) => updateActiveCardRelationship(e.target.value)}
+                      style={validationErrors.relationship ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}>
+                      <option value="">Select Relationship</option>
+                      <option value="Father">Father</option><option value="Mother">Mother</option>
+                      <option value="Spouse">Spouse</option><option value="Son">Son</option>
+                      <option value="Daughter">Daughter</option><option value="Father-in-law">Father-in-law</option>
+                      <option value="Mother-in-law">Mother-in-law</option><option value="Other">Other</option>
+                    </select>
+                    {validationErrors.relationship && <span className="field-error">{validationErrors.relationship}</span>}
+                  </div>
+                  <div className="form-group full-width">
+                    <label htmlFor="bs-conditions">Conditions (Optional)</label>
+                    <textarea id="bs-conditions" name="conditions" placeholder="e.g., Type 2 Diabetes, Hypertension."
+                      value={activeCard.profile.conditions} onChange={updateActiveCardProfile} rows={3} />
+                  </div>
+                  <div className="form-group full-width">
+                    <label htmlFor="bs-allergies">Allergies (Optional)</label>
+                    <textarea id="bs-allergies" name="allergies" placeholder="e.g., Penicillin (Anaphylaxis), Peanuts."
+                      value={activeCard.profile.allergies} onChange={updateActiveCardProfile} rows={3} />
+                  </div>
+                </div>
+              )}
+
+              {/* ── Insurance ── */}
+              {activeSheet === 'insurance' && (
+                <div className="form-grid">
+                  <div className="form-group full-width">
+                    <label htmlFor="bs-insurancePolicy">Insurer (Optional)</label>
+                    <input type="text" id="bs-insurancePolicy" name="insurancePolicy"
+                      placeholder="e.g., Star Health Senior Citizens Policy"
+                      value={activeCard.profile.insurancePolicy} onChange={updateActiveCardProfile} />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="bs-insuranceNumber">Policy / Member ID</label>
+                    <input type="text" id="bs-insuranceNumber" name="insuranceNumber"
+                      placeholder="e.g., POL-8849-002"
+                      value={activeCard.profile.insuranceNumber} onChange={updateActiveCardProfile} />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="bs-insuranceValidTill">Valid Till</label>
+                    <input type="text" id="bs-insuranceValidTill" name="insuranceValidTill"
+                      placeholder="e.g., 12/2028"
+                      value={activeCard.profile.insuranceValidTill || ''} onChange={updateActiveCardProfile} />
+                  </div>
+                </div>
+              )}
+
+              {/* ── Contacts ── */}
+              {activeSheet === 'contacts' && (
+                <div>
+                  {activeCard.emergencyContacts.length > 0 ? (
+                    <div className="contact-list-sheet">
+                      {activeCard.emergencyContacts.map((contact, index) => (
+                        <div key={index} className="contact-sheet-row">
+                          <div className="contact-sheet-info">
+                            <div className="contact-sheet-name">{contact.name}</div>
+                            <div className="contact-sheet-meta">{contact.relationship} · {contact.phoneNumber}</div>
+                            {contact.email && <div className="contact-sheet-email">{contact.email}</div>}
+                          </div>
+                          <button className="btn btn-danger btn-sm" onClick={() => removeContactFromActiveCard(index)}>
+                            <Trash2 size={15} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="item-list-empty">No contacts added yet. Use the form below.</div>
+                  )}
+
+                  {activeCard.emergencyContacts.length < 2 && (
+                    <form onSubmit={addContactToActiveCard} className="sheet-sub-form">
+                      <h4 className="sheet-sub-form-title">Add Contact</h4>
+                      <div className="form-grid">
+                        <div className="form-group">
+                          <label>Name</label>
+                          <input type="text" placeholder="e.g., Shloka Kumar" value={newContact.name}
+                            onChange={e => updateNewContact('name', e.target.value)}
+                            style={validationErrors.contactName ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}} />
+                          {validationErrors.contactName && <span className="field-error">{validationErrors.contactName}</span>}
+                        </div>
+                        <div className="form-group">
+                          <label>Relationship</label>
+                          <select value={newContact.relationship} onChange={e => updateNewContact('relationship', e.target.value)}
+                            style={validationErrors.contactRelationship ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}>
+                            <option value="">Select</option>
+                            <option value="Daughter">Daughter</option><option value="Son">Son</option>
+                            <option value="Spouse">Spouse</option><option value="Father">Father</option>
+                            <option value="Mother">Mother</option><option value="Brother">Brother</option>
+                            <option value="Sister">Sister</option><option value="Friend">Friend</option>
+                            <option value="Guardian">Guardian</option><option value="Neighbor">Neighbor</option>
+                            <option value="Other">Other</option>
+                          </select>
+                          {validationErrors.contactRelationship && <span className="field-error">{validationErrors.contactRelationship}</span>}
+                        </div>
+                        <div className="form-group">
+                          <label>Phone</label>
+                          <input type="tel" placeholder="e.g., 9886012345" value={newContact.phoneNumber}
+                            onChange={e => updateNewContact('phoneNumber', e.target.value)}
+                            style={validationErrors.contactPhone ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}} />
+                          {validationErrors.contactPhone && <span className="field-error">{validationErrors.contactPhone}</span>}
+                        </div>
+                        <div className="form-group">
+                          <label>Email (Optional)</label>
+                          <input type="email" placeholder="e.g., shloka@email.com" value={newContact.email || ''}
+                            onChange={e => updateNewContact('email', e.target.value)}
+                            style={validationErrors.contactEmail ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}} />
+                          {validationErrors.contactEmail && <span className="field-error">{validationErrors.contactEmail}</span>}
+                        </div>
+                        <div className="form-group full-width" style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                          <button type="submit" className="btn btn-secondary" style={{ width: 'fit-content' }}>
+                            <Plus size={15} /> Add
+                          </button>
+                        </div>
+                      </div>
+                    </form>
+                  )}
+                </div>
+              )}
+
+              {/* ── Medications ── */}
+              {activeSheet === 'meds' && (
+                <div>
+                  {activeCard.medications.length > 0 ? (
+                    <div className="contact-list-sheet">
+                      {activeCard.medications.map((med, index) => (
+                        <div key={index} className="contact-sheet-row">
+                          <div className="contact-sheet-info">
+                            <div className="contact-sheet-name">{med.name}</div>
+                            <div className="contact-sheet-meta">
+                              {[med.dosage, med.frequency].filter(Boolean).join(' · ')}
+                            </div>
+                            {med.instructions && <div className="contact-sheet-email">{med.instructions}</div>}
+                          </div>
+                          <button className="btn btn-danger btn-sm" onClick={() => removeMedicationFromActiveCard(index)}>
+                            <Trash2 size={15} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="item-list-empty">No medications added yet.</div>
+                  )}
+
+                  <form onSubmit={addMedicationToActiveCard} className="sheet-sub-form">
+                    <h4 className="sheet-sub-form-title">Add Medication</h4>
+                    <div className="form-grid">
+                      <div className="form-group">
+                        <label>Med Name</label>
+                        <input type="text" placeholder="e.g., Metformin" value={newMed.name}
+                          onChange={e => setNewMed(prev => ({ ...prev, name: e.target.value }))} />
+                      </div>
+                      <div className="form-group">
+                        <label>Dosage</label>
+                        <input type="text" placeholder="e.g., 500mg, 1 tab" value={newMed.dosage}
+                          onChange={e => setNewMed(prev => ({ ...prev, dosage: e.target.value }))} />
+                      </div>
+                      <div className="form-group">
+                        <label>Frequency</label>
+                        <select value={newMed.frequency} onChange={e => setNewMed(prev => ({ ...prev, frequency: e.target.value }))}>
+                          <option value="">Select</option>
+                          <option value="Once daily (morning)">Once daily (morning)</option>
+                          <option value="Once daily (night)">Once daily (night)</option>
+                          <option value="Twice daily (morning &amp; night)">Twice daily (morning &amp; night)</option>
+                          <option value="Three times daily">Three times daily</option>
+                          <option value="Four times daily">Four times daily</option>
+                          <option value="Once a week">Once a week</option>
+                          <option value="Twice a week">Twice a week</option>
+                          <option value="As needed (SOS)">As needed (SOS)</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+                      <div className="form-group">
+                        <label>Instructions</label>
+                        <input type="text" placeholder="e.g., After meals" value={newMed.instructions}
+                          onChange={e => setNewMed(prev => ({ ...prev, instructions: e.target.value }))} />
+                      </div>
+                      <div className="form-group full-width" style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                        <button type="submit" className="btn btn-secondary" style={{ width: 'fit-content' }}>
+                          <Plus size={15} /> Add
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              )}
+
+              {/* ── Share ── */}
+              {activeSheet === 'share' && (
+                <div>
+                  {activeCard.isShared ? (
+                    <div className="item-list-empty">
+                      This profile is owned by <strong>{activeCard.ownerEmail}</strong>. Only the owner can manage sharing.
+                    </div>
+                  ) : (
+                    <div>
+                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1rem' }}>
+                        Share this medical card with family members so they can view and update it jointly.
+                      </p>
+                      <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.25rem' }}>
+                        <input type="email" placeholder="family.member@email.com"
+                          value={shareEmail} onChange={(e) => setShareEmail(e.target.value)} style={{ flex: 1 }} />
+                        <button className="btn btn-primary btn-sm" onClick={handleShareCard}>Share</button>
+                      </div>
+                      {activeCard.sharedWith && activeCard.sharedWith.length > 0 ? (
+                        <div>
+                          <h4 style={{ fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem' }}>Shared With:</h4>
+                          {activeCard.sharedWith.map(email => (
+                            <div key={email} className="contact-sheet-row">
+                              <div className="contact-sheet-info">
+                                <div className="contact-sheet-name" style={{ fontSize: '0.9rem' }}>{email}</div>
+                              </div>
+                              <button className="btn btn-danger btn-sm" onClick={() => handleRevokeShare(email)}>Revoke</button>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="item-list-empty">Private — not shared with anyone yet.</div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
+            </div>
+
+            {/* Footer: Save & Close */}
+            <div className="bottom-sheet-footer">
+              <button className="btn btn-primary" style={{ flex: 1 }}
+                onClick={() => { handleSaveActiveCard(); setActiveSheet(null); }}>
+                <Save size={16} /> Save &amp; Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Mobile Sticky Save Footer — only when editing a card */}
       {selectedCardId !== null && activeTab === 'edit' && (
@@ -2168,7 +2054,7 @@ export default function App() {
               {joinedWaitlist ? (
                 <div className="waitlist-voted-area">
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '1rem 1.25rem', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--primary-light)', border: '1.5px solid rgba(15, 108, 95, 0.15)', color: 'var(--primary)', fontWeight: '600', fontSize: '1rem', marginBottom: '1.5rem' }}>
-                    <span style={{ fontSize: '1.25rem' }}>🎯</span>
+                    <span style={{ fontSize: '1.25rem' }}>ðŸŽ¯</span>
                     <span>{UPCOMING_FEATURES.find(f => f.id === votedFeature)?.label || 'General Interest'}</span>
                   </div>
                   <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', fontStyle: 'italic', margin: 0 }}>
