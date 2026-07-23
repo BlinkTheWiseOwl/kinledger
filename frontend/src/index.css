@@ -1179,7 +1179,7 @@ textarea {
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .app-header {
-    padding: 0.75rem 1rem !important;
+    padding: calc(0.625rem + env(safe-area-inset-top, 0px)) 1rem 0.625rem !important;
   }
 
   .main-content {
@@ -1210,7 +1210,7 @@ textarea {
     gap: 0.5rem;
     padding: 0.625rem 1rem;
     position: sticky;
-    top: 50px;
+    top: calc(60px + env(safe-area-inset-top, 0px));
     z-index: 90;
     margin-bottom: 0.75rem;
     background-color: white;
@@ -1852,9 +1852,7 @@ textarea {
   color: var(--text-primary);
 }
 
-.app-header {
-  padding-top: env(safe-area-inset-top);
-}
+/* safe-area padding handled in the base .app-header rule at line 86 */
 
 .workspace-header {
   display: flex;
@@ -1907,8 +1905,10 @@ textarea {
   }
 
   .app-header {
+    padding-top: calc(0.625rem + env(safe-area-inset-top, 0px));
     padding-left: 1rem;
     padding-right: 1rem;
+    padding-bottom: 0.625rem;
   }
 
   /* Dashboard grid: single column on small screens */
