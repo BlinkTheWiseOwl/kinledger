@@ -1309,7 +1309,7 @@ export default function App() {
                 border: 'none'
               }}
             >
-              Coming Up Next âœ¨
+              Coming Up Next ✨
             </button>
             <button
               className="hamburger-btn"
@@ -1417,8 +1417,8 @@ export default function App() {
                         <span className={`relationship-badge ${getRelationBadgeClass(card.relationship)}`}>
                           {card.relationship}
                         </span>
-                        {card.profile.age && <span>â€¢ {card.profile.age} yrs</span>}
-                        {card.profile.bloodGroup && <span>â€¢ {card.profile.bloodGroup}</span>}
+                        {card.profile.age && <span> ·  {card.profile.age} yrs</span>}
+                        {card.profile.bloodGroup && <span> ·  {card.profile.bloodGroup}</span>}
                       </div>
                     </div>
                     {/* Delete/Remove card directly from dashboard */}
@@ -1647,7 +1647,7 @@ export default function App() {
                       <span className="section-row-label">Profile</span>
                       <span className="section-row-status">
                         {activeCard.profile.fullName
-                          ? `${activeCard.profile.fullName}${activeCard.relationship ? ` Â· ${activeCard.relationship}` : ''}`
+                          ? `${activeCard.profile.fullName}${activeCard.relationship ? ` &middot; ${activeCard.relationship}` : ''}`
                           : 'Tap to fill in details'}
                       </span>
                     </div>
@@ -1732,7 +1732,7 @@ export default function App() {
         )}
       </main>
 
-      {/* ── Bottom Sheet: Edit section forms ── */}
+      {/* -- Bottom Sheet: Edit section forms -- */}
       {activeSheet !== null && selectedCardId !== null && (
         <div className="bottom-sheet-overlay" onClick={() => setActiveSheet(null)}>
           <div className="bottom-sheet" onClick={e => e.stopPropagation()}>
@@ -1755,7 +1755,7 @@ export default function App() {
             {/* Scrollable form body */}
             <div className="bottom-sheet-content">
 
-              {/* ── Profile ── */}
+              {/* -- Profile -- */}
               {activeSheet === 'profile' && (
                 <div className="form-grid">
                   <div className="form-group">
@@ -1809,7 +1809,7 @@ export default function App() {
                 </div>
               )}
 
-              {/* ── Insurance ── */}
+              {/* -- Insurance -- */}
               {activeSheet === 'insurance' && (
                 <div className="form-grid">
                   <div className="form-group full-width">
@@ -1833,7 +1833,7 @@ export default function App() {
                 </div>
               )}
 
-              {/* ── Contacts ── */}
+              {/* -- Contacts -- */}
               {activeSheet === 'contacts' && (
                 <div>
                   {activeCard.emergencyContacts.length > 0 ? (
@@ -1842,7 +1842,7 @@ export default function App() {
                         <div key={index} className="contact-sheet-row">
                           <div className="contact-sheet-info">
                             <div className="contact-sheet-name">{contact.name}</div>
-                            <div className="contact-sheet-meta">{contact.relationship} · {contact.phoneNumber}</div>
+                            <div className="contact-sheet-meta">{contact.relationship} &middot; {contact.phoneNumber}</div>
                             {contact.email && <div className="contact-sheet-email">{contact.email}</div>}
                           </div>
                           <button className="btn btn-danger btn-sm" onClick={() => removeContactFromActiveCard(index)}>
@@ -1905,7 +1905,7 @@ export default function App() {
                 </div>
               )}
 
-              {/* ── Medications ── */}
+              {/* -- Medications -- */}
               {activeSheet === 'meds' && (
                 <div>
                   {activeCard.medications.length > 0 ? (
@@ -1915,7 +1915,7 @@ export default function App() {
                           <div className="contact-sheet-info">
                             <div className="contact-sheet-name">{med.name}</div>
                             <div className="contact-sheet-meta">
-                              {[med.dosage, med.frequency].filter(Boolean).join(' · ')}
+                              {[med.dosage, med.frequency].filter(Boolean).join(' &middot; ')}
                             </div>
                             {med.instructions && <div className="contact-sheet-email">{med.instructions}</div>}
                           </div>
@@ -1972,7 +1972,7 @@ export default function App() {
                 </div>
               )}
 
-              {/* ── Share ── */}
+              {/* -- Share -- */}
               {activeSheet === 'share' && (
                 <div>
                   {activeCard.isShared ? (
@@ -2002,7 +2002,7 @@ export default function App() {
                           ))}
                         </div>
                       ) : (
-                        <div className="item-list-empty">Private — not shared with anyone yet.</div>
+                        <div className="item-list-empty">Private - not shared with anyone yet.</div>
                       )}
                     </div>
                   )}
@@ -2022,7 +2022,7 @@ export default function App() {
         </div>
       )}
 
-      {/* Mobile Sticky Save Footer — only when editing a card */}
+      {/* Mobile Sticky Save Footer - only when editing a card */}
       {selectedCardId !== null && activeTab === 'edit' && (
         <div className="sticky-save-footer">
           <button
