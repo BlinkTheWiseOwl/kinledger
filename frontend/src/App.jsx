@@ -1647,7 +1647,7 @@ export default function App() {
                       <span className="section-row-label">Profile</span>
                       <span className="section-row-status">
                         {activeCard.profile.fullName
-                          ? `${activeCard.profile.fullName}${activeCard.relationship ? ` &middot; ${activeCard.relationship}` : ''}`
+                          ? `${activeCard.profile.fullName}${activeCard.relationship ? ` · ${activeCard.relationship}` : ''}`
                           : 'Tap to fill in details'}
                       </span>
                     </div>
@@ -1842,7 +1842,7 @@ export default function App() {
                         <div key={index} className="contact-sheet-row">
                           <div className="contact-sheet-info">
                             <div className="contact-sheet-name">{contact.name}</div>
-                            <div className="contact-sheet-meta">{contact.relationship} &middot; {contact.phoneNumber}</div>
+                            <div className="contact-sheet-meta">{contact.relationship} · {contact.phoneNumber}</div>
                             {contact.email && <div className="contact-sheet-email">{contact.email}</div>}
                           </div>
                           <button className="btn btn-danger btn-sm" onClick={() => removeContactFromActiveCard(index)}>
@@ -1915,7 +1915,7 @@ export default function App() {
                           <div className="contact-sheet-info">
                             <div className="contact-sheet-name">{med.name}</div>
                             <div className="contact-sheet-meta">
-                              {[med.dosage, med.frequency].filter(Boolean).join(' &middot; ')}
+                              {[med.dosage, med.frequency].filter(Boolean).join(' · ')}
                             </div>
                             {med.instructions && <div className="contact-sheet-email">{med.instructions}</div>}
                           </div>
