@@ -1948,7 +1948,7 @@ export default function App() {
                           <option value="">Select</option>
                           <option value="Once daily (morning)">Once daily (morning)</option>
                           <option value="Once daily (night)">Once daily (night)</option>
-                          <option value="Twice daily (morning &amp; night)">Twice daily (morning &amp; night)</option>
+                          <option value="Twice daily (morning & night)">Twice daily (morning & night)</option>
                           <option value="Three times daily">Three times daily</option>
                           <option value="Four times daily">Four times daily</option>
                           <option value="Once a week">Once a week</option>
@@ -2015,7 +2015,7 @@ export default function App() {
             <div className="bottom-sheet-footer">
               <button className="btn btn-primary" style={{ flex: 1 }}
                 onClick={() => { handleSaveActiveCard(); setActiveSheet(null); }}>
-                <Save size={16} /> Save &amp; Close
+                <Save size={16} /> Save & Close
               </button>
             </div>
           </div>
