@@ -242,6 +242,75 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
+// Google Sign-In / Sign-Up
+app.post('/api/auth/google', async (req, res) => {
+  const { credential, email: backupEmail } = req.body;
+  if (!credential) {
+    return res.status(400).json({ error: 'Google credential token is required.' });
+  }
+
+  try {
+    let email = '';
+    
+    // Handle mock token for offline/emulator/local testing ease
+    if (credential === 'mock-google-token' && backupEmail) {
+      email = backupEmail.toLowerCase().trim();
+      console.log(`[AUTH] Mock Google Sign-In bypassed for email: ${email}`);
+    } else {
+      // Decode or verify token from Google tokeninfo endpoint
+      const googleVerifyUrl = `https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`;
+      const response = await fetch(googleVerifyUrl);
+      
+      if (!response.ok) {
+        throw new Error('Invalid Google credential token.');
+      }
+      
+      const payload = await response.json();
+      email = payload.email.toLowerCase().trim();
+      
+      // If configured, verify the client ID (aud)
+      const expectedClientId = process.env.GOOGLE_CLIENT_ID;
+      if (expectedClientId && payload.aud !== expectedClientId) {
+        return res.status(400).json({ error: 'Token audience mismatch.' });
+      }
+    }
+
+    if (!email) {
+      return res.status(400).json({ error: 'Could not retrieve email from Google credential.' });
+    }
+
+    // Check if user already exists
+    let userQuery = await db.query('SELECT * FROM public.users WHERE email = $1', [email]);
+    let user;
+
+    if (userQuery.rows.length === 0) {
+      // Create user. Generate a secure random password hash since password_hash is required NOT NULL
+      const secureRandomPassword = crypto.randomBytes(32).toString('hex');
+      const salt = await bcrypt.genSalt(10);
+      const passwordHash = await bcrypt.hash(secureRandomPassword, salt);
+      
+      const newUser = await db.query(
+        'INSERT INTO public.users (email, password_hash) VALUES ($1, $2) RETURNING id, email',
+        [email, passwordHash]
+      );
+      user = newUser.rows[0];
+      await logAudit(user.id, user.email, 'SIGNUP', 'New user registered via Google Sign-In.');
+    } else {
+      user = userQuery.rows[0];
+      await logAudit(user.id, user.email, 'LOGIN', 'User logged in via Google Sign-In.');
+    }
+
+    // Create app token
+    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '30d' });
+
+    res.json({ token, user: { email: user.email } });
+  } catch (err) {
+    console.error('Google Auth error:', err);
+    res.status(400).json({ error: err.message || 'Google authentication failed.' });
+  }
+});
+
+
 // Delete User Account for DPDP compliance (Right to Erasure)
 app.delete('/api/auth/account', authenticateToken, async (req, res) => {
   const { password } = req.body;

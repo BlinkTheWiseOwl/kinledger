@@ -20,6 +20,145 @@ export default function AuthScreen({ onAuthSuccess, showStatus, onShowPolicy }) 
   const [error, setError] = useState('');
   const [consentChecked, setConsentChecked] = useState(false);
   const [showConsentInfo, setShowConsentInfo] = useState(false);
+  const [googleSdkLoaded, setGoogleSdkLoaded] = useState(false);
+  const [useFallbackGoogle, setUseFallbackGoogle] = useState(false);
+
+  React.useEffect(() => {
+    // Dynamic loading of Google Identity Services library
+    const scriptId = 'google-gsi-script';
+    let script = document.getElementById(scriptId);
+
+    const initializeGoogleSignIn = () => {
+      try {
+        if (window.google && window.google.accounts) {
+          const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '1234567890-placeholder.apps.googleusercontent.com';
+          
+          window.google.accounts.id.initialize({
+            client_id: clientId,
+            callback: handleGoogleCredentialResponse,
+            cancel_on_tap_outside: true,
+          });
+
+          setGoogleSdkLoaded(true);
+        } else {
+          setUseFallbackGoogle(true);
+        }
+      } catch (err) {
+        console.error('Google Sign-In initialization failed:', err);
+        setUseFallbackGoogle(true);
+      }
+    };
+
+    if (!script) {
+      script = document.createElement('script');
+      script.id = scriptId;
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.async = true;
+      script.defer = true;
+      script.onload = initializeGoogleSignIn;
+      script.onerror = () => setUseFallbackGoogle(true);
+      document.body.appendChild(script);
+    } else if (window.google && window.google.accounts) {
+      initializeGoogleSignIn();
+    }
+
+    // Fallback trigger if SDK doesn't load/respond within 2.5 seconds (e.g. offline, local dev, emulator)
+    const timeout = setTimeout(() => {
+      if (!window.google || !window.google.accounts) {
+        setUseFallbackGoogle(true);
+      }
+    }, 2500);
+
+    return () => clearTimeout(timeout);
+  }, []);
+
+  // Render Google Sign-in button when SDK loaded
+  React.useEffect(() => {
+    if (googleSdkLoaded && window.google && window.google.accounts) {
+      const container = document.getElementById('google-signin-btn');
+      if (container) {
+        window.google.accounts.id.renderButton(container, {
+          theme: 'outline',
+          size: 'large',
+          width: container.offsetWidth || 300,
+          text: isLogin ? 'signin_with' : 'signup_with',
+          shape: 'pill'
+        });
+      }
+    }
+  }, [googleSdkLoaded, isLogin]);
+
+  const handleGoogleCredentialResponse = async (response) => {
+    if (!response || !response.credential) {
+      setError('Google login failed: no credentials returned.');
+      return;
+    }
+    
+    setLoading(true);
+    setError('');
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential: response.credential })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Google login failed.');
+      }
+
+      localStorage.setItem('kinledger_jwt_token', data.token);
+      localStorage.setItem('kinledger_user_email', data.user.email);
+      showStatus('Logged in with Google successfully!', 'success');
+      onAuthSuccess(data.token, data.user.email);
+    } catch (err) {
+      setError(err.message || 'Google Auth server communication failed.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFallbackGoogleSignIn = async () => {
+    const targetEmail = prompt('Enter your Google Email Address to authenticate (Dev Offline Mode):');
+    if (!targetEmail || targetEmail.trim() === '') return;
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(targetEmail.trim())) {
+      setError('Please enter a valid email address.');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          credential: 'mock-google-token',
+          email: targetEmail.trim()
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Google Login failed.');
+      }
+
+      localStorage.setItem('kinledger_jwt_token', data.token);
+      localStorage.setItem('kinledger_user_email', data.user.email);
+      showStatus('Logged in with Google (Dev Fallback) successfully!', 'success');
+      onAuthSuccess(data.token, data.user.email);
+    } catch (err) {
+      setError(err.message || 'Google Auth server communication failed.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   const containsUnsafeChars = (text) => {
     if (!text) return false;
@@ -248,6 +387,31 @@ export default function AuthScreen({ onAuthSuccess, showStatus, onShowPolicy }) 
             {loading ? 'Authenticating...' : isLogin ? 'Sign In' : 'Create Account'}
           </button>
         </form>
+
+        <div className="auth-divider">
+          <span>or</span>
+        </div>
+
+        <div className="google-auth-wrap" style={{ margin: '15px 0 10px', display: 'flex', justifyContent: 'center' }}>
+          {useFallbackGoogle ? (
+            <button 
+              type="button" 
+              className="btn-google-fallback" 
+              onClick={handleFallbackGoogleSignIn}
+              disabled={loading}
+            >
+              <svg className="google-icon" viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg" style={{ marginRight: '8px', verticalAlign: 'middle' }}>
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+              </svg>
+              <span>Continue with Google</span>
+            </button>
+          ) : (
+            <div id="google-signin-btn" style={{ display: 'flex', justifyContent: 'center', width: '100%', minHeight: '44px' }}></div>
+          )}
+        </div>
 
         <div className="auth-footer">
           <span>
