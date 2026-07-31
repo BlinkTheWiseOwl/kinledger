@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Shield, FileText, Plus, Trash2, Save, User, Heart, ShieldAlert, Award, Phone, ArrowLeft, Printer, Eye, Share2, LogOut, Menu, X, ChevronDown, ChevronRight } from 'lucide-react';
+import { Shield, FileText, Plus, Trash2, Save, User, Heart, ShieldAlert, Award, Phone, ArrowLeft, Printer, Eye, Share2, LogOut, Menu, X, ChevronDown, ChevronRight, Loader2 } from 'lucide-react';
 import { loadCardData, saveCardData, BACKEND_URL } from './utils/storage';
 import EmergencyCard from './components/EmergencyCard';
 import AuthScreen from './components/AuthScreen';
@@ -33,6 +33,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('edit'); // 'edit' or 'view' for the selected card
 
   const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [synced, setSynced] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
   const [statusMessage, setStatusMessage] = useState('');
@@ -465,10 +466,12 @@ export default function App() {
         if (Object.keys(errors).length > 0) {
           setValidationErrors(errors);
           showStatus("Save failed: Please correct the errors in the form.", "error");
-          return; // Abort saving!
+          return false; // Abort saving!
         }
       }
     }
+
+    setIsSaving(true);
 
     // Set updated list in state
     let finalCards = updatedCards;
@@ -487,11 +490,16 @@ export default function App() {
       setSynced(result.synced);
       if (result.success) {
         showStatus('Changes saved successfully.', 'success');
+        return true;
       } else {
         showStatus(`Save failed: ${result.error}`, 'error');
+        return false;
       }
     } catch (error) {
       showStatus('Error saving cards data.', 'error');
+      return false;
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -935,7 +943,7 @@ export default function App() {
 
   // Manual trigger to save current active states
   const handleSaveActiveCard = async () => {
-    await saveCollection(cards);
+    return await saveCollection(cards);
   };
 
   // Share Card Handler
@@ -1608,12 +1616,12 @@ export default function App() {
               </div>
 
               <div className="workspace-actions">
-                <button className="btn btn-secondary" onClick={() => setSelectedCardId(null)}>
+                <button className="btn btn-secondary" onClick={() => setSelectedCardId(null)} disabled={isSaving}>
                   Home
                 </button>
-                <button className="btn btn-primary" onClick={handleSaveActiveCard}>
-                  <Save size={16} />
-                  Save
+                <button className="btn btn-primary" onClick={handleSaveActiveCard} disabled={isSaving}>
+                  {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                  {isSaving ? 'Saving...' : 'Save'}
                 </button>
               </div>
             </div>
@@ -2013,9 +2021,15 @@ export default function App() {
 
             {/* Footer: Save & Close */}
             <div className="bottom-sheet-footer">
-              <button className="btn btn-primary" style={{ flex: 1 }}
-                onClick={() => { handleSaveActiveCard(); setActiveSheet(null); }}>
-                <Save size={16} /> Save & Close
+              <button className="btn btn-primary" style={{ flex: 1 }} disabled={isSaving}
+                onClick={async () => {
+                  const success = await handleSaveActiveCard();
+                  if (success) {
+                    setActiveSheet(null);
+                  }
+                }}>
+                {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                {isSaving ? 'Saving...' : 'Save & Close'}
               </button>
             </div>
           </div>
@@ -2029,8 +2043,10 @@ export default function App() {
             className="btn btn-primary"
             style={{ flex: 1 }}
             onClick={handleSaveActiveCard}
+            disabled={isSaving}
           >
-            <Save size={16} /> Save
+            {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+            {isSaving ? 'Saving...' : 'Save'}
           </button>
         </div>
       )}
