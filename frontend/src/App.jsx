@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Shield, FileText, Plus, Trash2, Save, User, Heart, ShieldAlert, Award, Phone, ArrowLeft, Printer, Eye, Share2, LogOut, Menu, X, ChevronDown, ChevronRight, Loader2 } from 'lucide-react';
 import { loadCardData, saveCardData, BACKEND_URL } from './utils/storage';
+import { Capacitor } from '@capacitor/core';
+import { Share } from '@capacitor/share';
 import EmergencyCard from './components/EmergencyCard';
 import AuthScreen from './components/AuthScreen';
 import PolicyPage from './components/PolicyPage';
@@ -120,6 +122,12 @@ export default function App() {
 
   // Sharing field state
   const [shareEmail, setShareEmail] = useState('');
+  const [shareError, setShareError] = useState(null);
+
+  useEffect(() => {
+    setShareError(null);
+    setShareEmail('');
+  }, [activeSheet]);
 
   // Dashboard state for adding a new member
   const [showAddMenu, setShowAddMenu] = useState(false);
@@ -946,13 +954,51 @@ export default function App() {
     return await saveCollection(cards);
   };
 
+  // Share app invite / install link
+  const handleShareAppInstall = async (invitedEmail) => {
+    const inviteMessage = `Hey! Join me on KinLedger to securely manage family medical emergency cards together. Please register your account using ${invitedEmail || 'your email'} at:`;
+    const appUrl = 'https://kinledger-blush.vercel.app';
+    
+    try {
+      if (Capacitor.isNativePlatform()) {
+        await Share.share({
+          title: 'Join KinLedger',
+          text: inviteMessage,
+          url: appUrl,
+          dialogTitle: 'Invite Family Member'
+        });
+      } else if (navigator.share) {
+        await navigator.share({
+          title: 'Join KinLedger',
+          text: inviteMessage,
+          url: appUrl
+        });
+      } else {
+        // Fallback: Copy to Clipboard
+        await navigator.clipboard.writeText(`${inviteMessage} ${appUrl}`);
+        showStatus('Invite link copied to clipboard! Send it to your family.', 'success');
+      }
+    } catch (err) {
+      if (err && !String(err).toLowerCase().includes('cancel')) {
+        console.error('Sharing invite link failed:', err);
+      }
+    }
+  };
+
   // Share Card Handler
   const handleShareCard = async () => {
     if (!shareEmail) return;
     const cleanEmail = shareEmail.toLowerCase().trim();
+    setShareError(null);
 
     if (cleanEmail === userEmail) {
-      showStatus("You cannot share a card with yourself.", "error");
+      setShareError({ message: "You cannot share a card with yourself.", type: "validation" });
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(cleanEmail)) {
+      setShareError({ message: "Please enter a valid email address.", type: "validation" });
       return;
     }
 
@@ -968,11 +1014,21 @@ export default function App() {
 
       const data = await response.json();
       if (!response.ok) {
+        if (data.notEnrolled) {
+          setShareError({
+            message: data.error || "This email is not registered with KinLedger yet.",
+            type: "notEnrolled",
+            email: cleanEmail
+          });
+        } else {
+          setShareError({ message: data.error || "Failed to share card.", type: "api" });
+        }
         throw new Error(data.error || 'Failed to share card.');
       }
 
       showStatus(`Card successfully shared with ${cleanEmail}!`, 'success');
       setShareEmail('');
+      setShareError(null);
 
       // Update local share state
       setCards(prev => prev.map(c => {
@@ -985,7 +1041,10 @@ export default function App() {
         return c;
       }));
     } catch (err) {
-      showStatus(err.message, 'error');
+      // API notifications handled via state shareError or regular alert status
+      if (err.message && !err.message.includes('registered')) {
+        showStatus(err.message, 'error');
+      }
     }
   };
 
@@ -1994,9 +2053,45 @@ export default function App() {
                       </p>
                       <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.25rem' }}>
                         <input type="email" placeholder="family.member@email.com"
-                          value={shareEmail} onChange={(e) => setShareEmail(e.target.value)} style={{ flex: 1 }} />
+                          value={shareEmail} onChange={(e) => { setShareEmail(e.target.value); setShareError(null); }} style={{ flex: 1 }} />
                         <button className="btn btn-primary btn-sm" onClick={handleShareCard}>Share</button>
                       </div>
+
+                      {shareError && (
+                        <div style={{ 
+                          padding: '12px', 
+                          borderRadius: 'var(--radius-sm)', 
+                          backgroundColor: shareError.type === 'notEnrolled' ? 'var(--warning-light)' : 'var(--danger-light)', 
+                          border: `1px solid ${shareError.type === 'notEnrolled' ? 'var(--warning)' : 'var(--danger)'}`,
+                          fontSize: '0.825rem',
+                          color: 'var(--text-primary)',
+                          marginBottom: '1.25rem',
+                          lineHeight: '1.4'
+                        }}>
+                          <div style={{ fontWeight: '700', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <ShieldAlert size={16} color={shareError.type === 'notEnrolled' ? 'var(--warning)' : 'var(--danger)'} />
+                            {shareError.type === 'notEnrolled' ? 'Family Member Not Enrolled' : 'Sharing Error'}
+                          </div>
+                          <p style={{ margin: '0 0 10px 0', color: 'var(--text-primary)' }}>{shareError.message}</p>
+                          
+                          {shareError.type === 'notEnrolled' && (
+                            <div style={{ marginTop: '8px', borderTop: '1px solid rgba(0,0,0,0.05)', paddingTop: '8px' }}>
+                              <p style={{ margin: '0 0 8px 0', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+                                To enable shared editing, they must have a KinLedger account. Share the app install/sign-up link with them now for easy enrollment:
+                              </p>
+                              <button 
+                                type="button"
+                                className="btn btn-primary btn-sm"
+                                style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 10px', fontSize: '0.75rem' }}
+                                onClick={() => handleShareAppInstall(shareError.email)}
+                              >
+                                <Share2 size={13} />
+                                Share App Invite Link
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )}
                       {activeCard.sharedWith && activeCard.sharedWith.length > 0 ? (
                         <div>
                           <h4 style={{ fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem' }}>Shared With:</h4>

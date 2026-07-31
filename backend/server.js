@@ -376,6 +376,15 @@ app.post('/api/shares', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'You cannot share a card with yourself.' });
     }
 
+    // Verify target email is registered (enrolled)
+    const userCheck = await db.query('SELECT id FROM public.users WHERE email = $1', [cleanEmail]);
+    if (userCheck.rows.length === 0) {
+      return res.status(400).json({
+        error: 'This email is not registered with KinLedger yet.',
+        notEnrolled: true
+      });
+    }
+
     // Insert sharing record
     await db.query(`
       INSERT INTO public.card_shares (profile_id, shared_with_email, access_level)
