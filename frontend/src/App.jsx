@@ -1494,7 +1494,7 @@ export default function App() {
                         setActiveTab('edit');
                       }}
                     >
-                      {getReadinessStatus(card).status === 'complete' ? 'Edit' : 'Complete'}
+                      {getReadinessStatus(card).status === 'complete' ? 'Edit' : 'Set Up'}
                     </button>
                     <button
                       className="btn btn-outline btn-sm"
@@ -1633,7 +1633,7 @@ export default function App() {
                 onClick={() => setActiveTab('edit')}
               >
                 <User size={15} />
-                {getReadinessStatus(activeCard).status === 'complete' ? 'Edit' : 'Complete'}
+                {getReadinessStatus(activeCard).status === 'complete' ? 'Edit' : 'Set Up'}
               </button>
               <button
                 className={`tab-btn ${activeTab === 'view' ? 'active' : ''}`}
