@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Shield, FileText, Plus, Trash2, Save, User, Heart, ShieldAlert, Award, Phone, ArrowLeft, Printer, Eye, Share2, LogOut, Menu, X, ChevronDown, ChevronRight, Loader2 } from 'lucide-react';
+import { Shield, FileText, Plus, Trash2, Save, User, Users, Heart, Activity, ShieldAlert, Award, Phone, ArrowLeft, Printer, Eye, Share2, LogOut, Menu, X, ChevronDown, ChevronRight, Loader2 } from 'lucide-react';
 import { loadCardData, saveCardData, BACKEND_URL } from './utils/storage';
 import { Capacitor } from '@capacitor/core';
 import { Share } from '@capacitor/share';
@@ -24,6 +24,79 @@ const UPCOMING_FEATURES = [
   { id: 'family', label: 'Keep the whole family on the same page' },
   { id: 'benefits', label: 'Discover healthcare related financial benefits and savings you\'re eligible for' }
 ];
+
+const getInitials = (name) => {
+  if (!name || !name.trim()) return '??';
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+  return parts[0].substring(0, 2).toUpperCase();
+};
+
+const renderMaterialAvatar = (avatarKey, size = 20, initials = '') => {
+  const avatarMap = {
+    avatar_user: { bg: '#6366f1', icon: <User size={size} color="#ffffff" /> },
+    avatar_heart: { bg: '#ec4899', icon: <Heart size={size} color="#ffffff" /> },
+    avatar_family: { bg: '#10b981', icon: <Users size={size} color="#ffffff" /> },
+    avatar_medical: { bg: '#0d9488', icon: <Activity size={size} color="#ffffff" /> },
+    avatar_insurance: { bg: '#eab308', icon: <Award size={size} color="#ffffff" /> },
+    avatar_emergency: { bg: '#ef4444', icon: <ShieldAlert size={size} color="#ffffff" /> },
+    avatar_phone: { bg: '#06b6d4', icon: <Phone size={size} color="#ffffff" /> },
+    avatar_shield: { bg: '#3b82f6', icon: <Shield size={size} color="#ffffff" /> }
+  };
+
+  const selected = avatarMap[avatarKey];
+  if (selected) {
+    return (
+      <div style={{
+        width: '100%',
+        height: '100%',
+        borderRadius: '50%',
+        backgroundColor: selected.bg,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.1)'
+      }}>
+        {selected.icon}
+      </div>
+    );
+  }
+
+  // Fallback: Two-letter initials Material Avatar
+  const getInitialsBg = (str) => {
+    const colors = ['#3b82f6', '#10b981', '#6366f1', '#8b5cf6', '#ec4899', '#f97316', '#0d9488', '#06b6d4'];
+    if (!str) return colors[0];
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const index = Math.abs(hash) % colors.length;
+    return colors[index];
+  };
+
+  const bg = getInitialsBg(initials);
+
+  return (
+    <div style={{
+      width: '100%',
+      height: '100%',
+      borderRadius: '50%',
+      backgroundColor: bg,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      color: '#ffffff',
+      fontSize: size > 18 ? '0.85rem' : '0.75rem',
+      fontWeight: '700',
+      boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.1)',
+      letterSpacing: '0.5px'
+    }}>
+      {initials}
+    </div>
+  );
+};
 
 export default function App() {
   // Session states
@@ -1487,7 +1560,7 @@ export default function App() {
 
               {/* Card Badges */}
               {cards.map(card => {
-                const initials = card.profile.fullName ? card.profile.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : '?';
+                const initials = getInitials(card.profile.fullName);
                 return (
                   <button
                     key={card.id}
@@ -1502,17 +1575,13 @@ export default function App() {
                       width: '52px', 
                       height: '52px', 
                       borderRadius: '50%', 
-                      backgroundColor: 'var(--primary-light)', 
                       border: '2px solid var(--border)',
                       display: 'flex', 
                       alignItems: 'center', 
                       justifyContent: 'center', 
-                      fontSize: card.avatar ? '1.5rem' : '0.95rem',
-                      fontWeight: 'bold',
-                      color: 'var(--primary)',
                       boxShadow: 'var(--shadow-sm)'
                     }}>
-                      {card.avatar || initials}
+                      {renderMaterialAvatar(card.avatar, 22, initials)}
                     </div>
                     <span style={{ fontSize: '0.75rem', fontWeight: '500', color: 'var(--text-primary)', maxWidth: '65px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {card.profile.fullName ? card.profile.fullName.split(' ')[0] : card.relationship}
@@ -1539,17 +1608,10 @@ export default function App() {
                       width: '40px',
                       height: '40px',
                       borderRadius: '50%',
-                      backgroundColor: 'var(--primary-light)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: card.avatar ? '1.25rem' : '0.85rem',
-                      fontWeight: 'bold',
-                      color: 'var(--primary)',
                       border: '1px solid var(--border)',
                       flexShrink: 0
                     }}>
-                      {card.avatar || (card.profile.fullName ? card.profile.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : '?')}
+                      {renderMaterialAvatar(card.avatar, 18, getInitials(card.profile.fullName))}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div className="member-name" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
@@ -1947,44 +2009,42 @@ export default function App() {
                     {validationErrors.relationship && <span className="field-error">{validationErrors.relationship}</span>}
                   </div>
                   <div className="form-group full-width">
-                    <label style={{ fontWeight: '600', marginBottom: '0.4rem', display: 'block' }}>Choose Profile Avatar Symbol</label>
+                    <label style={{ fontWeight: '600', marginBottom: '0.4rem', display: 'block' }}>Choose Profile Avatar Icon</label>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', backgroundColor: 'var(--bg-card)', padding: '0.85rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
-                      {[
-                        { label: 'Self & Spouse', emojis: ['👤', '🧑', '👩', '👨', '💖', '💍'] },
-                        { label: 'Parents & In-laws', emojis: ['👴', '👵', '👨', '👩'] },
-                        { label: 'Siblings & Children', emojis: ['🧔', '👱‍♂️', '👩‍🦰', '👩‍🦳', '🧑', '👦', '👧', '🧒', '👶'] },
-                        { label: 'Friends & Care', emojis: ['🫂', '🧑‍🤝‍🧑', '👥', '🤝', '🌟', '🩺', '❤️', '🩹'] }
-                      ].map(group => (
-                        <div key={group.label}>
-                          <div style={{ fontSize: '0.72rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: '700', marginBottom: '0.35rem', letterSpacing: '0.03em' }}>
-                            {group.label}
-                          </div>
-                          <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-                            {group.emojis.map(emoji => (
-                              <button
-                                key={emoji}
-                                type="button"
-                                onClick={() => updateActiveCardAvatar(emoji)}
-                                style={{
-                                  width: '38px',
-                                  height: '38px',
-                                  borderRadius: '50%',
-                                  border: activeCard.avatar === emoji ? '2px solid var(--primary)' : '1px solid var(--border)',
-                                  backgroundColor: activeCard.avatar === emoji ? 'var(--primary-light)' : 'var(--bg-card)',
-                                  fontSize: '1.2rem',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  cursor: 'pointer',
-                                  transition: 'all 0.15s ease'
-                                }}
-                              >
-                                {emoji}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
+                      <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
+                        {[
+                          { key: 'avatar_user', label: 'User / Self', bg: '#6366f1', icon: <User size={20} color="#ffffff" /> },
+                          { key: 'avatar_heart', label: 'Love / Spouse', bg: '#ec4899', icon: <Heart size={20} color="#ffffff" /> },
+                          { key: 'avatar_family', label: 'Family', bg: '#10b981', icon: <Users size={20} color="#ffffff" /> },
+                          { key: 'avatar_medical', label: 'Health / Pulse', bg: '#0d9488', icon: <Activity size={20} color="#ffffff" /> },
+                          { key: 'avatar_insurance', label: 'Insurance / Award', bg: '#eab308', icon: <Award size={20} color="#ffffff" /> },
+                          { key: 'avatar_emergency', label: 'Emergency', bg: '#ef4444', icon: <ShieldAlert size={20} color="#ffffff" /> },
+                          { key: 'avatar_phone', label: 'Contact / Phone', bg: '#06b6d4', icon: <Phone size={20} color="#ffffff" /> },
+                          { key: 'avatar_shield', label: 'Security / Shield', bg: '#3b82f6', icon: <Shield size={20} color="#ffffff" /> }
+                        ].map(av => (
+                          <button
+                            key={av.key}
+                            type="button"
+                            onClick={() => updateActiveCardAvatar(av.key)}
+                            style={{
+                              width: '42px',
+                              height: '42px',
+                              borderRadius: '50%',
+                              backgroundColor: av.bg,
+                              border: activeCard.avatar === av.key ? '3px solid var(--primary-dark)' : 'none',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              cursor: 'pointer',
+                              boxShadow: 'var(--shadow-sm)',
+                              transition: 'transform 0.15s ease'
+                            }}
+                            title={av.label}
+                          >
+                            {av.icon}
+                          </button>
+                        ))}
+                      </div>
                       {activeCard.avatar && (
                         <button
                           type="button"
@@ -1992,7 +2052,7 @@ export default function App() {
                           onClick={() => updateActiveCardAvatar('')}
                           style={{ alignSelf: 'flex-start', marginTop: '0.25rem', padding: '0.2rem 0.6rem', fontSize: '0.75rem' }}
                         >
-                          Clear Selection
+                          Clear Avatar Icon
                         </button>
                       )}
                     </div>
