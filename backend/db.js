@@ -55,6 +55,11 @@ const initDb = async () => {
       ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS insurance_valid_till VARCHAR(100);
     `);
 
+    // Ensure the avatar column exists
+    await client.query(`
+      ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS avatar VARCHAR(100);
+    `);
+
     // 3. Create Card Shares Table for Collaborative Access
     await client.query(`
       CREATE TABLE IF NOT EXISTS public.card_shares (

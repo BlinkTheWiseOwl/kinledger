@@ -2435,3 +2435,58 @@ textarea {
 .btn svg.animate-spin {
   margin-right: 8px;
 }
+
+/* Quick Access Scrollable Badges Bar */
+.quick-access-bar {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  padding: 0.5rem 0.5rem 1.25rem 0.5rem;
+  margin-bottom: 1.25rem;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}
+
+.quick-access-bar::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
+}
+
+.quick-access-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.quick-access-badge:hover {
+  transform: translateY(-2px);
+}
+
+.quick-access-badge:active {
+  transform: translateY(0) scale(0.95);
+}
+
+.quick-access-badge span {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  max-width: 65px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color 0.2s ease;
+}
+
+.quick-access-badge:hover span {
+  color: var(--primary);
+}
+
+.quick-access-badge.add-badge:hover span {
+  color: var(--primary-dark);
+}

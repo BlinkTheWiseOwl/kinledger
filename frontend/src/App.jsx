@@ -518,6 +518,7 @@ export default function App() {
     const newCard = {
       id: 'card-' + Date.now(),
       relationship: relation,
+      avatar: '',
       profile: {
         fullName: name || '',
         age: '',
@@ -729,6 +730,18 @@ export default function App() {
     const updated = cards.map(c => {
       if (c.id === selectedCardId) {
         return { ...c, relationship: value };
+      }
+      return c;
+    });
+    setCards(updated);
+  };
+
+  // Update active card avatar symbol
+  const updateActiveCardAvatar = (value) => {
+    if (!selectedCardId) return;
+    const updated = cards.map(c => {
+      if (c.id === selectedCardId) {
+        return { ...c, avatar: value };
       }
       return c;
     });
@@ -1458,6 +1471,57 @@ export default function App() {
               </div>
             </div>
 
+            {/* Quick Access Badges Bar */}
+            <div className="quick-access-bar" style={{ display: 'flex', gap: '1rem', overflowX: 'auto', padding: '0.5rem 0.5rem 1.25rem 0.5rem', marginBottom: '1.25rem', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+              {/* Add Member Badge */}
+              <button 
+                className="quick-access-badge add-badge"
+                onClick={() => setShowAddMenu(true)}
+                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.35rem', background: 'none', border: 'none', cursor: 'pointer', flexShrink: 0, padding: 0 }}
+              >
+                <div style={{ width: '52px', height: '52px', borderRadius: '50%', border: '2px dashed var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', backgroundColor: 'var(--primary-light)' }}>
+                  <Plus size={22} />
+                </div>
+                <span style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--primary)' }}>Add Member</span>
+              </button>
+
+              {/* Card Badges */}
+              {cards.map(card => {
+                const initials = card.profile.fullName ? card.profile.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : '?';
+                return (
+                  <button
+                    key={card.id}
+                    className="quick-access-badge"
+                    onClick={() => {
+                      setSelectedCardId(card.id);
+                      setActiveTab('view');
+                    }}
+                    style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.35rem', background: 'none', border: 'none', cursor: 'pointer', flexShrink: 0, padding: 0 }}
+                  >
+                    <div style={{ 
+                      width: '52px', 
+                      height: '52px', 
+                      borderRadius: '50%', 
+                      backgroundColor: 'var(--primary-light)', 
+                      border: '2px solid var(--border)',
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center', 
+                      fontSize: card.avatar ? '1.5rem' : '0.95rem',
+                      fontWeight: 'bold',
+                      color: 'var(--primary)',
+                      boxShadow: 'var(--shadow-sm)'
+                    }}>
+                      {card.avatar || initials}
+                    </div>
+                    <span style={{ fontSize: '0.75rem', fontWeight: '500', color: 'var(--text-primary)', maxWidth: '65px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {card.profile.fullName ? card.profile.fullName.split(' ')[0] : card.relationship}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
             <div className="dashboard-grid">
               {/* Profile Card List */}
               {cards.map(card => (
@@ -1470,10 +1534,28 @@ export default function App() {
                   }}
                   style={{ cursor: 'pointer' }}
                 >
-                  <div className="member-card-header">
-                    <div>
-                      <div className="member-name">
-                        {card.profile.fullName || 'Unnamed Profile'}
+                  <div className="member-card-header" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', width: '100%' }}>
+                    <div style={{
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '50%',
+                      backgroundColor: 'var(--primary-light)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: card.avatar ? '1.25rem' : '0.85rem',
+                      fontWeight: 'bold',
+                      color: 'var(--primary)',
+                      border: '1px solid var(--border)',
+                      flexShrink: 0
+                    }}>
+                      {card.avatar || (card.profile.fullName ? card.profile.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : '?')}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div className="member-name" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '170px' }}>
+                          {card.profile.fullName || 'Unnamed Profile'}
+                        </span>
                         {card.isShared && (
                           <span className="shared-badge" title={`Shared by ${card.ownerEmail}`}>
                             Shared
@@ -1493,6 +1575,7 @@ export default function App() {
                       className="btn-icon-only danger"
                       onClick={(e) => handleDeleteCard(card.id, e)}
                       title={card.isShared ? "Remove card from dashboard" : "Delete card"}
+                      style={{ alignSelf: 'flex-start', marginTop: '2px' }}
                     >
                       <Trash2 size={16} />
                     </button>
@@ -1862,6 +1945,57 @@ export default function App() {
                       <option value="Mother-in-law">Mother-in-law</option><option value="Other">Other</option>
                     </select>
                     {validationErrors.relationship && <span className="field-error">{validationErrors.relationship}</span>}
+                  </div>
+                  <div className="form-group full-width">
+                    <label style={{ fontWeight: '600', marginBottom: '0.4rem', display: 'block' }}>Choose Profile Avatar Symbol</label>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', backgroundColor: 'var(--bg-card)', padding: '0.85rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
+                      {[
+                        { label: 'Self & Spouse', emojis: ['👤', '🧑', '👩', '👨', '💖', '💍'] },
+                        { label: 'Parents & In-laws', emojis: ['👴', '👵', '👨', '👩'] },
+                        { label: 'Siblings & Children', emojis: ['🧔', '👱‍♂️', '👩‍🦰', '👩‍🦳', '🧑', '👦', '👧', '🧒', '👶'] },
+                        { label: 'Friends & Care', emojis: ['🫂', '🧑‍🤝‍🧑', '👥', '🤝', '🌟', '🩺', '❤️', '🩹'] }
+                      ].map(group => (
+                        <div key={group.label}>
+                          <div style={{ fontSize: '0.72rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: '700', marginBottom: '0.35rem', letterSpacing: '0.03em' }}>
+                            {group.label}
+                          </div>
+                          <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+                            {group.emojis.map(emoji => (
+                              <button
+                                key={emoji}
+                                type="button"
+                                onClick={() => updateActiveCardAvatar(emoji)}
+                                style={{
+                                  width: '38px',
+                                  height: '38px',
+                                  borderRadius: '50%',
+                                  border: activeCard.avatar === emoji ? '2px solid var(--primary)' : '1px solid var(--border)',
+                                  backgroundColor: activeCard.avatar === emoji ? 'var(--primary-light)' : 'var(--bg-card)',
+                                  fontSize: '1.2rem',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  cursor: 'pointer',
+                                  transition: 'all 0.15s ease'
+                                }}
+                              >
+                                {emoji}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                      {activeCard.avatar && (
+                        <button
+                          type="button"
+                          className="btn btn-outline btn-sm"
+                          onClick={() => updateActiveCardAvatar('')}
+                          style={{ alignSelf: 'flex-start', marginTop: '0.25rem', padding: '0.2rem 0.6rem', fontSize: '0.75rem' }}
+                        >
+                          Clear Selection
+                        </button>
+                      )}
+                    </div>
                   </div>
                   <div className="form-group full-width">
                     <label htmlFor="bs-conditions">Conditions (Optional)</label>
