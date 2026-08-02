@@ -35,32 +35,256 @@ const getInitials = (name) => {
 };
 
 const renderMaterialAvatar = (avatarKey, size = 20, initials = '') => {
-  const avatarMap = {
-    avatar_user: { bg: '#6366f1', icon: <User size={size} color="#ffffff" /> },
-    avatar_heart: { bg: '#ec4899', icon: <Heart size={size} color="#ffffff" /> },
-    avatar_family: { bg: '#10b981', icon: <Users size={size} color="#ffffff" /> },
-    avatar_medical: { bg: '#0d9488', icon: <Activity size={size} color="#ffffff" /> },
-    avatar_insurance: { bg: '#eab308', icon: <Award size={size} color="#ffffff" /> },
-    avatar_emergency: { bg: '#ef4444', icon: <ShieldAlert size={size} color="#ffffff" /> },
-    avatar_phone: { bg: '#06b6d4', icon: <Phone size={size} color="#ffffff" /> },
-    avatar_shield: { bg: '#3b82f6', icon: <Shield size={size} color="#ffffff" /> }
-  };
+  if (avatarKey && avatarKey.startsWith('avatar_')) {
+    const bgs = {
+      // Family (Kin)
+      avatar_father: '#dbeafe', // Blue 100
+      avatar_mother: '#fce7f3', // Pink 100
+      avatar_me: '#e0f2fe', // Sky 100
+      avatar_husband: '#ffedd5', // Orange 100
+      avatar_daughter: '#f3e8ff', // Purple 100
+      avatar_son: '#ccfbf1', // Teal 100
+      avatar_grandmother: '#fef3c7', // Amber 100
+      avatar_grandfather: '#e0e7ff', // Indigo 100
 
-  const selected = avatarMap[avatarKey];
-  if (selected) {
+      // Friends
+      avatar_friend_male: '#e0f2fe',
+      avatar_friend_female: '#fce7f3',
+      avatar_friend_close: '#dbeafe',
+      avatar_friend_best: '#f3e8ff',
+      avatar_friend_work: '#e2e8f0',
+      avatar_friend_neighbor: '#ccfbf1',
+      avatar_friend_senior: '#fef3c7',
+      avatar_friend_hijab: '#d1fae5',
+
+      // General
+      avatar_adult_male: '#e0f2fe',
+      avatar_adult_female: '#fce7f3',
+      avatar_young_adult_male: '#ccfbf1',
+      avatar_young_adult_female: '#f3e8ff',
+      avatar_teen_male: '#ffedd5',
+      avatar_teen_female: '#fae8ff',
+      avatar_child_male: '#dcfce7',
+      avatar_child_female: '#ffe4e6',
+      avatar_unknown: '#f1f5f9'
+    };
+
+    const bg = bgs[avatarKey] || '#e2e8f0';
+    const headX = 50;
+    const headY = 46;
+    const headR = 17;
+    const skinToneMap = {
+      avatar_father: '#fdba74',
+      avatar_mother: '#fed7aa',
+      avatar_me: '#fed7aa',
+      avatar_husband: '#fdba74',
+      avatar_daughter: '#fed7aa',
+      avatar_son: '#fed7aa',
+      avatar_grandmother: '#fed7aa',
+      avatar_grandfather: '#fdba74',
+      avatar_friend_hijab: '#fed7aa'
+    };
+    const skin = skinToneMap[avatarKey] || '#fed7aa';
+
     return (
-      <div style={{
-        width: '100%',
-        height: '100%',
-        borderRadius: '50%',
-        backgroundColor: selected.bg,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.1)'
-      }}>
-        {selected.icon}
-      </div>
+      <svg
+        viewBox="0 0 100 100"
+        style={{
+          width: '100%',
+          height: '100%',
+          borderRadius: '50%',
+          backgroundColor: bg,
+          display: 'block'
+        }}
+      >
+        <circle cx="50" cy="50" r="48" fill="none" stroke="rgba(0,0,0,0.03)" strokeWidth="1.5" />
+        <rect x="45" y="55" width="10" height="15" rx="3" fill={skin} />
+        <path d="M22,88 Q50,68 78,88 Z" fill="#0f766e" />
+        <path d="M43,68 L50,77 L57,68 Z" fill={skin} />
+        <circle cx={headX} cy={headY} r={headR} fill={skin} />
+        <circle cx={headX - headR + 1} cy={headY} r="3.5" fill={skin} />
+        <circle cx={headX + headR - 1} cy={headY} r="3.5" fill={skin} />
+        <circle cx={headX - 6} cy={headY - 2} r="1.5" fill="#1e293b" />
+        <circle cx={headX + 6} cy={headY - 2} r="1.5" fill="#1e293b" />
+        <path d="M46,55 Q50,59 54,55" stroke="#1e293b" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+
+        {avatarKey === 'avatar_father' && (
+          <>
+            <path d="M31,38 Q50,23 69,38 C60,25 40,25 31,38" fill="#94a3b8" />
+            <rect x="37" y="40" width="11" height="8" rx="1.5" fill="none" stroke="#1e293b" strokeWidth="1.5" />
+            <rect x="52" y="40" width="11" height="8" rx="1.5" fill="none" stroke="#1e293b" strokeWidth="1.5" />
+            <line x1="48" y1="44" x2="52" y2="44" stroke="#1e293b" strokeWidth="1.5" />
+            <path d="M44,51 Q50,54 56,51" stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+          </>
+        )}
+
+        {avatarKey === 'avatar_mother' && (
+          <>
+            <circle cx="32" cy="48" r="4.5" fill="#1e293b" />
+            <path d="M31,44 C31,24 69,24 69,44 C69,44 65,34 50,34 C35,34 31,44 31,44 Z" fill="#1e293b" />
+          </>
+        )}
+
+        {avatarKey === 'avatar_me' && (
+          <>
+            <path d="M31,40 C30,30 70,30 69,40 C68,52 70,68 70,72 L30,72 C30,68 32,52 31,40 Z" fill="#1e293b" />
+            <path d="M32,40 Q50,30 68,40 C60,34 40,34 32,40 Z" fill="#1e293b" />
+            <circle cx={headX} cy={headY} r={headR} fill={skin} />
+            <circle cx={headX - 6} cy={headY - 2} r="1.5" fill="#1e293b" />
+            <circle cx={headX + 6} cy={headY - 2} r="1.5" fill="#1e293b" />
+            <path d="M46,55 Q50,59 54,55" stroke="#1e293b" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+            <path d="M32,38 C40,30 50,38 50,38 C50,38 60,30 68,38 C60,32 40,32 32,38 Z" fill="#1e293b" />
+          </>
+        )}
+
+        {avatarKey === 'avatar_husband' && (
+          <>
+            <path d="M31,38 Q50,22 69,38 C60,26 40,26 31,38 Z" fill="#1e293b" />
+            <path d="M32,48 C32,65 50,68 68,48 C68,57 60,63 50,63 C40,63 32,57 32,48 Z" fill="#1e293b" />
+            <path d="M43,51 Q50,54 57,51" stroke="#1e293b" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+          </>
+        )}
+
+        {avatarKey === 'avatar_daughter' && (
+          <>
+            <path d="M32,42 C30,30 70,30 68,42 C68,52 69,65 69,68 L31,68 C31,65 32,52 32,42 Z" fill="#1e293b" />
+            <circle cx={headX} cy={headY} r={headR} fill={skin} />
+            <circle cx={headX - 6} cy={headY - 2} r="1.5" fill="#1e293b" />
+            <circle cx={headX + 6} cy={headY - 2} r="1.5" fill="#1e293b" />
+            <path d="M46,55 Q50,59 54,55" stroke="#1e293b" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+            <path d="M33,38 Q50,26 67,38" fill="none" stroke="#06b6d4" strokeWidth="3" strokeLinecap="round" />
+            <path d="M32,38 C40,32 50,37 50,37 C50,37 60,32 68,38 Z" fill="#1e293b" />
+          </>
+        )}
+
+        {avatarKey === 'avatar_son' && (
+          <>
+            <path d="M31,38 Q50,23 69,38 C62,28 38,28 31,38 Z" fill="#1e293b" />
+          </>
+        )}
+
+        {avatarKey === 'avatar_grandmother' && (
+          <>
+            <circle cx="50" cy="27" r="6" fill="#cbd5e1" />
+            <path d="M32,44 C31,24 69,24 69,44 C69,44 65,33 50,33 C35,33 32,44 32,44 Z" fill="#cbd5e1" />
+            <circle cx="42" cy="45" r="4.5" fill="none" stroke="#1e293b" strokeWidth="1.5" />
+            <circle cx="58" cy="45" r="4.5" fill="none" stroke="#1e293b" strokeWidth="1.5" />
+            <line x1="46.5" y1="45" x2="53.5" y2="45" stroke="#1e293b" strokeWidth="1.5" />
+          </>
+        )}
+
+        {avatarKey === 'avatar_grandfather' && (
+          <>
+            <path d="M31,46 C30,36 34,35 36,35 C38,39 35,42 35,46 Z" fill="#cbd5e1" />
+            <path d="M69,46 C70,36 66,35 64,35 C62,39 65,42 65,46 Z" fill="#cbd5e1" />
+            <circle cx="42" cy="45" r="4.5" fill="none" stroke="#1e293b" strokeWidth="1.5" />
+            <circle cx="58" cy="45" r="4.5" fill="none" stroke="#1e293b" strokeWidth="1.5" />
+            <line x1="46.5" y1="45" x2="53.5" y2="45" stroke="#1e293b" strokeWidth="1.5" />
+            <path d="M47,68 L50,74 L53,68 Z" fill="#ffffff" />
+          </>
+        )}
+
+        {(avatarKey === 'avatar_friend_male' || avatarKey === 'avatar_adult_male') && (
+          <>
+            <path d="M32,36 Q50,22 68,36 Q55,30 45,30 Z" fill="#1e293b" />
+          </>
+        )}
+
+        {(avatarKey === 'avatar_friend_female' || avatarKey === 'avatar_adult_female') && (
+          <>
+            <circle cx="68" cy="42" r="5" fill="#1e293b" />
+            <path d="M32,44 C31,24 69,24 69,44 C69,44 65,34 50,34 C35,34 32,44 32,44 Z" fill="#1e293b" />
+          </>
+        )}
+
+        {avatarKey === 'avatar_friend_close' && (
+          <>
+            <path d="M30,38 Q50,22 70,38 C60,26 40,26 30,38 Z" fill="#1e293b" />
+            <circle cx="34" cy="35" r="3" fill="#1e293b" />
+            <circle cx="50" cy="27" r="3" fill="#1e293b" />
+            <circle cx="66" cy="35" r="3" fill="#1e293b" />
+            <rect x="37" y="41" width="11" height="8" rx="1" fill="none" stroke="#1e293b" strokeWidth="1.5" />
+            <rect x="52" y="41" width="11" height="8" rx="1" fill="none" stroke="#1e293b" strokeWidth="1.5" />
+            <line x1="48" y1="45" x2="52" y2="45" stroke="#1e293b" strokeWidth="1.5" />
+          </>
+        )}
+
+        {avatarKey === 'avatar_friend_best' && (
+          <>
+            <path d="M31,44 C31,28 69,28 69,44 C69,44 69,56 66,58 C62,40 38,40 34,58 Z" fill="#1e293b" />
+          </>
+        )}
+
+        {avatarKey === 'avatar_friend_work' && (
+          <>
+            <path d="M32,38 C32,25 68,25 68,38 C62,32 50,35 50,35 C50,35 38,32 32,38 Z" fill="#1e293b" />
+          </>
+        )}
+
+        {avatarKey === 'avatar_friend_neighbor' && (
+          <>
+            <circle cx="50" cy="27" r="5" fill="#1e293b" />
+            <path d="M32,44 C31,24 69,24 69,44 C69,44 65,34 50,34 C35,34 32,44 32,44 Z" fill="#1e293b" />
+          </>
+        )}
+
+        {avatarKey === 'avatar_friend_senior' && (
+          <>
+            <path d="M32,38 Q50,23 68,38 Z" fill="#94a3b8" />
+            <path d="M32,48 C32,65 50,68 68,48 C68,57 60,63 50,63 C40,63 32,57 32,48 Z" fill="#cbd5e1" />
+            <circle cx="42" cy="45" r="4.5" fill="none" stroke="#1e293b" strokeWidth="1.5" />
+            <circle cx="58" cy="45" r="4.5" fill="none" stroke="#1e293b" strokeWidth="1.5" />
+            <line x1="46.5" y1="45" x2="53.5" y2="45" stroke="#1e293b" strokeWidth="1.5" />
+          </>
+        )}
+
+        {avatarKey === 'avatar_friend_hijab' && (
+          <>
+            <path d="M31,46 C31,26 69,26 69,46 C69,58 72,70 75,78 L25,78 C28,70 31,58 31,46 Z" fill="#0d9488" />
+            <ellipse cx="50" cy="46" rx="14" ry="16" fill={skin} />
+            <circle cx="44" cy="45" r="1.5" fill="#1e293b" />
+            <circle cx="56" cy="45" r="1.5" fill="#1e293b" />
+            <path d="M46,54 Q50,57 54,54" stroke="#1e293b" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+          </>
+        )}
+
+        {(avatarKey === 'avatar_young_adult_male' || avatarKey === 'avatar_teen_male') && (
+          <>
+            <path d="M30,36 C28,26 40,23 50,26 C60,23 72,26 70,36 C65,30 35,30 30,36 Z" fill="#1e293b" />
+          </>
+        )}
+
+        {(avatarKey === 'avatar_young_adult_female' || avatarKey === 'avatar_teen_female') && (
+          <>
+            <path d="M66,48 C72,48 74,56 72,60 C68,60 66,54 66,48 Z" fill="#1e293b" />
+            <path d="M32,44 C31,24 69,24 69,44 C69,44 65,34 50,34 C35,34 32,44 32,44 Z" fill="#1e293b" />
+          </>
+        )}
+
+        {avatarKey === 'avatar_child_male' && (
+          <>
+            <path d="M32,38 C32,26 68,26 68,38 C60,33 40,33 32,38 Z" fill="#1e293b" />
+          </>
+        )}
+
+        {avatarKey === 'avatar_child_female' && (
+          <>
+            <circle cx="28" cy="38" r="5.5" fill="#1e293b" />
+            <circle cx="72" cy="38" r="5.5" fill="#1e293b" />
+            <path d="M32,40 C32,28 68,28 68,40 C68,40 60,33 50,33 C40,33 32,40 32,40 Z" fill="#1e293b" />
+          </>
+        )}
+
+        {avatarKey === 'avatar_unknown' && (
+          <>
+            <rect x="45" y="55" width="10" height="15" rx="3" fill="#cbd5e1" />
+            <circle cx={headX} cy={headY} r={headR} fill="#cbd5e1" />
+            <path d="M22,88 Q50,68 78,88 Z" fill="#94a3b8" />
+            <circle cx="31" cy="48" r="3.5" fill="#cbd5e1" />
+            <circle cx="69" cy="48" r="3.5" fill="#cbd5e1" />
+          </>
+        )}
+      </svg>
     );
   }
 
@@ -2010,41 +2234,79 @@ export default function App() {
                   </div>
                   <div className="form-group full-width">
                     <label style={{ fontWeight: '600', marginBottom: '0.4rem', display: 'block' }}>Choose Profile Avatar Icon</label>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', backgroundColor: 'var(--bg-card)', padding: '0.85rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
-                      <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
-                        {[
-                          { key: 'avatar_user', label: 'User / Self', bg: '#6366f1', icon: <User size={20} color="#ffffff" /> },
-                          { key: 'avatar_heart', label: 'Love / Spouse', bg: '#ec4899', icon: <Heart size={20} color="#ffffff" /> },
-                          { key: 'avatar_family', label: 'Family', bg: '#10b981', icon: <Users size={20} color="#ffffff" /> },
-                          { key: 'avatar_medical', label: 'Health / Pulse', bg: '#0d9488', icon: <Activity size={20} color="#ffffff" /> },
-                          { key: 'avatar_insurance', label: 'Insurance / Award', bg: '#eab308', icon: <Award size={20} color="#ffffff" /> },
-                          { key: 'avatar_emergency', label: 'Emergency', bg: '#ef4444', icon: <ShieldAlert size={20} color="#ffffff" /> },
-                          { key: 'avatar_phone', label: 'Contact / Phone', bg: '#06b6d4', icon: <Phone size={20} color="#ffffff" /> },
-                          { key: 'avatar_shield', label: 'Security / Shield', bg: '#3b82f6', icon: <Shield size={20} color="#ffffff" /> }
-                        ].map(av => (
-                          <button
-                            key={av.key}
-                            type="button"
-                            onClick={() => updateActiveCardAvatar(av.key)}
-                            style={{
-                              width: '42px',
-                              height: '42px',
-                              borderRadius: '50%',
-                              backgroundColor: av.bg,
-                              border: activeCard.avatar === av.key ? '3px solid var(--primary-dark)' : 'none',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              cursor: 'pointer',
-                              boxShadow: 'var(--shadow-sm)',
-                              transition: 'transform 0.15s ease'
-                            }}
-                            title={av.label}
-                          >
-                            {av.icon}
-                          </button>
-                        ))}
-                      </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', backgroundColor: 'var(--bg-card)', padding: '0.85rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
+                      {[
+                        {
+                          groupName: 'Family (Kin)',
+                          avatars: [
+                            { key: 'avatar_father', label: 'Father' },
+                            { key: 'avatar_mother', label: 'Mother' },
+                            { key: 'avatar_me', label: 'Me' },
+                            { key: 'avatar_husband', label: 'Husband/Spouse' },
+                            { key: 'avatar_daughter', label: 'Daughter' },
+                            { key: 'avatar_son', label: 'Son' },
+                            { key: 'avatar_grandmother', label: 'Grandmother' },
+                            { key: 'avatar_grandfather', label: 'Grandfather' }
+                          ]
+                        },
+                        {
+                          groupName: 'Friends',
+                          avatars: [
+                            { key: 'avatar_friend_male', label: 'Male Friend' },
+                            { key: 'avatar_friend_female', label: 'Female Friend' },
+                            { key: 'avatar_friend_close', label: 'Close Friend' },
+                            { key: 'avatar_friend_best', label: 'Best Friend' },
+                            { key: 'avatar_friend_work', label: 'Work Friend' },
+                            { key: 'avatar_friend_neighbor', label: 'Neighbor' },
+                            { key: 'avatar_friend_senior', label: 'Senior Friend' },
+                            { key: 'avatar_friend_hijab', label: 'Friend (Hijab)' }
+                          ]
+                        },
+                        {
+                          groupName: 'General / Other',
+                          avatars: [
+                            { key: 'avatar_adult_male', label: 'Adult Male' },
+                            { key: 'avatar_adult_female', label: 'Adult Female' },
+                            { key: 'avatar_young_adult_male', label: 'Young Adult Male' },
+                            { key: 'avatar_young_adult_female', label: 'Young Adult Female' },
+                            { key: 'avatar_teen_male', label: 'Teen Male' },
+                            { key: 'avatar_teen_female', label: 'Teen Female' },
+                            { key: 'avatar_child_male', label: 'Child Male' },
+                            { key: 'avatar_child_female', label: 'Child Female' },
+                            { key: 'avatar_unknown', label: 'Unknown/Generic' }
+                          ]
+                        }
+                      ].map(group => (
+                        <div key={group.groupName}>
+                          <div style={{ fontSize: '0.72rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: '700', marginBottom: '0.4rem', letterSpacing: '0.03em' }}>
+                            {group.groupName}
+                          </div>
+                          <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
+                            {group.avatars.map(av => (
+                              <button
+                                key={av.key}
+                                type="button"
+                                onClick={() => updateActiveCardAvatar(av.key)}
+                                style={{
+                                  width: '42px',
+                                  height: '42px',
+                                  borderRadius: '50%',
+                                  border: activeCard.avatar === av.key ? '3px solid var(--primary-dark)' : 'none',
+                                  padding: 0,
+                                  cursor: 'pointer',
+                                  boxShadow: 'var(--shadow-sm)',
+                                  transition: 'transform 0.15s ease',
+                                  overflow: 'hidden'
+                                }}
+                                title={av.label}
+                              >
+                                {renderMaterialAvatar(av.key, 20)}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+
                       {activeCard.avatar && (
                         <button
                           type="button"
