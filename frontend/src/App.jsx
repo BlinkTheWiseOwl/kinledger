@@ -2261,53 +2261,51 @@ export default function App() {
                     <div className="item-list-empty">No contacts added yet. Use the form below.</div>
                   )}
 
-                  {activeCard.emergencyContacts.length < 2 && (
-                    <form onSubmit={addContactToActiveCard} className="sheet-sub-form">
-                      <h4 className="sheet-sub-form-title">Add Contact</h4>
-                      <div className="form-grid">
-                        <div className="form-group">
-                          <label>Name</label>
-                          <input type="text" placeholder="e.g., Shloka Kumar" value={newContact.name}
-                            onChange={e => updateNewContact('name', e.target.value)}
-                            style={validationErrors.contactName ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}} />
-                          {validationErrors.contactName && <span className="field-error">{validationErrors.contactName}</span>}
-                        </div>
-                        <div className="form-group">
-                          <label>Relationship</label>
-                          <select value={newContact.relationship} onChange={e => updateNewContact('relationship', e.target.value)}
-                            style={validationErrors.contactRelationship ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}>
-                            <option value="">Select</option>
-                            <option value="Daughter">Daughter</option><option value="Son">Son</option>
-                            <option value="Spouse">Spouse</option><option value="Father">Father</option>
-                            <option value="Mother">Mother</option><option value="Brother">Brother</option>
-                            <option value="Sister">Sister</option><option value="Friend">Friend</option>
-                            <option value="Guardian">Guardian</option><option value="Neighbor">Neighbor</option>
-                            <option value="Other">Other</option>
-                          </select>
-                          {validationErrors.contactRelationship && <span className="field-error">{validationErrors.contactRelationship}</span>}
-                        </div>
-                        <div className="form-group">
-                          <label>Phone</label>
-                          <input type="tel" placeholder="e.g., 9886012345" value={newContact.phoneNumber}
-                            onChange={e => updateNewContact('phoneNumber', e.target.value)}
-                            style={validationErrors.contactPhone ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}} />
-                          {validationErrors.contactPhone && <span className="field-error">{validationErrors.contactPhone}</span>}
-                        </div>
-                        <div className="form-group">
-                          <label>Email (Optional)</label>
-                          <input type="email" placeholder="e.g., shloka@email.com" value={newContact.email || ''}
-                            onChange={e => updateNewContact('email', e.target.value)}
-                            style={validationErrors.contactEmail ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}} />
-                          {validationErrors.contactEmail && <span className="field-error">{validationErrors.contactEmail}</span>}
-                        </div>
-                        <div className="form-group full-width" style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                          <button type="submit" className="btn btn-secondary" style={{ width: 'fit-content' }}>
-                            <Plus size={15} /> Add to List
-                          </button>
-                        </div>
+                  <form onSubmit={addContactToActiveCard} className="sheet-sub-form">
+                    <h4 className="sheet-sub-form-title">Add Contact</h4>
+                    <div className="form-grid">
+                      <div className="form-group">
+                        <label>Name</label>
+                        <input type="text" placeholder="e.g., Shloka Kumar" value={newContact.name}
+                          onChange={e => updateNewContact('name', e.target.value)}
+                          style={validationErrors.contactName ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}} />
+                        {validationErrors.contactName && <span className="field-error">{validationErrors.contactName}</span>}
                       </div>
-                    </form>
-                  )}
+                      <div className="form-group">
+                        <label>Relationship</label>
+                        <select value={newContact.relationship} onChange={e => updateNewContact('relationship', e.target.value)}
+                          style={validationErrors.contactRelationship ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}>
+                          <option value="">Select</option>
+                          <option value="Daughter">Daughter</option><option value="Son">Son</option>
+                          <option value="Spouse">Spouse</option><option value="Father">Father</option>
+                          <option value="Mother">Mother</option><option value="Brother">Brother</option>
+                          <option value="Sister">Sister</option><option value="Friend">Friend</option>
+                          <option value="Guardian">Guardian</option><option value="Neighbor">Neighbor</option>
+                          <option value="Other">Other</option>
+                        </select>
+                        {validationErrors.contactRelationship && <span className="field-error">{validationErrors.contactRelationship}</span>}
+                      </div>
+                      <div className="form-group">
+                        <label>Phone</label>
+                        <input type="tel" placeholder="e.g., 9886012345" value={newContact.phoneNumber}
+                          onChange={e => updateNewContact('phoneNumber', e.target.value)}
+                          style={validationErrors.contactPhone ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}} />
+                        {validationErrors.contactPhone && <span className="field-error">{validationErrors.contactPhone}</span>}
+                      </div>
+                      <div className="form-group">
+                        <label>Email (Optional)</label>
+                        <input type="email" placeholder="e.g., shloka@email.com" value={newContact.email || ''}
+                          onChange={e => updateNewContact('email', e.target.value)}
+                          style={validationErrors.contactEmail ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}} />
+                        {validationErrors.contactEmail && <span className="field-error">{validationErrors.contactEmail}</span>}
+                      </div>
+                      <div className="form-group full-width" style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                        <button type="submit" className="btn btn-secondary" style={{ width: 'fit-content' }}>
+                          <Plus size={15} /> Add to List
+                        </button>
+                      </div>
+                    </div>
+                  </form>
                 </div>
               )}
 
