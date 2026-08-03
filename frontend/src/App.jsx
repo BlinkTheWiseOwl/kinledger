@@ -1575,7 +1575,7 @@ export default function App() {
             </div>
 
             {/* Quick Access Badges Bar */}
-            <div className="quick-access-bar" style={{ display: 'flex', gap: '1rem', overflowX: 'auto', padding: '0.5rem 0.5rem 1.25rem 0.5rem', marginBottom: '1.25rem', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            <div className="quick-access-bar" style={{ display: 'flex', gap: '1rem 0.75rem', flexWrap: 'wrap', padding: '0.5rem', marginBottom: '1.5rem' }}>
               {/* Add Member Badge */}
               <button 
                 className="quick-access-badge add-badge"
