@@ -192,6 +192,15 @@ export default function App() {
   // Dashboard state for adding a new member
   const [showAddMenu, setShowAddMenu] = useState(false);
   const [customRelation, setCustomRelation] = useState('');
+  const addMenuRef = useRef(null);
+
+  useEffect(() => {
+    if (showAddMenu && addMenuRef.current) {
+      setTimeout(() => {
+        addMenuRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 150);
+    }
+  }, [showAddMenu]);
 
   // Temp contact and medication forms state (local to selected card workspace)
   const [newContact, setNewContact] = useState({ name: '', relationship: '', phoneNumber: '', email: '' });
@@ -444,12 +453,12 @@ export default function App() {
 
         // 2. Relationship Tag
         const rel = activeUpdate.relationship || '';
-        if (!rel || rel.trim() === '') {
-          errors.relationship = "Relationship is required.";
+        if (!rel || rel.trim() === '' || rel === 'Other') {
+          errors.relationship = "Relationship is a required field.";
         } else {
           const cleanRel = rel.trim();
           const relationRegex = /^[a-zA-Z\s\-'\.]{1,30}$/;
-          if (!relationRegex.test(cleanRel) && cleanRel !== 'Other') {
+          if (!relationRegex.test(cleanRel)) {
             errors.relationship = "Relationship tag must be 1-30 characters and only contain letters, spaces, hyphens, dots, or apostrophes.";
           }
         }
@@ -1745,7 +1754,7 @@ export default function App() {
                   Add New Member
                 </button>
               ) : (
-                <div className="member-summary-card" style={{ borderStyle: 'solid', borderColor: 'var(--primary)', backgroundColor: 'var(--primary-light)' }}>
+                <div ref={addMenuRef} className="member-summary-card" style={{ borderStyle: 'solid', borderColor: 'var(--primary)', backgroundColor: 'var(--primary-light)' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', width: '100%', height: '100%' }}>
                     <div style={{ fontWeight: 'bold', color: 'var(--primary)', fontFamily: 'var(--font-title)' }}>
                       New Member
@@ -1791,9 +1800,15 @@ export default function App() {
                             const val = e.target.value;
                             // Clean input: only allow safe characters (letters, spaces, hyphens, dots, apostrophes)
                             const clean = val.replace(/[^a-zA-Z\s\-'\.]/g, '').substring(0, 30);
-                            setCustomRelation(clean);
+                            setCustomRelation(clean === '' ? 'Other' : clean);
                           }}
+                          style={customRelation === 'Other' ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
                         />
+                        {customRelation === 'Other' && (
+                          <span className="field-error" style={{ color: 'var(--danger)', fontSize: '0.75rem', fontWeight: '500' }}>
+                            Relationship is a required field.
+                          </span>
+                        )}
                         <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
                           Letters, spaces, hyphens, dots, or apostrophes only (max 30 chars).
                         </span>
@@ -1804,7 +1819,7 @@ export default function App() {
                         <button
                           className="btn btn-primary btn-sm"
                           style={{ flex: 1 }}
-                          disabled={!newMemberName.trim() || !customRelation?.trim()}
+                          disabled={!newMemberName.trim() || !customRelation?.trim() || customRelation === 'Other'}
                           onClick={() => {
                               handleCreateCard(customRelation, newMemberName);
                           }}
@@ -2062,10 +2077,15 @@ export default function App() {
                         onChange={(e) => {
                           const val = e.target.value;
                           const clean = val.replace(/[^a-zA-Z\s\-'\.]/g, '').substring(0, 30);
-                          updateActiveCardRelationship(clean);
+                          updateActiveCardRelationship(clean === '' ? 'Other' : clean);
                         }}
-                        style={validationErrors.relationship ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
+                        style={validationErrors.relationship || activeCard.relationship === 'Other' ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
                       />
+                      {(validationErrors.relationship || activeCard.relationship === 'Other') && (
+                        <span className="field-error" style={{ color: 'var(--danger)', fontSize: '0.75rem', fontWeight: '500' }}>
+                          {activeCard.relationship === 'Other' ? "Relationship is a required field." : validationErrors.relationship}
+                        </span>
+                      )}
                       <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
                         Letters, spaces, hyphens, dots, or apostrophes only (max 30 chars).
                       </span>
