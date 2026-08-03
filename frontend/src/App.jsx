@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Shield, FileText, Plus, Trash2, Save, User, Users, Heart, Activity, ShieldAlert, Award, Phone, ArrowLeft, Printer, Eye, Share2, LogOut, Menu, X, ChevronDown, ChevronRight, Loader2 } from 'lucide-react';
+import { Shield, FileText, Plus, Trash2, Save, User, Users, Heart, Activity, ShieldAlert, Award, Phone, ArrowLeft, Printer, Eye, Share2, LogOut, Menu, X, ChevronDown, ChevronRight, Loader2, Check } from 'lucide-react';
 import { loadCardData, saveCardData, BACKEND_URL } from './utils/storage';
 import { Capacitor } from '@capacitor/core';
 import { Share } from '@capacitor/share';
@@ -446,8 +446,12 @@ export default function App() {
         const rel = activeUpdate.relationship || '';
         if (!rel || rel.trim() === '') {
           errors.relationship = "Relationship is required.";
-        } else if (containsUnsafeChars(rel)) {
-          errors.relationship = "Relationship cannot contain unsafe characters (<, >, \\, `).";
+        } else {
+          const cleanRel = rel.trim();
+          const relationRegex = /^[a-zA-Z\s\-'\.]{1,30}$/;
+          if (!relationRegex.test(cleanRel) && cleanRel !== 'Other') {
+            errors.relationship = "Relationship tag must be 1-30 characters and only contain letters, spaces, hyphens, dots, or apostrophes.";
+          }
         }
 
         // 3. Age
@@ -573,14 +577,38 @@ export default function App() {
 
   // Add a new profile card
   const handleCreateCard = (relation, name) => {
-    if (!relation) return;
+    if (!relation || !relation.trim()) {
+      showStatus("Relationship is required.", "error");
+      return;
+    }
+    if (!name || !name.trim()) {
+      showStatus("Name is required.", "error");
+      return;
+    }
+
+    const cleanRelation = relation.trim();
+    const relationRegex = /^[a-zA-Z\s\-'\.]{1,30}$/;
+    if (!relationRegex.test(cleanRelation)) {
+      showStatus("Relationship tag must be 1-30 characters and only contain letters, spaces, hyphens, dots, or apostrophes.", "error");
+      return;
+    }
+
+    const cleanName = name.trim();
+    if (cleanName.length < 2 || cleanName.length > 100) {
+      showStatus("Name must be between 2 and 100 characters.", "error");
+      return;
+    }
+    if (containsUnsafeChars(cleanName)) {
+      showStatus("Name cannot contain unsafe characters (<, >, \\, `).", "error");
+      return;
+    }
 
     const newCard = {
       id: 'card-' + Date.now(),
-      relationship: relation,
+      relationship: cleanRelation,
       avatar: '',
       profile: {
-        fullName: name || '',
+        fullName: cleanName,
         age: '',
         bloodGroup: '',
         allergies: '',
@@ -611,7 +639,7 @@ export default function App() {
     setShowAddMenu(false);
     setCustomRelation('');
     setNewMemberName('');
-    showStatus(`New card created for ${relation}.`, 'success');
+    showStatus(`New card created for ${cleanRelation}.`, 'success');
   };
 
   // Delete a profile card (revokes access if shared card)
@@ -775,14 +803,20 @@ export default function App() {
 
   // Update active card relationship type
   const updateActiveCardRelationship = (value) => {
-    if (!selectedCardId || !value) return;
+    if (!selectedCardId) return;
 
     setValidationErrors(prev => {
       const copy = { ...prev };
-      if (!value || value.trim() === '') {
+      if (value === undefined || value === null || String(value).trim() === '') {
         copy.relationship = "Relationship is required.";
       } else {
-        delete copy.relationship;
+        const cleanVal = String(value).trim();
+        const relationRegex = /^[a-zA-Z\s\-'\.]{1,30}$/;
+        if (!relationRegex.test(cleanVal) && cleanVal !== 'Other') {
+          copy.relationship = "Relationship tag must be 1-30 characters and only contain letters, spaces, hyphens, dots, or apostrophes.";
+        } else {
+          delete copy.relationship;
+        }
       }
       return copy;
     });
@@ -1728,7 +1762,7 @@ export default function App() {
                     <select
                       onChange={(e) => {
                         if (e.target.value === 'custom') {
-                          // keep menu open, let user input custom relation
+                          setCustomRelation('Other');
                         } else {
                           setCustomRelation(e.target.value);
                         }
@@ -1752,9 +1786,17 @@ export default function App() {
                         <input
                           type="text"
                           placeholder="e.g., Grandfather, Aunt"
-                          value={customRelation}
-                          onChange={(e) => setCustomRelation(e.target.value)}
+                          value={customRelation === 'Other' ? '' : customRelation}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            // Clean input: only allow safe characters (letters, spaces, hyphens, dots, apostrophes)
+                            const clean = val.replace(/[^a-zA-Z\s\-'\.]/g, '').substring(0, 30);
+                            setCustomRelation(clean);
+                          }}
                         />
+                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                          Letters, spaces, hyphens, dots, or apostrophes only (max 30 chars).
+                        </span>
                       </div>
                     )}
 
@@ -1985,16 +2027,51 @@ export default function App() {
                   </div>
                   <div className="form-group">
                     <label>Relationship <span className="required-asterisk">*</span></label>
-                    <select value={activeCard.relationship} onChange={(e) => updateActiveCardRelationship(e.target.value)}
-                      style={validationErrors.relationship ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}>
+                    <select
+                      value={['Father', 'Mother', 'Spouse', 'Son', 'Daughter', 'Father-in-law', 'Mother-in-law'].includes(activeCard.relationship) ? activeCard.relationship : (activeCard.relationship ? 'Other' : '')}
+                      onChange={(e) => {
+                        if (e.target.value === 'Other') {
+                          updateActiveCardRelationship('Other');
+                        } else {
+                          updateActiveCardRelationship(e.target.value);
+                        }
+                      }}
+                      style={validationErrors.relationship ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
+                    >
                       <option value="">Select Relationship</option>
-                      <option value="Father">Father</option><option value="Mother">Mother</option>
-                      <option value="Spouse">Spouse</option><option value="Son">Son</option>
-                      <option value="Daughter">Daughter</option><option value="Father-in-law">Father-in-law</option>
-                      <option value="Mother-in-law">Mother-in-law</option><option value="Other">Other</option>
+                      <option value="Father">Father</option>
+                      <option value="Mother">Mother</option>
+                      <option value="Spouse">Spouse</option>
+                      <option value="Son">Son</option>
+                      <option value="Daughter">Daughter</option>
+                      <option value="Father-in-law">Father-in-law</option>
+                      <option value="Mother-in-law">Mother-in-law</option>
+                      <option value="Other">Other / Custom...</option>
                     </select>
                     {validationErrors.relationship && <span className="field-error">{validationErrors.relationship}</span>}
                   </div>
+
+                  {activeCard.relationship !== null && activeCard.relationship !== '' && !['Father', 'Mother', 'Spouse', 'Son', 'Daughter', 'Father-in-law', 'Mother-in-law'].includes(activeCard.relationship) && (
+                    <div className="form-group">
+                      <label htmlFor="bs-custom-relationship">Custom Relationship <span className="required-asterisk">*</span></label>
+                      <input
+                        type="text"
+                        id="bs-custom-relationship"
+                        placeholder="e.g., Grandfather, Aunt"
+                        value={activeCard.relationship === 'Other' ? '' : activeCard.relationship}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          const clean = val.replace(/[^a-zA-Z\s\-'\.]/g, '').substring(0, 30);
+                          updateActiveCardRelationship(clean);
+                        }}
+                        style={validationErrors.relationship ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
+                      />
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                        Letters, spaces, hyphens, dots, or apostrophes only (max 30 chars).
+                      </span>
+                    </div>
+                  )}
+
                   <div className="form-group full-width">
                     <label style={{ fontWeight: '600', marginBottom: '0.4rem', display: 'block' }}>Choose Profile Avatar Icon</label>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', backgroundColor: 'var(--bg-card)', padding: '0.85rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
@@ -2054,16 +2131,39 @@ export default function App() {
                                   width: '42px',
                                   height: '42px',
                                   borderRadius: '50%',
-                                  border: activeCard.avatar === av.key ? '3px solid var(--primary-dark)' : 'none',
+                                  border: 'none',
+                                  boxShadow: activeCard.avatar === av.key ? '0 0 0 3px var(--primary), var(--shadow-md)' : 'var(--shadow-sm)',
+                                  transform: activeCard.avatar === av.key ? 'scale(1.12)' : 'scale(1)',
                                   padding: 0,
                                   cursor: 'pointer',
-                                  boxShadow: 'var(--shadow-sm)',
-                                  transition: 'transform 0.15s ease',
-                                  overflow: 'hidden'
+                                  transition: 'all 0.2s ease',
+                                  overflow: 'visible',
+                                  position: 'relative'
                                 }}
                                 title={av.label}
                               >
-                                {renderMaterialAvatar(av.key, 20)}
+                                <div style={{ width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden' }}>
+                                  {renderMaterialAvatar(av.key, 20)}
+                                </div>
+                                {activeCard.avatar === av.key && (
+                                  <div style={{
+                                    position: 'absolute',
+                                    bottom: '-2px',
+                                    right: '-2px',
+                                    width: '16px',
+                                    height: '16px',
+                                    borderRadius: '50%',
+                                    backgroundColor: 'var(--primary)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    color: '#ffffff',
+                                    boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+                                    zIndex: 2
+                                  }}>
+                                    <Check size={10} strokeWidth={4} />
+                                  </div>
+                                )}
                               </button>
                             ))}
                           </div>
