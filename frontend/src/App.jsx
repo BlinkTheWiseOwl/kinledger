@@ -851,19 +851,6 @@ export default function App() {
     setCards(updated);
   };
 
-  // Safe sheet close handler with auto-add/commit logic
-  const handleCloseSheet = () => {
-    // Auto-commit medication if name is entered
-    if (activeSheet === 'meds' && newMed.name && newMed.name.trim()) {
-      addMedicationToActiveCard(null);
-    }
-    // Auto-commit contact if name is entered
-    if (activeSheet === 'contacts' && newContact.name && newContact.name.trim()) {
-      addContactToActiveCard(null);
-    }
-    setActiveSheet(null);
-  };
-
   // Real-time validation helper for emergency contact form fields
   const updateNewContact = (field, value) => {
     setNewContact(prev => ({ ...prev, [field]: value }));
@@ -2003,7 +1990,7 @@ export default function App() {
 
       {/* -- Bottom Sheet: Edit section forms -- */}
       {activeSheet !== null && selectedCardId !== null && (
-        <div className="bottom-sheet-overlay" onClick={handleCloseSheet}>
+        <div className="bottom-sheet-overlay" onClick={() => setActiveSheet(null)}>
           <div className="bottom-sheet" onClick={e => e.stopPropagation()}>
             <div className="bottom-sheet-handle-bar" />
 
@@ -2016,7 +2003,7 @@ export default function App() {
                 {activeSheet === 'meds' && <><Heart size={18} /> Medications</>}
                 {activeSheet === 'share' && <><Share2 size={18} /> Share Card</>}
               </h3>
-              <button className="modal-close-btn" onClick={handleCloseSheet} aria-label="Close">
+              <button className="modal-close-btn" onClick={() => setActiveSheet(null)} aria-label="Close">
                 <X size={20} />
               </button>
             </div>
@@ -2470,14 +2457,6 @@ export default function App() {
             <div className="bottom-sheet-footer">
               <button className="btn btn-primary" style={{ flex: 1 }} disabled={isSaving}
                 onClick={async () => {
-                  // Auto-commit medication if name is entered
-                  if (activeSheet === 'meds' && newMed.name && newMed.name.trim()) {
-                    addMedicationToActiveCard(null);
-                  }
-                  // Auto-commit contact if name is entered
-                  if (activeSheet === 'contacts' && newContact.name && newContact.name.trim()) {
-                    addContactToActiveCard(null);
-                  }
                   const success = await handleSaveActiveCard();
                   if (success) {
                     setActiveSheet(null);
