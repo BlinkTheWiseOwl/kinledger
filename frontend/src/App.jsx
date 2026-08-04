@@ -847,6 +847,8 @@ export default function App() {
   // Update active card avatar symbol
   
   // Update active card contact/medication directly for inline editing
+
+  // Update active card contact/medication directly for inline editing
   const updateActiveCardContact = (index, field, value) => {
     if (!selectedCardId) return;
     const updated = cards.map(c => {
@@ -2320,14 +2322,14 @@ export default function App() {
                             <div className="form-grid">
                               <div className="form-group">
                                 <label>Name <span className="required-asterisk">*</span></label>
-                                <input type="text" placeholder="e.g., Shloka Kumar" value={newContact.name}
-                                  onChange={e => updateNewContact('name', e.target.value)}
+                                <input type="text" placeholder="e.g., Shloka Kumar" value={contact.name}
+                                  onChange={e => updateActiveCardContact(index, 'name', e.target.value)}
                                   style={validationErrors.contactName ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}} />
                                 {validationErrors.contactName && <span className="field-error">{validationErrors.contactName}</span>}
                               </div>
                               <div className="form-group">
                                 <label>Relationship <span className="required-asterisk">*</span></label>
-                                <select value={newContact.relationship} onChange={e => updateNewContact('relationship', e.target.value)}
+                                <select value={contact.relationship} onChange={e => updateActiveCardContact(index, 'relationship', e.target.value)}
                                   style={validationErrors.contactRelationship ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}>
                                   <option value="">Select</option>
                                   <option value="Daughter">Daughter</option><option value="Son">Son</option>
@@ -2341,28 +2343,17 @@ export default function App() {
                               </div>
                               <div className="form-group">
                                 <label>Phone <span className="required-asterisk">*</span></label>
-                                <input type="tel" placeholder="e.g., 9886012345" value={newContact.phoneNumber}
-                                  onChange={e => updateNewContact('phoneNumber', e.target.value)}
+                                <input type="tel" placeholder="e.g., 9886012345" value={contact.phoneNumber}
+                                  onChange={e => updateActiveCardContact(index, 'phoneNumber', e.target.value)}
                                   style={validationErrors.contactPhone ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}} />
                                 {validationErrors.contactPhone && <span className="field-error">{validationErrors.contactPhone}</span>}
                               </div>
                               <div className="form-group">
                                 <label>Email (Optional)</label>
-                                <input type="email" placeholder="e.g., shloka@email.com" value={newContact.email || ''}
-                                  onChange={e => updateNewContact('email', e.target.value)}
+                                <input type="email" placeholder="e.g., shloka@email.com" value={contact.email || ''}
+                                  onChange={e => updateActiveCardContact(index, 'email', e.target.value)}
                                   style={validationErrors.contactEmail ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}} />
                                 {validationErrors.contactEmail && <span className="field-error">{validationErrors.contactEmail}</span>}
-                              </div>
-                              <div className="form-group full-width" style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', flexWrap: 'wrap' }}>
-                                <button type="button" className="btn btn-outline" style={{ width: 'auto', flex: 1, minWidth: '120px' }} onClick={() => {
-                                  setEditingContactIndex(null);
-                                  setNewContact({ name: '', relationship: '', phoneNumber: '', email: '' });
-                                }}>
-                                  Cancel
-                                </button>
-                                <button type="button" className="btn btn-secondary" style={{ width: 'auto', flex: 1, minWidth: '120px' }} onClick={(e) => addContactToActiveCard(e)}>
-                                  Save Changes
-                                </button>
                               </div>
                             </div>
                           </div>
@@ -2453,13 +2444,13 @@ export default function App() {
                             <div className="form-grid">
                               <div className="form-group">
                                 <label>Med Name <span className="required-asterisk">*</span></label>
-                                <input type="text" placeholder="e.g., Metformin" value={newMed.name}
-                                  onChange={e => setNewMed(prev => ({ ...prev, name: e.target.value }))} />
+                                <input type="text" placeholder="e.g., Metformin" value={med.name}
+                                  onChange={e => updateActiveCardMedication(index, 'name', e.target.value)} />
                               </div>
                               <div className="form-group">
                                 <label>Dosage</label>
-                                <input type="text" placeholder="e.g., 500mg, 1 tab" value={newMed.dosage}
-                                  onChange={e => setNewMed(prev => ({ ...prev, dosage: e.target.value }))} />
+                                <input type="text" placeholder="e.g., 500mg, 1 tab" value={med.dosage}
+                                  onChange={e => updateActiveCardMedication(index, 'dosage', e.target.value)} />
                               </div>
                               <div className="form-group">
                                 <label>Frequency</label>
@@ -2478,19 +2469,8 @@ export default function App() {
                               </div>
                               <div className="form-group">
                                 <label>Instructions</label>
-                                <input type="text" placeholder="e.g., After meals" value={newMed.instructions}
-                                  onChange={e => setNewMed(prev => ({ ...prev, instructions: e.target.value }))} />
-                              </div>
-                              <div className="form-group full-width" style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', flexWrap: 'wrap' }}>
-                                <button type="button" className="btn btn-outline" style={{ width: 'auto', flex: 1, minWidth: '120px' }} onClick={() => {
-                                  setEditingMedIndex(null);
-                                  setNewMed({ name: '', dosage: '', frequency: '', instructions: '' });
-                                }}>
-                                  Cancel
-                                </button>
-                                <button type="button" className="btn btn-secondary" style={{ width: 'auto', flex: 1, minWidth: '120px' }} onClick={(e) => addMedicationToActiveCard(e)}>
-                                  Save Changes
-                                </button>
+                                <input type="text" placeholder="e.g., After meals" value={med.instructions}
+                                  onChange={e => updateActiveCardMedication(index, 'instructions', e.target.value)} />
                               </div>
                             </div>
                           </div>
