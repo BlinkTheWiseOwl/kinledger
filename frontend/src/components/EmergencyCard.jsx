@@ -407,26 +407,25 @@ export default function EmergencyCard({ profile, emergencyContacts, medications,
 
   return (
     <div className="emergency-card-container animated">
-      <div className="card-actions-bar">
+      <div className="card-actions-bar" style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '8px' }}>
         <button
-          className="btn btn-primary btn-icon-only"
           onClick={handlePrint}
           title="Print & Share Card"
           style={{
-            width: '44px',
-            height: '44px',
-            borderRadius: '50%',
-            backgroundColor: 'var(--primary)',
-            color: 'white',
+            background: 'none',
+            border: 'none',
+            color: 'var(--text-secondary)',
+            cursor: 'pointer',
+            padding: '4px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: 'var(--shadow-md)',
-            transition: 'var(--transition)',
-            padding: 0
+            transition: 'color 0.2s'
           }}
+          onMouseEnter={(e) => e.currentTarget.style.color = 'var(--primary)'}
+          onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
         >
-          <Share2 size={20} />
+          <Share2 size={18} />
         </button>
       </div>
 

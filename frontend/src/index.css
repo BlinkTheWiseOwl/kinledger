@@ -311,6 +311,34 @@ input::-ms-clear {
   color: var(--danger);
 }
 
+.btn-icon-subtle {
+  background: none;
+  border: 1px solid transparent;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+.btn-icon-subtle:hover {
+  opacity: 1;
+  border-color: var(--border);
+  color: var(--primary);
+  background-color: var(--bg-app);
+}
+
+.btn-icon-subtle.danger-hover:hover {
+  color: var(--danger);
+  border-color: rgba(220, 38, 38, 0.3);
+  background-color: var(--danger-light);
+}
+
 /* Add Member Blank Card */
 .add-member-card {
   background: none;

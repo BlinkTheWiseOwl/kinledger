@@ -2287,85 +2287,130 @@ export default function App() {
                   {activeCard.emergencyContacts.length > 0 ? (
                     <div className="contact-list-sheet">
                       {activeCard.emergencyContacts.map((contact, index) => (
-                        <div key={index} className="contact-sheet-row">
-                          <div className="contact-sheet-info">
-                            <div className="contact-sheet-name">{contact.name}</div>
-                            <div className="contact-sheet-meta">{contact.relationship} · {contact.phoneNumber}</div>
-                            {contact.email && <div className="contact-sheet-email">{contact.email}</div>}
+                        editingContactIndex === index ? (
+                          <div key={index} className="sheet-sub-form inline-edit-form" style={{ padding: '10px', border: '1px solid var(--border)', borderRadius: '8px', marginBottom: '10px', backgroundColor: 'var(--bg-app)' }}>
+                            <div className="form-grid">
+                              <div className="form-group">
+                                <label>Name <span className="required-asterisk">*</span></label>
+                                <input type="text" placeholder="e.g., Shloka Kumar" value={newContact.name}
+                                  onChange={e => updateNewContact('name', e.target.value)}
+                                  style={validationErrors.contactName ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}} />
+                                {validationErrors.contactName && <span className="field-error">{validationErrors.contactName}</span>}
+                              </div>
+                              <div className="form-group">
+                                <label>Relationship <span className="required-asterisk">*</span></label>
+                                <select value={newContact.relationship} onChange={e => updateNewContact('relationship', e.target.value)}
+                                  style={validationErrors.contactRelationship ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}>
+                                  <option value="">Select</option>
+                                  <option value="Daughter">Daughter</option><option value="Son">Son</option>
+                                  <option value="Spouse">Spouse</option><option value="Father">Father</option>
+                                  <option value="Mother">Mother</option><option value="Brother">Brother</option>
+                                  <option value="Sister">Sister</option><option value="Friend">Friend</option>
+                                  <option value="Guardian">Guardian</option><option value="Neighbor">Neighbor</option>
+                                  <option value="Other">Other</option>
+                                </select>
+                                {validationErrors.contactRelationship && <span className="field-error">{validationErrors.contactRelationship}</span>}
+                              </div>
+                              <div className="form-group">
+                                <label>Phone <span className="required-asterisk">*</span></label>
+                                <input type="tel" placeholder="e.g., 9886012345" value={newContact.phoneNumber}
+                                  onChange={e => updateNewContact('phoneNumber', e.target.value)}
+                                  style={validationErrors.contactPhone ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}} />
+                                {validationErrors.contactPhone && <span className="field-error">{validationErrors.contactPhone}</span>}
+                              </div>
+                              <div className="form-group">
+                                <label>Email (Optional)</label>
+                                <input type="email" placeholder="e.g., shloka@email.com" value={newContact.email || ''}
+                                  onChange={e => updateNewContact('email', e.target.value)}
+                                  style={validationErrors.contactEmail ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}} />
+                                {validationErrors.contactEmail && <span className="field-error">{validationErrors.contactEmail}</span>}
+                              </div>
+                              <div className="form-group full-width" style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                <button type="button" className="btn btn-outline" style={{ width: 'auto', flex: 1, minWidth: '120px' }} onClick={() => {
+                                  setEditingContactIndex(null);
+                                  setNewContact({ name: '', relationship: '', phoneNumber: '', email: '' });
+                                }}>
+                                  Cancel
+                                </button>
+                                <button type="button" className="btn btn-secondary" style={{ width: 'auto', flex: 1, minWidth: '120px' }} onClick={(e) => addContactToActiveCard(e)}>
+                                  Save Changes
+                                </button>
+                              </div>
+                            </div>
                           </div>
-                          <div style={{ display: 'flex', gap: '0.5rem' }}>
-                            <button className="btn btn-secondary btn-sm" onClick={() => {
-                              setEditingContactIndex(index);
-                              setNewContact({ ...contact });
-                            }} type="button">
-                              <Pencil size={15} />
-                            </button>
-                            <button className="btn btn-danger btn-sm" onClick={() => removeContactFromActiveCard(index)}>
-                              <Trash2 size={15} />
-                            </button>
+                        ) : (
+                          <div key={index} className="contact-sheet-row">
+                            <div className="contact-sheet-info">
+                              <div className="contact-sheet-name">{contact.name}</div>
+                              <div className="contact-sheet-meta">{contact.relationship} · {contact.phoneNumber}</div>
+                              {contact.email && <div className="contact-sheet-email">{contact.email}</div>}
+                            </div>
+                            <div style={{ display: 'flex', gap: '0.25rem' }}>
+                              <button className="btn-icon-subtle" onClick={() => {
+                                setEditingContactIndex(index);
+                                setNewContact({ ...contact });
+                              }} type="button" title="Edit Contact">
+                                <Pencil size={15} />
+                              </button>
+                              <button className="btn-icon-subtle danger-hover" onClick={() => removeContactFromActiveCard(index)} type="button" title="Delete Contact">
+                                <Trash2 size={15} />
+                              </button>
+                            </div>
                           </div>
-                        </div>
+                        )
                       ))}
                     </div>
                   ) : (
                     <div className="item-list-empty">No contacts added yet. Use the form below.</div>
                   )}
 
-                  <form onSubmit={addContactToActiveCard} className="sheet-sub-form">
-                    <h4 className="sheet-sub-form-title">
-                      {editingContactIndex !== null ? 'Edit Contact' : 'Add Contact'}
-                    </h4>
-                    <div className="form-grid">
-                      <div className="form-group">
-                        <label>Name <span className="required-asterisk">*</span></label>
-                        <input type="text" placeholder="e.g., Shloka Kumar" value={newContact.name}
-                          onChange={e => updateNewContact('name', e.target.value)}
-                          style={validationErrors.contactName ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}} />
-                        {validationErrors.contactName && <span className="field-error">{validationErrors.contactName}</span>}
-                      </div>
-                      <div className="form-group">
-                        <label>Relationship <span className="required-asterisk">*</span></label>
-                        <select value={newContact.relationship} onChange={e => updateNewContact('relationship', e.target.value)}
-                          style={validationErrors.contactRelationship ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}>
-                          <option value="">Select</option>
-                          <option value="Daughter">Daughter</option><option value="Son">Son</option>
-                          <option value="Spouse">Spouse</option><option value="Father">Father</option>
-                          <option value="Mother">Mother</option><option value="Brother">Brother</option>
-                          <option value="Sister">Sister</option><option value="Friend">Friend</option>
-                          <option value="Guardian">Guardian</option><option value="Neighbor">Neighbor</option>
-                          <option value="Other">Other</option>
-                        </select>
-                        {validationErrors.contactRelationship && <span className="field-error">{validationErrors.contactRelationship}</span>}
-                      </div>
-                      <div className="form-group">
-                        <label>Phone <span className="required-asterisk">*</span></label>
-                        <input type="tel" placeholder="e.g., 9886012345" value={newContact.phoneNumber}
-                          onChange={e => updateNewContact('phoneNumber', e.target.value)}
-                          style={validationErrors.contactPhone ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}} />
-                        {validationErrors.contactPhone && <span className="field-error">{validationErrors.contactPhone}</span>}
-                      </div>
-                      <div className="form-group">
-                        <label>Email (Optional)</label>
-                        <input type="email" placeholder="e.g., shloka@email.com" value={newContact.email || ''}
-                          onChange={e => updateNewContact('email', e.target.value)}
-                          style={validationErrors.contactEmail ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}} />
-                        {validationErrors.contactEmail && <span className="field-error">{validationErrors.contactEmail}</span>}
-                      </div>
-                      <div className="form-group full-width" style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
-                        {editingContactIndex !== null && (
-                          <button type="button" className="btn btn-outline" style={{ width: 'fit-content' }} onClick={() => {
-                            setEditingContactIndex(null);
-                            setNewContact({ name: '', relationship: '', phoneNumber: '', email: '' });
-                          }}>
-                            Cancel
+                  {editingContactIndex === null && (
+                    <form onSubmit={addContactToActiveCard} className="sheet-sub-form">
+                      <h4 className="sheet-sub-form-title">Add Contact</h4>
+                      <div className="form-grid">
+                        <div className="form-group">
+                          <label>Name <span className="required-asterisk">*</span></label>
+                          <input type="text" placeholder="e.g., Shloka Kumar" value={newContact.name}
+                            onChange={e => updateNewContact('name', e.target.value)}
+                            style={validationErrors.contactName ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}} />
+                          {validationErrors.contactName && <span className="field-error">{validationErrors.contactName}</span>}
+                        </div>
+                        <div className="form-group">
+                          <label>Relationship <span className="required-asterisk">*</span></label>
+                          <select value={newContact.relationship} onChange={e => updateNewContact('relationship', e.target.value)}
+                            style={validationErrors.contactRelationship ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}>
+                            <option value="">Select</option>
+                            <option value="Daughter">Daughter</option><option value="Son">Son</option>
+                            <option value="Spouse">Spouse</option><option value="Father">Father</option>
+                            <option value="Mother">Mother</option><option value="Brother">Brother</option>
+                            <option value="Sister">Sister</option><option value="Friend">Friend</option>
+                            <option value="Guardian">Guardian</option><option value="Neighbor">Neighbor</option>
+                            <option value="Other">Other</option>
+                          </select>
+                          {validationErrors.contactRelationship && <span className="field-error">{validationErrors.contactRelationship}</span>}
+                        </div>
+                        <div className="form-group">
+                          <label>Phone <span className="required-asterisk">*</span></label>
+                          <input type="tel" placeholder="e.g., 9886012345" value={newContact.phoneNumber}
+                            onChange={e => updateNewContact('phoneNumber', e.target.value)}
+                            style={validationErrors.contactPhone ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}} />
+                          {validationErrors.contactPhone && <span className="field-error">{validationErrors.contactPhone}</span>}
+                        </div>
+                        <div className="form-group">
+                          <label>Email (Optional)</label>
+                          <input type="email" placeholder="e.g., shloka@email.com" value={newContact.email || ''}
+                            onChange={e => updateNewContact('email', e.target.value)}
+                            style={validationErrors.contactEmail ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}} />
+                          {validationErrors.contactEmail && <span className="field-error">{validationErrors.contactEmail}</span>}
+                        </div>
+                        <div className="form-group full-width" style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                          <button type="submit" className="btn btn-secondary" style={{ width: 'fit-content' }}>
+                            <Plus size={15} /> Add to List
                           </button>
-                        )}
-                        <button type="submit" className="btn btn-secondary" style={{ width: 'fit-content' }}>
-                          {editingContactIndex !== null ? 'Save Changes' : <><Plus size={15} /> Add to List</>}
-                        </button>
+                        </div>
                       </div>
-                    </div>
-                  </form>
+                    </form>
+                  )}
                 </div>
               )}
 
@@ -2375,82 +2420,122 @@ export default function App() {
                   {activeCard.medications.length > 0 ? (
                     <div className="contact-list-sheet">
                       {activeCard.medications.map((med, index) => (
-                        <div key={index} className="contact-sheet-row">
-                          <div className="contact-sheet-info">
-                            <div className="contact-sheet-name">{med.name}</div>
-                            <div className="contact-sheet-meta">
-                              {[med.dosage, med.frequency].filter(Boolean).join(' · ')}
+                        editingMedIndex === index ? (
+                          <div key={index} className="sheet-sub-form inline-edit-form" style={{ padding: '10px', border: '1px solid var(--border)', borderRadius: '8px', marginBottom: '10px', backgroundColor: 'var(--bg-app)' }}>
+                            <div className="form-grid">
+                              <div className="form-group">
+                                <label>Med Name <span className="required-asterisk">*</span></label>
+                                <input type="text" placeholder="e.g., Metformin" value={newMed.name}
+                                  onChange={e => setNewMed(prev => ({ ...prev, name: e.target.value }))} />
+                              </div>
+                              <div className="form-group">
+                                <label>Dosage</label>
+                                <input type="text" placeholder="e.g., 500mg, 1 tab" value={newMed.dosage}
+                                  onChange={e => setNewMed(prev => ({ ...prev, dosage: e.target.value }))} />
+                              </div>
+                              <div className="form-group">
+                                <label>Frequency</label>
+                                <select value={newMed.frequency} onChange={e => setNewMed(prev => ({ ...prev, frequency: e.target.value }))}>
+                                  <option value="">Select</option>
+                                  <option value="Once daily (morning)">Once daily (morning)</option>
+                                  <option value="Once daily (night)">Once daily (night)</option>
+                                  <option value="Twice daily (morning & night)">Twice daily (morning & night)</option>
+                                  <option value="Three times daily">Three times daily</option>
+                                  <option value="Four times daily">Four times daily</option>
+                                  <option value="Once a week">Once a week</option>
+                                  <option value="Twice a week">Twice a week</option>
+                                  <option value="As needed (SOS)">As needed (SOS)</option>
+                                  <option value="Other">Other</option>
+                                </select>
+                              </div>
+                              <div className="form-group">
+                                <label>Instructions</label>
+                                <input type="text" placeholder="e.g., After meals" value={newMed.instructions}
+                                  onChange={e => setNewMed(prev => ({ ...prev, instructions: e.target.value }))} />
+                              </div>
+                              <div className="form-group full-width" style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                <button type="button" className="btn btn-outline" style={{ width: 'auto', flex: 1, minWidth: '120px' }} onClick={() => {
+                                  setEditingMedIndex(null);
+                                  setNewMed({ name: '', dosage: '', frequency: '', instructions: '' });
+                                }}>
+                                  Cancel
+                                </button>
+                                <button type="button" className="btn btn-secondary" style={{ width: 'auto', flex: 1, minWidth: '120px' }} onClick={(e) => addMedicationToActiveCard(e)}>
+                                  Save Changes
+                                </button>
+                              </div>
                             </div>
-                            {med.instructions && <div className="contact-sheet-email">{med.instructions}</div>}
                           </div>
-                          <div style={{ display: 'flex', gap: '0.5rem' }}>
-                            <button className="btn btn-secondary btn-sm" onClick={() => {
-                              setEditingMedIndex(index);
-                              setNewMed({ ...med });
-                            }} type="button">
-                              <Pencil size={15} />
-                            </button>
-                            <button className="btn btn-danger btn-sm" onClick={() => removeMedicationFromActiveCard(index)}>
-                              <Trash2 size={15} />
-                            </button>
+                        ) : (
+                          <div key={index} className="contact-sheet-row">
+                            <div className="contact-sheet-info">
+                              <div className="contact-sheet-name">{med.name}</div>
+                              <div className="contact-sheet-meta">
+                                {[med.dosage, med.frequency].filter(Boolean).join(' · ')}
+                              </div>
+                              {med.instructions && <div className="contact-sheet-email">{med.instructions}</div>}
+                            </div>
+                            <div style={{ display: 'flex', gap: '0.25rem' }}>
+                              <button className="btn-icon-subtle" onClick={() => {
+                                setEditingMedIndex(index);
+                                setNewMed({ ...med });
+                              }} type="button" title="Edit Medication">
+                                <Pencil size={15} />
+                              </button>
+                              <button className="btn-icon-subtle danger-hover" onClick={() => removeMedicationFromActiveCard(index)} type="button" title="Delete Medication">
+                                <Trash2 size={15} />
+                              </button>
+                            </div>
                           </div>
-                        </div>
+                        )
                       ))}
                     </div>
                   ) : (
                     <div className="item-list-empty">No medications added yet.</div>
                   )}
 
-                  <form onSubmit={addMedicationToActiveCard} className="sheet-sub-form">
-                    <h4 className="sheet-sub-form-title">
-                      {editingMedIndex !== null ? 'Edit Medication' : 'Add Medication'}
-                    </h4>
-                    <div className="form-grid">
-                      <div className="form-group">
-                        <label>Med Name <span className="required-asterisk">*</span></label>
-                        <input type="text" placeholder="e.g., Metformin" value={newMed.name}
-                          onChange={e => setNewMed(prev => ({ ...prev, name: e.target.value }))} />
-                      </div>
-                      <div className="form-group">
-                        <label>Dosage</label>
-                        <input type="text" placeholder="e.g., 500mg, 1 tab" value={newMed.dosage}
-                          onChange={e => setNewMed(prev => ({ ...prev, dosage: e.target.value }))} />
-                      </div>
-                      <div className="form-group">
-                        <label>Frequency</label>
-                        <select value={newMed.frequency} onChange={e => setNewMed(prev => ({ ...prev, frequency: e.target.value }))}>
-                          <option value="">Select</option>
-                          <option value="Once daily (morning)">Once daily (morning)</option>
-                          <option value="Once daily (night)">Once daily (night)</option>
-                          <option value="Twice daily (morning & night)">Twice daily (morning & night)</option>
-                          <option value="Three times daily">Three times daily</option>
-                          <option value="Four times daily">Four times daily</option>
-                          <option value="Once a week">Once a week</option>
-                          <option value="Twice a week">Twice a week</option>
-                          <option value="As needed (SOS)">As needed (SOS)</option>
-                          <option value="Other">Other</option>
-                        </select>
-                      </div>
-                      <div className="form-group">
-                        <label>Instructions</label>
-                        <input type="text" placeholder="e.g., After meals" value={newMed.instructions}
-                          onChange={e => setNewMed(prev => ({ ...prev, instructions: e.target.value }))} />
-                      </div>
-                      <div className="form-group full-width" style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
-                        {editingMedIndex !== null && (
-                          <button type="button" className="btn btn-outline" style={{ width: 'fit-content' }} onClick={() => {
-                            setEditingMedIndex(null);
-                            setNewMed({ name: '', dosage: '', frequency: '', instructions: '' });
-                          }}>
-                            Cancel
+                  {editingMedIndex === null && (
+                    <form onSubmit={addMedicationToActiveCard} className="sheet-sub-form">
+                      <h4 className="sheet-sub-form-title">Add Medication</h4>
+                      <div className="form-grid">
+                        <div className="form-group">
+                          <label>Med Name <span className="required-asterisk">*</span></label>
+                          <input type="text" placeholder="e.g., Metformin" value={newMed.name}
+                            onChange={e => setNewMed(prev => ({ ...prev, name: e.target.value }))} />
+                        </div>
+                        <div className="form-group">
+                          <label>Dosage</label>
+                          <input type="text" placeholder="e.g., 500mg, 1 tab" value={newMed.dosage}
+                            onChange={e => setNewMed(prev => ({ ...prev, dosage: e.target.value }))} />
+                        </div>
+                        <div className="form-group">
+                          <label>Frequency</label>
+                          <select value={newMed.frequency} onChange={e => setNewMed(prev => ({ ...prev, frequency: e.target.value }))}>
+                            <option value="">Select</option>
+                            <option value="Once daily (morning)">Once daily (morning)</option>
+                            <option value="Once daily (night)">Once daily (night)</option>
+                            <option value="Twice daily (morning & night)">Twice daily (morning & night)</option>
+                            <option value="Three times daily">Three times daily</option>
+                            <option value="Four times daily">Four times daily</option>
+                            <option value="Once a week">Once a week</option>
+                            <option value="Twice a week">Twice a week</option>
+                            <option value="As needed (SOS)">As needed (SOS)</option>
+                            <option value="Other">Other</option>
+                          </select>
+                        </div>
+                        <div className="form-group">
+                          <label>Instructions</label>
+                          <input type="text" placeholder="e.g., After meals" value={newMed.instructions}
+                            onChange={e => setNewMed(prev => ({ ...prev, instructions: e.target.value }))} />
+                        </div>
+                        <div className="form-group full-width" style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                          <button type="submit" className="btn btn-secondary" style={{ width: 'fit-content' }}>
+                            <Plus size={15} /> Add to List
                           </button>
-                        )}
-                        <button type="submit" className="btn btn-secondary" style={{ width: 'fit-content' }}>
-                          {editingMedIndex !== null ? 'Save Changes' : <><Plus size={15} /> Add to List</>}
-                        </button>
+                        </div>
                       </div>
-                    </div>
-                  </form>
+                    </form>
+                  )}
                 </div>
               )}
 
