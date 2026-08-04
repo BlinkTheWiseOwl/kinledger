@@ -1019,9 +1019,9 @@ export default function App() {
     });
 
     if (editingContactIndex !== null) {
-      showStatus("Emergency contact updated. Click 'Save Card Information' at the top to save your changes.", "info");
+      showStatus(/"Emergency contact updated. Click 'Save & Close' to confirm."/, "info");
     } else {
-      showStatus("Emergency contact added. Click 'Save Card Information' at the top to save your changes.", "info");
+      showStatus(/"Emergency contact added. Click 'Save & Close' to confirm."/, "info");
     }
   };
 
@@ -1038,7 +1038,7 @@ export default function App() {
       return c;
     });
     setCards(updated);
-    showStatus("Emergency contact removed. Click 'Save Card Information' at the top to save your changes.", "info");
+    showStatus(/"Emergency contact removed. Click 'Save & Close' to confirm."/, "info");
   };
 
   // Add/Edit medication of selected card
@@ -1101,9 +1101,9 @@ export default function App() {
     setEditingMedIndex(null);
 
     if (editingMedIndex !== null) {
-      showStatus("Medication updated. Click 'Save Card Information' at the top to save your changes.", "info");
+      showStatus(/"Medication updated. Click 'Save & Close' to confirm."/, "info");
     } else {
-      showStatus("Medication added. Click 'Save Card Information' at the top to save your changes.", "info");
+      showStatus(/"Medication added. Click 'Save & Close' to confirm."/, "info");
     }
   };
 
@@ -1120,7 +1120,7 @@ export default function App() {
       return c;
     });
     setCards(updated);
-    showStatus("Medication removed. Click 'Save Card Information' at the top to save your changes.", "info");
+    showStatus(/"Medication removed. Click 'Save & Close' to confirm."/, "info");
   };
 
   // Manual trigger to save current active states
@@ -2016,7 +2016,7 @@ export default function App() {
                 {/* Medications row */}
                 <button className="section-row" onClick={() => setActiveSheet('meds')}>
                   <div className="section-row-left">
-                    <div className="section-row-icon-wrap"><Tablets size={18} /></div>
+                    <div className="section-row-icon-wrap"><Pill size={18} /></div>
                     <div className="section-row-info">
                       <span className="section-row-label">Medications</span>
                       <span className="section-row-status">
@@ -2072,7 +2072,7 @@ export default function App() {
                 {activeSheet === 'profile' && <><User size={18} /> Profile</>}
                 {activeSheet === 'insurance' && <><Award size={18} /> Insurance</>}
                 {activeSheet === 'contacts' && <><Phone size={18} /> Emergency Contacts</>}
-                {activeSheet === 'meds' && <><Tablets size={18} /> Medications</>}
+                {activeSheet === 'meds' && <><Pill size={18} /> Medications</>}
                 {activeSheet === 'share' && <><Users size={18} /> Share Card</>}
               </h3>
               <button className="modal-close-btn" onClick={() => setActiveSheet(null)} aria-label="Close">
