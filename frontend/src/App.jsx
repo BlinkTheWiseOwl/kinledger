@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Shield, FileText, Plus, Trash2, Save, User, Users, Heart, Activity, ShieldAlert, Award, Phone, ArrowLeft, Printer, Eye, Share2, LogOut, Menu, X, ChevronDown, ChevronRight, Loader2, Check, Pencil, Pill } from 'lucide-react';
+import { Shield, FileText, Plus, Trash2, Save, User, Users, Heart, Activity, ShieldAlert, Award, Phone, ArrowLeft, Printer, Eye, Share2, LogOut, Menu, X, ChevronDown, ChevronRight, Loader2, Check, Pencil, Pill, Tablets } from 'lucide-react';
 import { loadCardData, saveCardData, BACKEND_URL } from './utils/storage';
 import { Capacitor } from '@capacitor/core';
 import { Share } from '@capacitor/share';
@@ -1950,7 +1950,7 @@ export default function App() {
                 className={`tab-btn ${activeTab === 'edit' ? 'active' : ''}`}
                 onClick={() => setActiveTab('edit')}
               >
-                <User size={15} />
+                <Pencil size={15} />
                 {getReadinessStatus(activeCard).status === 'complete' ? 'Edit' : 'Set Up'}
               </button>
               <button
@@ -2014,7 +2014,7 @@ export default function App() {
                 {/* Medications row */}
                 <button className="section-row" onClick={() => setActiveSheet('meds')}>
                   <div className="section-row-left">
-                    <div className="section-row-icon-wrap"><Heart size={18} /></div>
+                    <div className="section-row-icon-wrap"><Tablets size={18} /></div>
                     <div className="section-row-info">
                       <span className="section-row-label">Medications</span>
                       <span className="section-row-status">
@@ -2030,7 +2030,7 @@ export default function App() {
                 {/* Share row */}
                 <button className="section-row section-row-last" onClick={() => setActiveSheet('share')}>
                   <div className="section-row-left">
-                    <div className="section-row-icon-wrap"><Share2 size={18} /></div>
+                    <div className="section-row-icon-wrap"><Users size={18} /></div>
                     <div className="section-row-info">
                       <span className="section-row-label">Share</span>
                       <span className="section-row-status">
@@ -2070,7 +2070,7 @@ export default function App() {
                 {activeSheet === 'profile' && <><User size={18} /> Profile</>}
                 {activeSheet === 'insurance' && <><Award size={18} /> Insurance</>}
                 {activeSheet === 'contacts' && <><Phone size={18} /> Emergency Contacts</>}
-                {activeSheet === 'meds' && <><Pill size={18} /> Medications</>}
+                {activeSheet === 'meds' && <><Tablets size={18} /> Medications</>}
                 {activeSheet === 'share' && <><Users size={18} /> Share Card</>}
               </h3>
               <button className="modal-close-btn" onClick={() => setActiveSheet(null)} aria-label="Close">
