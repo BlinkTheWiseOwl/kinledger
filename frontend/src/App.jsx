@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Shield, FileText, Plus, Trash2, Save, User, Users, Heart, Activity, ShieldAlert, Award, Phone, ArrowLeft, Printer, Eye, Share2, LogOut, Menu, X, ChevronDown, ChevronRight, Loader2, Check, Pencil } from 'lucide-react';
+import { Shield, FileText, Plus, Trash2, Save, User, Users, Heart, Activity, ShieldAlert, Award, Phone, ArrowLeft, Printer, Eye, Share2, LogOut, Menu, X, ChevronDown, ChevronRight, Loader2, Check, Pencil, Pill } from 'lucide-react';
 import { loadCardData, saveCardData, BACKEND_URL } from './utils/storage';
 import { Capacitor } from '@capacitor/core';
 import { Share } from '@capacitor/share';
@@ -845,6 +845,34 @@ export default function App() {
   };
 
   // Update active card avatar symbol
+  
+  // Update active card contact/medication directly for inline editing
+  const updateActiveCardContact = (index, field, value) => {
+    if (!selectedCardId) return;
+    const updated = cards.map(c => {
+      if (c.id === selectedCardId) {
+        const contacts = [...c.emergencyContacts];
+        contacts[index] = { ...contacts[index], [field]: value };
+        return { ...c, emergencyContacts: contacts };
+      }
+      return c;
+    });
+    setCards(updated);
+  };
+
+  const updateActiveCardMedication = (index, field, value) => {
+    if (!selectedCardId) return;
+    const updated = cards.map(c => {
+      if (c.id === selectedCardId) {
+        const meds = [...c.medications];
+        meds[index] = { ...meds[index], [field]: value };
+        return { ...c, medications: meds };
+      }
+      return c;
+    });
+    setCards(updated);
+  };
+
   const updateActiveCardAvatar = (value) => {
     if (!selectedCardId) return;
     const updated = cards.map(c => {
@@ -2042,8 +2070,8 @@ export default function App() {
                 {activeSheet === 'profile' && <><User size={18} /> Profile</>}
                 {activeSheet === 'insurance' && <><Award size={18} /> Insurance</>}
                 {activeSheet === 'contacts' && <><Phone size={18} /> Emergency Contacts</>}
-                {activeSheet === 'meds' && <><Heart size={18} /> Medications</>}
-                {activeSheet === 'share' && <><Share2 size={18} /> Share Card</>}
+                {activeSheet === 'meds' && <><Pill size={18} /> Medications</>}
+                {activeSheet === 'share' && <><Users size={18} /> Share Card</>}
               </h3>
               <button className="modal-close-btn" onClick={() => setActiveSheet(null)} aria-label="Close">
                 <X size={20} />
@@ -2435,7 +2463,7 @@ export default function App() {
                               </div>
                               <div className="form-group">
                                 <label>Frequency</label>
-                                <select value={newMed.frequency} onChange={e => setNewMed(prev => ({ ...prev, frequency: e.target.value }))}>
+                                <select value={med.frequency} onChange={e => updateActiveCardMedication(index, 'frequency', e.target.value)}>
                                   <option value="">Select</option>
                                   <option value="Once daily (morning)">Once daily (morning)</option>
                                   <option value="Once daily (night)">Once daily (night)</option>

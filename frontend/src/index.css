@@ -312,31 +312,35 @@ input::-ms-clear {
 }
 
 .btn-icon-subtle {
-  background: none;
-  border: 1px solid transparent;
-  width: 28px;
-  height: 28px;
-  border-radius: 4px;
+  background-color: var(--primary-light);
+  border: 1px solid rgba(15, 108, 95, 0.2);
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: var(--transition);
-  color: var(--text-muted);
-  opacity: 0.6;
+  color: var(--primary);
 }
 
 .btn-icon-subtle:hover {
-  opacity: 1;
-  border-color: var(--border);
-  color: var(--primary);
-  background-color: var(--bg-app);
+  background-color: var(--primary);
+  border-color: var(--primary);
+  color: #ffffff;
+}
+
+.btn-icon-subtle.danger-hover {
+  background-color: var(--danger-light);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  color: var(--danger);
 }
 
 .btn-icon-subtle.danger-hover:hover {
-  color: var(--danger);
-  border-color: rgba(220, 38, 38, 0.3);
-  background-color: var(--danger-light);
+  background-color: var(--danger);
+  border-color: var(--danger);
+  color: #ffffff;
 }
 
 /* Add Member Blank Card */
