@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Shield, FileText, Plus, Trash2, Save, User, Users, Heart, Activity, ShieldAlert, Award, Phone, ArrowLeft, Printer, Eye, Share2, LogOut, Menu, X, ChevronDown, ChevronRight, Loader2, Check } from 'lucide-react';
+import { Shield, FileText, Plus, Trash2, Save, User, Users, Heart, Activity, ShieldAlert, Award, Phone, ArrowLeft, Printer, Eye, Share2, LogOut, Menu, X, ChevronDown, ChevronRight, Loader2, Check, Pencil } from 'lucide-react';
 import { loadCardData, saveCardData, BACKEND_URL } from './utils/storage';
 import { Capacitor } from '@capacitor/core';
 import { Share } from '@capacitor/share';
@@ -191,6 +191,7 @@ export default function App() {
 
   // Dashboard state for adding a new member
   const [showAddMenu, setShowAddMenu] = useState(false);
+  const [showAddMenuAtTop, setShowAddMenuAtTop] = useState(false);
   const [customRelation, setCustomRelation] = useState('');
   const addMenuRef = useRef(null);
 
@@ -205,6 +206,8 @@ export default function App() {
   // Temp contact and medication forms state (local to selected card workspace)
   const [newContact, setNewContact] = useState({ name: '', relationship: '', phoneNumber: '', email: '' });
   const [newMed, setNewMed] = useState({ name: '', dosage: '', frequency: '', instructions: '' });
+  const [editingContactIndex, setEditingContactIndex] = useState(null);
+  const [editingMedIndex, setEditingMedIndex] = useState(null);
 
   // Load cards array on mount or session change
   useEffect(() => {
@@ -252,11 +255,13 @@ export default function App() {
     }
   }, [userEmail]);
 
-  // Clear local contact and medication input fields when switching cards or adding members
+  // Clear local contact and medication input fields when switching cards, sheets, or adding members
   useEffect(() => {
     setNewContact({ name: '', relationship: '', phoneNumber: '', email: '' });
     setNewMed({ name: '', dosage: '', frequency: '', instructions: '' });
-  }, [selectedCardId]);
+    setEditingContactIndex(null);
+    setEditingMedIndex(null);
+  }, [selectedCardId, activeSheet]);
 
   // Close hamburger menu when clicking outside
   useEffect(() => {
@@ -907,7 +912,7 @@ export default function App() {
     });
   };
 
-  // Add contact to selected card
+  // Add/Edit contact of selected card
   const addContactToActiveCard = (e) => {
     if (e) e.preventDefault();
     if (!selectedCardId) return;
@@ -948,16 +953,22 @@ export default function App() {
       return;
     }
 
-    if (activeCard.emergencyContacts.length >= 2) {
+    if (editingContactIndex === null && activeCard.emergencyContacts.length >= 2) {
       showStatus('Emergency contacts are limited to 2 per card.', 'error');
       return;
     }
 
     const updated = cards.map(c => {
       if (c.id === selectedCardId) {
+        let updatedContacts = [...c.emergencyContacts];
+        if (editingContactIndex !== null) {
+          updatedContacts[editingContactIndex] = { ...newContact };
+        } else {
+          updatedContacts.push({ ...newContact });
+        }
         return {
           ...c,
-          emergencyContacts: [...c.emergencyContacts, { ...newContact }]
+          emergencyContacts: updatedContacts
         };
       }
       return c;
@@ -965,6 +976,7 @@ export default function App() {
 
     setCards(updated);
     setNewContact({ name: '', relationship: '', phoneNumber: '', email: '' });
+    setEditingContactIndex(null);
 
     // Clear contact errors
     setValidationErrors(prev => {
@@ -976,7 +988,11 @@ export default function App() {
       return copy;
     });
 
-    showStatus("Emergency contact added. Click 'Save Card Information' at the top to save your changes.", "info");
+    if (editingContactIndex !== null) {
+      showStatus("Emergency contact updated. Click 'Save Card Information' at the top to save your changes.", "info");
+    } else {
+      showStatus("Emergency contact added. Click 'Save Card Information' at the top to save your changes.", "info");
+    }
   };
 
   // Remove contact from selected card
@@ -995,7 +1011,7 @@ export default function App() {
     showStatus("Emergency contact removed. Click 'Save Card Information' at the top to save your changes.", "info");
   };
 
-  // Add medication to selected card
+  // Add/Edit medication of selected card
   const addMedicationToActiveCard = (e) => {
     if (e) e.preventDefault();
     if (!selectedCardId) return;
@@ -1036,9 +1052,15 @@ export default function App() {
 
     const updated = cards.map(c => {
       if (c.id === selectedCardId) {
+        let updatedMeds = [...c.medications];
+        if (editingMedIndex !== null) {
+          updatedMeds[editingMedIndex] = { ...newMed };
+        } else {
+          updatedMeds.push({ ...newMed });
+        }
         return {
           ...c,
-          medications: [...c.medications, { ...newMed }]
+          medications: updatedMeds
         };
       }
       return c;
@@ -1046,7 +1068,13 @@ export default function App() {
 
     setCards(updated);
     setNewMed({ name: '', dosage: '', frequency: '', instructions: '' });
-    showStatus("Medication added. Click 'Save Card Information' at the top to save your changes.", "info");
+    setEditingMedIndex(null);
+
+    if (editingMedIndex !== null) {
+      showStatus("Medication updated. Click 'Save Card Information' at the top to save your changes.", "info");
+    } else {
+      showStatus("Medication added. Click 'Save Card Information' at the top to save your changes.", "info");
+    }
   };
 
   // Remove medication from selected card
@@ -1297,6 +1325,95 @@ export default function App() {
     if (clean === 'mother-in-law') return 'badge-mother-in-law';
     return 'badge-other';
   };
+
+  const renderAddMemberForm = () => (
+    <div ref={addMenuRef} className="member-summary-card" style={{ borderStyle: 'solid', borderColor: 'var(--primary)', backgroundColor: 'var(--primary-light)' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', width: '100%', height: '100%' }}>
+        <div style={{ fontWeight: 'bold', color: 'var(--primary)', fontFamily: 'var(--font-title)' }}>
+          New Member
+        </div>
+        
+        <input
+          type="text"
+          placeholder="Name * (Required)"
+          value={newMemberName}
+          onChange={(e) => setNewMemberName(e.target.value)}
+          style={{ marginBottom: '0.2rem' }}
+        />
+        
+        <select
+          onChange={(e) => {
+            if (e.target.value === 'custom') {
+              setCustomRelation('Other');
+            } else {
+              setCustomRelation(e.target.value);
+            }
+          }}
+          value={customRelation && ['Father', 'Mother', 'Spouse', 'Son', 'Daughter', 'Father-in-law', 'Mother-in-law'].includes(customRelation) ? customRelation : (customRelation ? 'custom' : '')}
+        >
+          <option value="" disabled>Choose relationship * (Required)...</option>
+          <option value="Father">Father</option>
+          <option value="Mother">Mother</option>
+          <option value="Spouse">Spouse</option>
+          <option value="Son">Son</option>
+          <option value="Daughter">Daughter</option>
+          <option value="Father-in-law">Father-in-law</option>
+          <option value="Mother-in-law">Mother-in-law</option>
+          <option value="custom">Other / Custom...</option>
+        </select>
+
+        {/* Show input if custom relation selected */}
+        {customRelation !== null && customRelation !== '' && !['Father', 'Mother', 'Spouse', 'Son', 'Daughter', 'Father-in-law', 'Mother-in-law'].includes(customRelation) && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginTop: '0.2rem' }}>
+            <input
+              type="text"
+              placeholder="e.g., Grandfather, Aunt"
+              value={customRelation === 'Other' ? '' : customRelation}
+              onChange={(e) => {
+                const val = e.target.value;
+                // Clean input: only allow safe characters (letters, spaces, hyphens, dots, apostrophes)
+                const clean = val.replace(/[^a-zA-Z\s\-'\.]/g, '').substring(0, 30);
+                setCustomRelation(clean === '' ? 'Other' : clean);
+              }}
+              style={customRelation === 'Other' ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
+            />
+            {customRelation === 'Other' && (
+              <span className="field-error" style={{ color: 'var(--danger)', fontSize: '0.75rem', fontWeight: '500' }}>
+                Relationship is a required field.
+              </span>
+            )}
+            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+              Letters, spaces, hyphens, dots, or apostrophes only (max 30 chars).
+            </span>
+          </div>
+        )}
+
+        <div style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto' }}>
+            <button
+              className="btn btn-primary btn-sm"
+              style={{ flex: 1 }}
+              disabled={!newMemberName.trim() || !customRelation?.trim() || customRelation === 'Other'}
+              onClick={() => {
+                  handleCreateCard(customRelation, newMemberName);
+              }}
+            >
+              Confirm
+            </button>
+            <button
+              className="btn btn-danger btn-sm"
+              onClick={() => {
+                setShowAddMenu(false);
+                setShowAddMenuAtTop(false);
+                setCustomRelation('');
+                setNewMemberName('');
+              }}
+            >
+              Cancel
+            </button>
+        </div>
+      </div>
+    </div>
+  );
 
   if (showSplash) {
     return (
@@ -1579,7 +1696,10 @@ export default function App() {
               {/* Add Member Badge */}
               <button 
                 className="quick-access-badge add-badge"
-                onClick={() => setShowAddMenu(true)}
+                onClick={() => {
+                  setShowAddMenu(true);
+                  setShowAddMenuAtTop(true);
+                }}
                 style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.35rem', background: 'none', border: 'none', cursor: 'pointer', flexShrink: 0, padding: 0 }}
               >
                 <div style={{ width: '52px', height: '52px', borderRadius: '50%', border: '2px dashed var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', backgroundColor: 'var(--primary-light)' }}>
@@ -1622,6 +1742,8 @@ export default function App() {
             </div>
 
             <div className="dashboard-grid">
+              {showAddMenu && showAddMenuAtTop && renderAddMemberForm()}
+
               {/* Profile Card List */}
               {cards.map(card => (
                 <div
@@ -1721,7 +1843,7 @@ export default function App() {
                   <div className="member-card-footer">
                     <button
                       className="btn btn-secondary btn-sm"
-                      style={{ flex: 1 }}
+                      style={{ flex: 1, display: 'flex', gap: '0.25rem', alignItems: 'center', justifyContent: 'center' }}
                       onClick={(e) => {
                         e.stopPropagation();
                         setSelectedCardId(card.id);
@@ -1732,7 +1854,7 @@ export default function App() {
                     </button>
                     <button
                       className="btn btn-outline btn-sm"
-                      style={{ display: 'flex', gap: '0.25rem', alignItems: 'center' }}
+                      style={{ flex: 1, display: 'flex', gap: '0.25rem', alignItems: 'center', justifyContent: 'center' }}
                       onClick={(e) => {
                         e.stopPropagation();
                         setSelectedCardId(card.id);
@@ -1745,100 +1867,20 @@ export default function App() {
                 </div>
               ))}
 
-              {/* Add Member Button Card */}
-              {!showAddMenu ? (
-                <button className="add-member-card" onClick={() => setShowAddMenu(true)}>
-                  <div className="add-member-icon-wrap">
-                    <Plus size={22} />
-                  </div>
-                  Add New Member
-                </button>
+              {showAddMenu && !showAddMenuAtTop ? (
+                renderAddMemberForm()
               ) : (
-                <div ref={addMenuRef} className="member-summary-card" style={{ borderStyle: 'solid', borderColor: 'var(--primary)', backgroundColor: 'var(--primary-light)' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', width: '100%', height: '100%' }}>
-                    <div style={{ fontWeight: 'bold', color: 'var(--primary)', fontFamily: 'var(--font-title)' }}>
-                      New Member
+                !showAddMenu && (
+                  <button className="add-member-card" onClick={() => {
+                    setShowAddMenu(true);
+                    setShowAddMenuAtTop(false);
+                  }}>
+                    <div className="add-member-icon-wrap">
+                      <Plus size={22} />
                     </div>
-                    
-                    <input
-                      type="text"
-                      placeholder="Name * (Required)"
-                      value={newMemberName}
-                      onChange={(e) => setNewMemberName(e.target.value)}
-                      style={{ marginBottom: '0.2rem' }}
-                    />
-                    
-                    <select
-                      onChange={(e) => {
-                        if (e.target.value === 'custom') {
-                          setCustomRelation('Other');
-                        } else {
-                          setCustomRelation(e.target.value);
-                        }
-                      }}
-                      value={customRelation && ['Father', 'Mother', 'Spouse', 'Son', 'Daughter', 'Father-in-law', 'Mother-in-law'].includes(customRelation) ? customRelation : (customRelation ? 'custom' : '')}
-                    >
-                      <option value="" disabled>Choose relationship * (Required)...</option>
-                      <option value="Father">Father</option>
-                      <option value="Mother">Mother</option>
-                      <option value="Spouse">Spouse</option>
-                      <option value="Son">Son</option>
-                      <option value="Daughter">Daughter</option>
-                      <option value="Father-in-law">Father-in-law</option>
-                      <option value="Mother-in-law">Mother-in-law</option>
-                      <option value="custom">Other / Custom...</option>
-                    </select>
-
-                    {/* Show input if custom relation selected */}
-                    {customRelation !== null && customRelation !== '' && !['Father', 'Mother', 'Spouse', 'Son', 'Daughter', 'Father-in-law', 'Mother-in-law'].includes(customRelation) && (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginTop: '0.2rem' }}>
-                        <input
-                          type="text"
-                          placeholder="e.g., Grandfather, Aunt"
-                          value={customRelation === 'Other' ? '' : customRelation}
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            // Clean input: only allow safe characters (letters, spaces, hyphens, dots, apostrophes)
-                            const clean = val.replace(/[^a-zA-Z\s\-'\.]/g, '').substring(0, 30);
-                            setCustomRelation(clean === '' ? 'Other' : clean);
-                          }}
-                          style={customRelation === 'Other' ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}
-                        />
-                        {customRelation === 'Other' && (
-                          <span className="field-error" style={{ color: 'var(--danger)', fontSize: '0.75rem', fontWeight: '500' }}>
-                            Relationship is a required field.
-                          </span>
-                        )}
-                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                          Letters, spaces, hyphens, dots, or apostrophes only (max 30 chars).
-                        </span>
-                      </div>
-                    )}
-
-                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto' }}>
-                        <button
-                          className="btn btn-primary btn-sm"
-                          style={{ flex: 1 }}
-                          disabled={!newMemberName.trim() || !customRelation?.trim() || customRelation === 'Other'}
-                          onClick={() => {
-                              handleCreateCard(customRelation, newMemberName);
-                          }}
-                        >
-                          Confirm
-                        </button>
-                        <button
-                          className="btn btn-danger btn-sm"
-                          onClick={() => {
-                            setShowAddMenu(false);
-                            setCustomRelation('');
-                            setNewMemberName('');
-                          }}
-                        >
-                          Cancel
-                        </button>
-                    </div>
-                  </div>
-                </div>
+                    Add New Member
+                  </button>
+                )
               )}
             </div>
           </div>
@@ -2251,9 +2293,17 @@ export default function App() {
                             <div className="contact-sheet-meta">{contact.relationship} · {contact.phoneNumber}</div>
                             {contact.email && <div className="contact-sheet-email">{contact.email}</div>}
                           </div>
-                          <button className="btn btn-danger btn-sm" onClick={() => removeContactFromActiveCard(index)}>
-                            <Trash2 size={15} />
-                          </button>
+                          <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <button className="btn btn-secondary btn-sm" onClick={() => {
+                              setEditingContactIndex(index);
+                              setNewContact({ ...contact });
+                            }} type="button">
+                              <Pencil size={15} />
+                            </button>
+                            <button className="btn btn-danger btn-sm" onClick={() => removeContactFromActiveCard(index)}>
+                              <Trash2 size={15} />
+                            </button>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -2262,17 +2312,19 @@ export default function App() {
                   )}
 
                   <form onSubmit={addContactToActiveCard} className="sheet-sub-form">
-                    <h4 className="sheet-sub-form-title">Add Contact</h4>
+                    <h4 className="sheet-sub-form-title">
+                      {editingContactIndex !== null ? 'Edit Contact' : 'Add Contact'}
+                    </h4>
                     <div className="form-grid">
                       <div className="form-group">
-                        <label>Name</label>
+                        <label>Name <span className="required-asterisk">*</span></label>
                         <input type="text" placeholder="e.g., Shloka Kumar" value={newContact.name}
                           onChange={e => updateNewContact('name', e.target.value)}
                           style={validationErrors.contactName ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}} />
                         {validationErrors.contactName && <span className="field-error">{validationErrors.contactName}</span>}
                       </div>
                       <div className="form-group">
-                        <label>Relationship</label>
+                        <label>Relationship <span className="required-asterisk">*</span></label>
                         <select value={newContact.relationship} onChange={e => updateNewContact('relationship', e.target.value)}
                           style={validationErrors.contactRelationship ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}>
                           <option value="">Select</option>
@@ -2286,7 +2338,7 @@ export default function App() {
                         {validationErrors.contactRelationship && <span className="field-error">{validationErrors.contactRelationship}</span>}
                       </div>
                       <div className="form-group">
-                        <label>Phone</label>
+                        <label>Phone <span className="required-asterisk">*</span></label>
                         <input type="tel" placeholder="e.g., 9886012345" value={newContact.phoneNumber}
                           onChange={e => updateNewContact('phoneNumber', e.target.value)}
                           style={validationErrors.contactPhone ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}} />
@@ -2299,9 +2351,17 @@ export default function App() {
                           style={validationErrors.contactEmail ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}} />
                         {validationErrors.contactEmail && <span className="field-error">{validationErrors.contactEmail}</span>}
                       </div>
-                      <div className="form-group full-width" style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                      <div className="form-group full-width" style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                        {editingContactIndex !== null && (
+                          <button type="button" className="btn btn-outline" style={{ width: 'fit-content' }} onClick={() => {
+                            setEditingContactIndex(null);
+                            setNewContact({ name: '', relationship: '', phoneNumber: '', email: '' });
+                          }}>
+                            Cancel
+                          </button>
+                        )}
                         <button type="submit" className="btn btn-secondary" style={{ width: 'fit-content' }}>
-                          <Plus size={15} /> Add to List
+                          {editingContactIndex !== null ? 'Save Changes' : <><Plus size={15} /> Add to List</>}
                         </button>
                       </div>
                     </div>
@@ -2323,9 +2383,17 @@ export default function App() {
                             </div>
                             {med.instructions && <div className="contact-sheet-email">{med.instructions}</div>}
                           </div>
-                          <button className="btn btn-danger btn-sm" onClick={() => removeMedicationFromActiveCard(index)}>
-                            <Trash2 size={15} />
-                          </button>
+                          <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <button className="btn btn-secondary btn-sm" onClick={() => {
+                              setEditingMedIndex(index);
+                              setNewMed({ ...med });
+                            }} type="button">
+                              <Pencil size={15} />
+                            </button>
+                            <button className="btn btn-danger btn-sm" onClick={() => removeMedicationFromActiveCard(index)}>
+                              <Trash2 size={15} />
+                            </button>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -2334,10 +2402,12 @@ export default function App() {
                   )}
 
                   <form onSubmit={addMedicationToActiveCard} className="sheet-sub-form">
-                    <h4 className="sheet-sub-form-title">Add Medication</h4>
+                    <h4 className="sheet-sub-form-title">
+                      {editingMedIndex !== null ? 'Edit Medication' : 'Add Medication'}
+                    </h4>
                     <div className="form-grid">
                       <div className="form-group">
-                        <label>Med Name</label>
+                        <label>Med Name <span className="required-asterisk">*</span></label>
                         <input type="text" placeholder="e.g., Metformin" value={newMed.name}
                           onChange={e => setNewMed(prev => ({ ...prev, name: e.target.value }))} />
                       </div>
@@ -2366,9 +2436,17 @@ export default function App() {
                         <input type="text" placeholder="e.g., After meals" value={newMed.instructions}
                           onChange={e => setNewMed(prev => ({ ...prev, instructions: e.target.value }))} />
                       </div>
-                      <div className="form-group full-width" style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                      <div className="form-group full-width" style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                        {editingMedIndex !== null && (
+                          <button type="button" className="btn btn-outline" style={{ width: 'fit-content' }} onClick={() => {
+                            setEditingMedIndex(null);
+                            setNewMed({ name: '', dosage: '', frequency: '', instructions: '' });
+                          }}>
+                            Cancel
+                          </button>
+                        )}
                         <button type="submit" className="btn btn-secondary" style={{ width: 'fit-content' }}>
-                          <Plus size={15} /> Add to List
+                          {editingMedIndex !== null ? 'Save Changes' : <><Plus size={15} /> Add to List</>}
                         </button>
                       </div>
                     </div>

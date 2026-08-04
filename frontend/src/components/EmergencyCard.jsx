@@ -1,5 +1,5 @@
 import React from 'react';
-import { Phone, Heart, ShieldAlert, Award, FileText, Printer, CheckCircle } from 'lucide-react';
+import { Phone, Heart, ShieldAlert, Award, FileText, Printer, CheckCircle, Share2 } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
@@ -408,9 +408,25 @@ export default function EmergencyCard({ profile, emergencyContacts, medications,
   return (
     <div className="emergency-card-container animated">
       <div className="card-actions-bar">
-        <button className="btn btn-primary" onClick={handlePrint}>
-          <Printer size={18} />
-          Print / Save PDF
+        <button
+          className="btn btn-primary btn-icon-only"
+          onClick={handlePrint}
+          title="Print & Share Card"
+          style={{
+            width: '44px',
+            height: '44px',
+            borderRadius: '50%',
+            backgroundColor: 'var(--primary)',
+            color: 'white',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: 'var(--shadow-md)',
+            transition: 'var(--transition)',
+            padding: 0
+          }}
+        >
+          <Share2 size={20} />
         </button>
       </div>
 

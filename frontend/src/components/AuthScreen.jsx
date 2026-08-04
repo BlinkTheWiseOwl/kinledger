@@ -40,12 +40,14 @@ export default function AuthScreen({ onAuthSuccess, showStatus, onShowPolicy }) 
           });
 
           setGoogleSdkLoaded(true);
-        } else {
+        } else if (!import.meta.env.PROD) {
           setUseFallbackGoogle(true);
         }
       } catch (err) {
         console.error('Google Sign-In initialization failed:', err);
-        setUseFallbackGoogle(true);
+        if (!import.meta.env.PROD) {
+          setUseFallbackGoogle(true);
+        }
       }
     };
 
@@ -56,7 +58,13 @@ export default function AuthScreen({ onAuthSuccess, showStatus, onShowPolicy }) 
       script.async = true;
       script.defer = true;
       script.onload = initializeGoogleSignIn;
-      script.onerror = () => setUseFallbackGoogle(true);
+      script.onerror = () => {
+        if (!import.meta.env.PROD) {
+          setUseFallbackGoogle(true);
+        } else {
+          setError('Google Sign-In failed to load. Please check your internet connection.');
+        }
+      };
       document.body.appendChild(script);
     } else if (window.google && window.google.accounts) {
       initializeGoogleSignIn();
@@ -64,7 +72,7 @@ export default function AuthScreen({ onAuthSuccess, showStatus, onShowPolicy }) 
 
     // Fallback trigger if SDK doesn't load/respond within 2.5 seconds (e.g. offline, local dev, emulator)
     const timeout = setTimeout(() => {
-      if (!window.google || !window.google.accounts) {
+      if ((!window.google || !window.google.accounts) && !import.meta.env.PROD) {
         setUseFallbackGoogle(true);
       }
     }, 2500);
@@ -121,6 +129,10 @@ export default function AuthScreen({ onAuthSuccess, showStatus, onShowPolicy }) 
   };
 
   const handleFallbackGoogleSignIn = async () => {
+    if (import.meta.env.PROD) {
+      setError('Mock Google authentication is disabled in production.');
+      return;
+    }
     const targetEmail = prompt('Enter your Google Email Address to authenticate (Dev Offline Mode):');
     if (!targetEmail || targetEmail.trim() === '') return;
 
