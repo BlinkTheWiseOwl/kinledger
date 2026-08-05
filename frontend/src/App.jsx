@@ -256,12 +256,13 @@ export default function App() {
     }
   }, [userEmail]);
 
-  // Clear local contact and medication input fields when switching cards, sheets, or adding members
+  // Clear local contact and medication input fields and validation errors when switching cards, sheets, or adding members
   useEffect(() => {
     setNewContact({ name: '', relationship: '', phoneNumber: '', email: '' });
     setNewMed({ name: '', dosage: '', frequency: '', instructions: '' });
     setEditingContactIndex(null);
     setEditingMedIndex(null);
+    setValidationErrors({});
   }, [selectedCardId, activeSheet]);
 
   // Close hamburger menu when clicking outside
