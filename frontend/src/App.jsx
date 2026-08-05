@@ -2452,13 +2452,13 @@ export default function App() {
                                 <label>Name <span className="required-asterisk">*</span></label>
                                 <input type="text" placeholder="e.g., Shloka Kumar" value={contact.name}
                                   onChange={e => updateActiveCardContact(index, 'name', e.target.value)}
-                                  style={validationErrors.contactName ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}} />
-                                {validationErrors.contactName && <span className="field-error">{validationErrors.contactName}</span>}
+                                  style={validationErrors[`contactName_${index}`] ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}} />
+                                {validationErrors[`contactName_${index}`] && <span className="field-error">{validationErrors[`contactName_${index}`]}</span>}
                               </div>
                               <div className="form-group">
                                 <label>Relationship <span className="required-asterisk">*</span></label>
                                 <select value={contact.relationship} onChange={e => updateActiveCardContact(index, 'relationship', e.target.value)}
-                                  style={validationErrors.newContactRelationship ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}>
+                                  style={validationErrors[`contactRelationship_${index}`] ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}>
                                   <option value="">Select</option>
                                   <option value="Daughter">Daughter</option><option value="Son">Son</option>
                                   <option value="Spouse">Spouse</option><option value="Father">Father</option>
@@ -2467,21 +2467,21 @@ export default function App() {
                                   <option value="Guardian">Guardian</option><option value="Neighbor">Neighbor</option>
                                   <option value="Other">Other</option>
                                 </select>
-                                {validationErrors.newContactRelationship && <span className="field-error">{validationErrors.newContactRelationship}</span>}
+                                {validationErrors[`contactRelationship_${index}`] && <span className="field-error">{validationErrors[`contactRelationship_${index}`]}</span>}
                               </div>
                               <div className="form-group">
                                 <label>Phone <span className="required-asterisk">*</span></label>
                                 <input type="tel" placeholder="e.g., 9886012345" value={contact.phoneNumber}
                                   onChange={e => updateActiveCardContact(index, 'phoneNumber', e.target.value)}
-                                  style={validationErrors.contactPhone ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}} />
-                                {validationErrors.contactPhone && <span className="field-error">{validationErrors.contactPhone}</span>}
+                                  style={validationErrors[`contactPhone_${index}`] ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}} />
+                                {validationErrors[`contactPhone_${index}`] && <span className="field-error">{validationErrors[`contactPhone_${index}`]}</span>}
                               </div>
                               <div className="form-group">
                                 <label>Email (Optional)</label>
                                 <input type="email" placeholder="e.g., shloka@email.com" value={contact.email || ''}
                                   onChange={e => updateActiveCardContact(index, 'email', e.target.value)}
-                                  style={validationErrors.contactEmail ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}} />
-                                {validationErrors.contactEmail && <span className="field-error">{validationErrors.contactEmail}</span>}
+                                  style={validationErrors[`contactEmail_${index}`] ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}} />
+                                {validationErrors[`contactEmail_${index}`] && <span className="field-error">{validationErrors[`contactEmail_${index}`]}</span>}
                               </div>
                             </div>
                           </div>
