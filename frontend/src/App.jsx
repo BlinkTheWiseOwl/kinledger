@@ -116,6 +116,7 @@ export default function App() {
   const [newMemberName, setNewMemberName] = useState('');
   const [expandedSections, setExpandedSections] = useState({ profile: true, insurance: false, contacts: false, meds: false, share: false });
   const [activeSheet, setActiveSheet] = useState(null);
+  const [cardsBackup, setCardsBackup] = useState(null);
 
   const toggleSection = (section) => {
     setExpandedSections(prev => ({
@@ -255,6 +256,18 @@ export default function App() {
       setSelectedFeature(null);
     }
   }, [userEmail]);
+
+  // Handle cards backup and restore on sheet open/close to support discarding changes
+  useEffect(() => {
+    if (activeSheet !== null) {
+      setCardsBackup(JSON.parse(JSON.stringify(cards)));
+    } else {
+      if (cardsBackup) {
+        setCards(cardsBackup);
+        setCardsBackup(null);
+      }
+    }
+  }, [activeSheet]);
 
   // Clear local contact and medication input fields and validation errors when switching cards, sheets, or adding members
   useEffect(() => {
