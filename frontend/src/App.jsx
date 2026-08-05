@@ -2404,7 +2404,6 @@ export default function App() {
                             <div style={{ display: 'flex', gap: '0.25rem' }}>
                               <button className="btn-icon-subtle" onClick={() => {
                                 setEditingContactIndex(index);
-                                setNewContact({ ...contact });
                               }} type="button" title="Edit Contact">
                                 <Pencil size={15} />
                               </button>
@@ -2521,7 +2520,6 @@ export default function App() {
                             <div style={{ display: 'flex', gap: '0.25rem' }}>
                               <button className="btn-icon-subtle" onClick={() => {
                                 setEditingMedIndex(index);
-                                setNewMed({ ...med });
                               }} type="button" title="Edit Medication">
                                 <Pencil size={15} />
                               </button>
