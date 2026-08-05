@@ -543,11 +543,31 @@ export default function App() {
 
         // 10. Emergency Contacts
         (activeUpdate.emergencyContacts || []).forEach((contact, idx) => {
-          if (containsUnsafeChars(contact.name)) {
-            errors[`contactName_${idx}`] = `Emergency Contact #${idx + 1} Name cannot contain unsafe characters (<, >, \\, \`).`;
+          if (!contact.name || !contact.name.trim()) {
+            errors[`contactName_${idx}`] = "Contact Name is required.";
+          } else if (contact.name.length < 2 || contact.name.length > 100) {
+            errors[`contactName_${idx}`] = "Contact Name must be between 2 and 100 characters.";
+          } else if (containsUnsafeChars(contact.name)) {
+            errors[`contactName_${idx}`] = "Contact Name cannot contain unsafe characters (<, >, \\, `).";
           }
-          if (containsUnsafeChars(contact.email)) {
-            errors[`contactEmail_${idx}`] = `Emergency Contact #${idx + 1} Email cannot contain unsafe characters (<, >, \\, \`).`;
+
+          if (!contact.relationship) {
+            errors[`contactRelationship_${idx}`] = "Relationship is required.";
+          }
+
+          if (!contact.phoneNumber || !contact.phoneNumber.trim()) {
+            errors[`contactPhone_${idx}`] = "Phone Number is required.";
+          } else if (!/^[0-9]{8,14}$/.test(contact.phoneNumber.trim())) {
+            errors[`contactPhone_${idx}`] = "Phone Number must contain exactly 8 to 14 digits with no special characters.";
+          }
+
+          if (contact.email && contact.email.trim() !== '') {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(contact.email.trim())) {
+              errors[`contactEmail_${idx}`] = "Please enter a valid email address.";
+            } else if (containsUnsafeChars(contact.email)) {
+              errors[`contactEmail_${idx}`] = "Email cannot contain unsafe characters (<, >, \\, `).";
+            }
           }
         });
 
