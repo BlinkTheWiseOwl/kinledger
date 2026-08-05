@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Shield, FileText, Plus, Trash2, Save, User, Users, Heart, Activity, ShieldAlert, Award, Phone, ArrowLeft, Printer, Eye, Share2, LogOut, Menu, X, ChevronDown, ChevronRight, Loader2, Check, Pencil, Pill, Tablets } from 'lucide-react';
+import { Shield, FileText, Plus, Trash2, Save, User, Users, Heart, Activity, ShieldAlert, Award, Phone, ArrowLeft, Printer, Eye, Share2, LogOut, Menu, X, ChevronDown, ChevronRight, Loader2, Check, Pencil, Tablets } from 'lucide-react';
 import { loadCardData, saveCardData, BACKEND_URL } from './utils/storage';
+import CapsuleIcon from './components/CapsuleIcon';
 import { Capacitor } from '@capacitor/core';
 import { Share } from '@capacitor/share';
 import EmergencyCard from './components/EmergencyCard';
@@ -1019,9 +1020,9 @@ export default function App() {
     });
 
     if (editingContactIndex !== null) {
-      showStatus(/"Emergency contact updated. Click 'Save & Close' to confirm."/, "info");
+      showStatus("Emergency contact updated. Click 'Save & Close' to confirm.", "info");
     } else {
-      showStatus(/"Emergency contact added. Click 'Save & Close' to confirm."/, "info");
+      showStatus("Emergency contact added. Click 'Save & Close' to confirm.", "info");
     }
   };
 
@@ -1038,7 +1039,7 @@ export default function App() {
       return c;
     });
     setCards(updated);
-    showStatus(/"Emergency contact removed. Click 'Save & Close' to confirm."/, "info");
+    showStatus("Emergency contact removed. Click 'Save & Close' to confirm.", "info");
   };
 
   // Add/Edit medication of selected card
@@ -1101,9 +1102,9 @@ export default function App() {
     setEditingMedIndex(null);
 
     if (editingMedIndex !== null) {
-      showStatus(/"Medication updated. Click 'Save & Close' to confirm."/, "info");
+      showStatus("Medication updated. Click 'Save & Close' to confirm.", "info");
     } else {
-      showStatus(/"Medication added. Click 'Save & Close' to confirm."/, "info");
+      showStatus("Medication added. Click 'Save & Close' to confirm.", "info");
     }
   };
 
@@ -1120,12 +1121,48 @@ export default function App() {
       return c;
     });
     setCards(updated);
-    showStatus(/"Medication removed. Click 'Save & Close' to confirm."/, "info");
+    showStatus("Medication removed. Click 'Save & Close' to confirm.", "info");
   };
 
-  // Manual trigger to save current active states
+  // Manual trigger to save current active states (auto-flushes pending add forms)
   const handleSaveActiveCard = async () => {
-    return await saveCollection(cards);
+    let currentCards = [...cards];
+    let cardsChanged = false;
+
+    // Auto-save pending new contact if partially filled
+    if (newContact && newContact.name && newContact.name.trim() !== '') {
+      currentCards = currentCards.map(c => {
+        if (c.id === selectedCardId) {
+          return {
+            ...c,
+            emergencyContacts: [...c.emergencyContacts, { ...newContact }]
+          };
+        }
+        return c;
+      });
+      setNewContact({ name: '', relationship: '', phoneNumber: '', email: '' });
+      cardsChanged = true;
+    }
+
+    // Auto-save pending new medication if partially filled
+    if (newMed && newMed.name && newMed.name.trim() !== '') {
+      currentCards = currentCards.map(c => {
+        if (c.id === selectedCardId) {
+          return {
+            ...c,
+            medications: [...c.medications, { ...newMed }]
+          };
+        }
+        return c;
+      });
+      setNewMed({ name: '', dosage: '', frequency: '', instructions: '' });
+      cardsChanged = true;
+    }
+
+    if (cardsChanged) {
+      setCards(currentCards);
+    }
+    return await saveCollection(currentCards);
   };
 
   // Share app invite / install link
@@ -2016,7 +2053,7 @@ export default function App() {
                 {/* Medications row */}
                 <button className="section-row" onClick={() => setActiveSheet('meds')}>
                   <div className="section-row-left">
-                    <div className="section-row-icon-wrap"><Pill size={18} /></div>
+                    <div className="section-row-icon-wrap"><CapsuleIcon size={18} /></div>
                     <div className="section-row-info">
                       <span className="section-row-label">Medications</span>
                       <span className="section-row-status">
@@ -2072,7 +2109,7 @@ export default function App() {
                 {activeSheet === 'profile' && <><User size={18} /> Profile</>}
                 {activeSheet === 'insurance' && <><Award size={18} /> Insurance</>}
                 {activeSheet === 'contacts' && <><Phone size={18} /> Emergency Contacts</>}
-                {activeSheet === 'meds' && <><Pill size={18} /> Medications</>}
+                {activeSheet === 'meds' && <><CapsuleIcon size={18} /> Medications</>}
                 {activeSheet === 'share' && <><Users size={18} /> Share Card</>}
               </h3>
               <button className="modal-close-btn" onClick={() => setActiveSheet(null)} aria-label="Close">
@@ -2383,9 +2420,8 @@ export default function App() {
                     <div className="item-list-empty">No contacts added yet. Use the form below.</div>
                   )}
 
-                  {editingContactIndex === null && (
-                    <form onSubmit={addContactToActiveCard} className="sheet-sub-form">
-                      <h4 className="sheet-sub-form-title">Add Contact</h4>
+                  <form onSubmit={addContactToActiveCard} className="sheet-sub-form">
+                      <h4 className="sheet-sub-form-title">Add New Contact</h4>
                       <div className="form-grid">
                         <div className="form-group">
                           <label>Name <span className="required-asterisk">*</span></label>
@@ -2429,7 +2465,6 @@ export default function App() {
                         </div>
                       </div>
                     </form>
-                  )}
                 </div>
               )}
 
@@ -2502,9 +2537,8 @@ export default function App() {
                     <div className="item-list-empty">No medications added yet.</div>
                   )}
 
-                  {editingMedIndex === null && (
-                    <form onSubmit={addMedicationToActiveCard} className="sheet-sub-form">
-                      <h4 className="sheet-sub-form-title">Add Medication</h4>
+                  <form onSubmit={addMedicationToActiveCard} className="sheet-sub-form">
+                      <h4 className="sheet-sub-form-title">Add New Medication</h4>
                       <div className="form-grid">
                         <div className="form-group">
                           <label>Med Name <span className="required-asterisk">*</span></label>
@@ -2543,7 +2577,6 @@ export default function App() {
                         </div>
                       </div>
                     </form>
-                  )}
                 </div>
               )}
 
