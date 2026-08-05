@@ -2367,7 +2367,7 @@ export default function App() {
                               <div className="form-group">
                                 <label>Relationship <span className="required-asterisk">*</span></label>
                                 <select value={contact.relationship} onChange={e => updateActiveCardContact(index, 'relationship', e.target.value)}
-                                  style={validationErrors.contactRelationship ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}>
+                                  style={validationErrors.newContactRelationship ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}>
                                   <option value="">Select</option>
                                   <option value="Daughter">Daughter</option><option value="Son">Son</option>
                                   <option value="Spouse">Spouse</option><option value="Father">Father</option>
@@ -2376,7 +2376,7 @@ export default function App() {
                                   <option value="Guardian">Guardian</option><option value="Neighbor">Neighbor</option>
                                   <option value="Other">Other</option>
                                 </select>
-                                {validationErrors.contactRelationship && <span className="field-error">{validationErrors.contactRelationship}</span>}
+                                {validationErrors.newContactRelationship && <span className="field-error">{validationErrors.newContactRelationship}</span>}
                               </div>
                               <div className="form-group">
                                 <label>Phone <span className="required-asterisk">*</span></label>
