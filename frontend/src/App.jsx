@@ -1125,13 +1125,64 @@ export default function App() {
     showStatus("Medication removed. Click 'Save & Close' to confirm.", "info");
   };
 
-  // Manual trigger to save current active states (auto-flushes pending add forms)
+// Manual trigger to save current active states (auto-flushes pending add forms with validation)
   const handleSaveActiveCard = async () => {
     let currentCards = [...cards];
     let cardsChanged = false;
 
-    // Auto-save pending new contact if partially filled
-    if (newContact && newContact.name && newContact.name.trim() !== '') {
+    // Validate and auto-save pending new contact if partially filled
+    const hasPendingContact = newContact && (
+      (newContact.name && newContact.name.trim() !== '') ||
+      newContact.relationship ||
+      (newContact.phoneNumber && newContact.phoneNumber.trim() !== '') ||
+      (newContact.email && newContact.email.trim() !== '')
+    );
+
+    if (hasPendingContact) {
+      const { name = '', relationship = '', phoneNumber = '', email = '' } = newContact;
+      const contactErrors = {};
+
+      if (!name.trim()) {
+        contactErrors.newContactName = "Contact Name is required.";
+      } else if (name.length < 2 || name.length > 100) {
+        contactErrors.newContactName = "Contact Name must be between 2 and 100 characters.";
+      } else if (containsUnsafeChars(name)) {
+        contactErrors.newContactName = "Contact Name cannot contain unsafe characters (<, >, \\, `).";
+      }
+
+      if (!relationship) {
+        contactErrors.newContactRelationship = "Relationship is required.";
+      }
+
+      if (!phoneNumber.trim()) {
+        contactErrors.newContactPhone = "Phone Number is required.";
+      } else if (!/^[0-9]{8,14}$/.test(phoneNumber.trim())) {
+        contactErrors.newContactPhone = "Phone Number must contain exactly 8 to 14 digits with no special characters.";
+      }
+
+      if (email && email.trim() !== '') {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email.trim())) {
+          contactErrors.newContactEmail = "Please enter a valid email address.";
+        } else if (containsUnsafeChars(email)) {
+          contactErrors.newContactEmail = "Email cannot contain unsafe characters (<, >, \\, `).";
+        }
+      }
+
+      // Check limits
+      const activeCard = cards.find(c => c.id === selectedCardId);
+      if (activeCard && activeCard.emergencyContacts.length >= 2) {
+        showStatus('Emergency contacts are limited to 2 per card.', 'error');
+        return false;
+      }
+
+      if (Object.keys(contactErrors).length > 0) {
+        setValidationErrors(prev => ({ ...prev, ...contactErrors }));
+        showStatus('Please correct the contact form errors.', 'error');
+        return false;
+      }
+
+      // If valid, append it
       currentCards = currentCards.map(c => {
         if (c.id === selectedCardId) {
           return {
@@ -1145,8 +1196,47 @@ export default function App() {
       cardsChanged = true;
     }
 
-    // Auto-save pending new medication if partially filled
-    if (newMed && newMed.name && newMed.name.trim() !== '') {
+    // Validate and auto-save pending new medication if partially filled
+    const hasPendingMed = newMed && (
+      (newMed.name && newMed.name.trim() !== '') ||
+      (newMed.dosage && newMed.dosage.trim() !== '') ||
+      newMed.frequency ||
+      (newMed.instructions && newMed.instructions.trim() !== '')
+    );
+
+    if (hasPendingMed) {
+      const { name = '', dosage = '', frequency = '', instructions = '' } = newMed;
+
+      if (!name.trim()) {
+        showStatus('Medication Name is required.', 'error');
+        return false;
+      }
+      if (name.length > 100) {
+        showStatus('Medication Name cannot exceed 100 characters.', 'error');
+        return false;
+      }
+      if (containsUnsafeChars(name)) {
+        showStatus('Medication Name cannot contain unsafe characters (<, >, \\, `).', 'error');
+        return false;
+      }
+      if (dosage && dosage.length > 50) {
+        showStatus('Dosage cannot exceed 50 characters.', 'error');
+        return false;
+      }
+      if (containsUnsafeChars(dosage)) {
+        showStatus('Dosage cannot contain unsafe characters (<, >, \\, `).', 'error');
+        return false;
+      }
+      if (containsUnsafeChars(frequency)) {
+        showStatus('Frequency cannot contain unsafe characters (<, >, \\, `).', 'error');
+        return false;
+      }
+      if (containsUnsafeChars(instructions)) {
+        showStatus('Instructions cannot contain unsafe characters (<, >, \\, `).', 'error');
+        return false;
+      }
+
+      // If valid, append it
       currentCards = currentCards.map(c => {
         if (c.id === selectedCardId) {
           return {
