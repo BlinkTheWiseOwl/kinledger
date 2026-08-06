@@ -140,9 +140,6 @@ export default function AuthScreen({ onAuthSuccess, showStatus, onShowPolicy }) 
     try {
       const result = await SocialLogin.login({
         provider: 'google',
-        options: {
-          scopes: ['email', 'profile'],
-        },
       });
 
       // Extract the ID token from the native response
