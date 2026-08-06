@@ -611,6 +611,7 @@ export default function App() {
       setSynced(result.synced);
       if (result.success) {
         showStatus('Changes saved successfully.', 'success');
+        setCardsBackup(JSON.parse(JSON.stringify(finalCards)));
         return true;
       } else {
         showStatus(`Save failed: ${result.error}`, 'error');
