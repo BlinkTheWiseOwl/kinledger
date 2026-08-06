@@ -1584,6 +1584,7 @@ export default function App() {
             </button>
             <button
               className="btn btn-danger btn-sm"
+              style={{ flex: 1 }}
               onClick={() => {
                 setShowAddMenu(false);
                 setShowAddMenuAtTop(false);
