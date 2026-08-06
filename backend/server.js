@@ -252,11 +252,11 @@ app.post('/api/auth/google', async (req, res) => {
   try {
     let email = '';
     
-    // Handle mock token for offline/emulator/local testing ease (disabled in production environment)
-    const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1';
+    // Handle mock token for local development only (requires explicit ALLOW_MOCK_AUTH=true)
+    const allowMockAuth = process.env.ALLOW_MOCK_AUTH === 'true';
     if (credential === 'mock-google-token' && backupEmail) {
-      if (isProduction) {
-        return res.status(403).json({ error: 'Mock authentication is disabled in production.' });
+      if (!allowMockAuth) {
+        return res.status(403).json({ error: 'Mock authentication is disabled.' });
       }
       email = backupEmail.toLowerCase().trim();
       console.log(`[AUTH] Mock Google Sign-In bypassed for email: ${email}`);

@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { BACKEND_URL } from '../utils/storage';
+import { Capacitor } from '@capacitor/core';
+import { SocialLogin } from '@capgo/capacitor-social-login';
+
+const isNative = Capacitor.isNativePlatform();
 
 const BlueShield = ({ size = 24, className = "" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={{ display: 'inline-block', verticalAlign: 'middle' }}>
@@ -21,10 +25,27 @@ export default function AuthScreen({ onAuthSuccess, showStatus, onShowPolicy }) 
   const [consentChecked, setConsentChecked] = useState(false);
   const [showConsentInfo, setShowConsentInfo] = useState(false);
   const [googleSdkLoaded, setGoogleSdkLoaded] = useState(false);
-  const [useFallbackGoogle, setUseFallbackGoogle] = useState(false);
+  const [nativeGoogleReady, setNativeGoogleReady] = useState(false);
 
+  // Initialize Google Sign-In: native plugin on Android, web SDK on browser
   React.useEffect(() => {
-    // Dynamic loading of Google Identity Services library
+    if (isNative) {
+      // Initialize native SocialLogin plugin for Android
+      const webClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
+      SocialLogin.initialize({
+        google: {
+          webClientId: webClientId,
+        },
+      }).then(() => {
+        setNativeGoogleReady(true);
+      }).catch((err) => {
+        console.error('Native Google Sign-In initialization failed:', err);
+        setError('Google Sign-In could not be initialized.');
+      });
+      return; // Skip web SDK loading on native
+    }
+
+    // Web SDK loading (browser only)
     const scriptId = 'google-gsi-script';
     let script = document.getElementById(scriptId);
 
@@ -40,14 +61,10 @@ export default function AuthScreen({ onAuthSuccess, showStatus, onShowPolicy }) 
           });
 
           setGoogleSdkLoaded(true);
-        } else if (!import.meta.env.PROD) {
-          setUseFallbackGoogle(true);
         }
       } catch (err) {
         console.error('Google Sign-In initialization failed:', err);
-        if (!import.meta.env.PROD) {
-          setUseFallbackGoogle(true);
-        }
+        setError('Google Sign-In failed to load.');
       }
     };
 
@@ -59,25 +76,12 @@ export default function AuthScreen({ onAuthSuccess, showStatus, onShowPolicy }) 
       script.defer = true;
       script.onload = initializeGoogleSignIn;
       script.onerror = () => {
-        if (!import.meta.env.PROD) {
-          setUseFallbackGoogle(true);
-        } else {
-          setError('Google Sign-In failed to load. Please check your internet connection.');
-        }
+        setError('Google Sign-In failed to load. Please check your internet connection.');
       };
       document.body.appendChild(script);
     } else if (window.google && window.google.accounts) {
       initializeGoogleSignIn();
     }
-
-    // Fallback trigger if SDK doesn't load/respond within 2.5 seconds (e.g. offline, local dev, emulator)
-    const timeout = setTimeout(() => {
-      if ((!window.google || !window.google.accounts) && !import.meta.env.PROD) {
-        setUseFallbackGoogle(true);
-      }
-    }, 2500);
-
-    return () => clearTimeout(timeout);
   }, []);
 
   // Render Google Sign-in button when SDK loaded
@@ -128,44 +132,48 @@ export default function AuthScreen({ onAuthSuccess, showStatus, onShowPolicy }) 
     }
   };
 
-  const handleFallbackGoogleSignIn = async () => {
-    if (import.meta.env.PROD) {
-      setError('Mock Google authentication is disabled in production.');
-      return;
-    }
-    const targetEmail = prompt('Enter your Google Email Address to authenticate (Dev Offline Mode):');
-    if (!targetEmail || targetEmail.trim() === '') return;
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(targetEmail.trim())) {
-      setError('Please enter a valid email address.');
-      return;
-    }
-
+  // Native Google Sign-In handler (Android via SocialLogin plugin)
+  const handleNativeGoogleSignIn = async () => {
     setLoading(true);
     setError('');
 
     try {
+      const result = await SocialLogin.login({
+        provider: 'google',
+        options: {
+          scopes: ['email', 'profile'],
+        },
+      });
+
+      // Extract the ID token from the native response
+      const idToken = result?.result?.idToken;
+      if (!idToken) {
+        throw new Error('Google login failed: no ID token returned.');
+      }
+
+      // Send the real Google ID token to the backend for verification
       const res = await fetch(`${BACKEND_URL}/auth/google`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          credential: 'mock-google-token',
-          email: targetEmail.trim()
-        })
+        body: JSON.stringify({ credential: idToken })
       });
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || 'Google Login failed.');
+        throw new Error(data.error || 'Google login failed.');
       }
 
       localStorage.setItem('kinledger_jwt_token', data.token);
       localStorage.setItem('kinledger_user_email', data.user.email);
-      showStatus('Logged in with Google (Dev Fallback) successfully!', 'success');
+      showStatus('Logged in with Google successfully!', 'success');
       onAuthSuccess(data.token, data.user.email);
     } catch (err) {
-      setError(err.message || 'Google Auth server communication failed.');
+      // Handle user cancellation gracefully
+      if (err?.message?.includes('cancel') || err?.message?.includes('Cancel')) {
+        setError('');
+      } else {
+        setError(err.message || 'Google Sign-In failed.');
+      }
     } finally {
       setLoading(false);
     }
@@ -405,12 +413,12 @@ export default function AuthScreen({ onAuthSuccess, showStatus, onShowPolicy }) 
         </div>
 
         <div className="google-auth-wrap" style={{ margin: '15px 0 10px', display: 'flex', justifyContent: 'center' }}>
-          {useFallbackGoogle ? (
+          {isNative ? (
             <button 
               type="button" 
-              className="btn-google-fallback" 
-              onClick={handleFallbackGoogleSignIn}
-              disabled={loading}
+              className="btn-google-native" 
+              onClick={handleNativeGoogleSignIn}
+              disabled={loading || !nativeGoogleReady}
             >
               <svg className="google-icon" viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg" style={{ marginRight: '8px', verticalAlign: 'middle' }}>
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -418,7 +426,7 @@ export default function AuthScreen({ onAuthSuccess, showStatus, onShowPolicy }) 
                 <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
                 <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
               </svg>
-              <span>Continue with Google</span>
+              <span>Sign in with Google</span>
             </button>
           ) : (
             <div id="google-signin-btn" style={{ display: 'flex', justifyContent: 'center', width: '100%', minHeight: '44px' }}></div>

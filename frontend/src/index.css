@@ -2423,7 +2423,7 @@ textarea {
   letter-spacing: 0.05em;
 }
 
-.btn-google-fallback {
+.btn-google-native {
   width: 100%;
   max-width: 300px;
   min-height: 44px;
@@ -2441,12 +2441,12 @@ textarea {
   padding: 0.5rem 1rem;
 }
 
-.btn-google-fallback:hover {
+.btn-google-native:hover {
   background-color: var(--bg-app);
   border-color: var(--text-muted);
 }
 
-.btn-google-fallback:active {
+.btn-google-native:active {
   transform: scale(0.98);
 }
 

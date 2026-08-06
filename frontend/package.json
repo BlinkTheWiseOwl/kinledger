@@ -14,6 +14,7 @@
     "@capacitor/core": "^6.1.2",
     "@capacitor/filesystem": "^6.0.4",
     "@capacitor/share": "^6.0.4",
+    "@capgo/capacitor-social-login": "^6.0.1",
     "jspdf": "^4.2.1",
     "lucide-react": "^0.379.0",
     "react": "^18.3.1",
