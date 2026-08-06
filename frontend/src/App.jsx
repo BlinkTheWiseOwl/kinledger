@@ -485,9 +485,7 @@ export default function App() {
 
         // 3. Age
         const ageVal = activeUpdate.profile.age;
-        if (ageVal === undefined || ageVal === null || String(ageVal).trim() === '') {
-          errors.age = "Age is required.";
-        } else {
+        if (ageVal !== undefined && ageVal !== null && String(ageVal).trim() !== '') {
           const ageNum = Number(ageVal);
           if (!Number.isInteger(ageNum) || ageNum < 0 || ageNum > 130) {
             errors.age = "Age must be an integer between 0 and 130.";
@@ -495,10 +493,7 @@ export default function App() {
         }
 
         // 4. Blood Group
-        const bg = activeUpdate.profile.bloodGroup || '';
-        if (!bg || bg.trim() === '') {
-          errors.bloodGroup = "Blood Group is required.";
-        }
+        // Blood Group is optional
 
         // 5. Conditions
         const cond = activeUpdate.profile.conditions || '';
@@ -760,7 +755,7 @@ export default function App() {
 
       if (name === 'age') {
         if (value === undefined || value === null || String(value).trim() === '') {
-          copy.age = "Age is required.";
+          delete copy.age;
         } else {
           const ageNum = Number(value);
           if (!Number.isInteger(ageNum) || ageNum < 0 || ageNum > 130) {
@@ -772,11 +767,7 @@ export default function App() {
       }
 
       if (name === 'bloodGroup') {
-        if (!value || value.trim() === '') {
-          copy.bloodGroup = "Blood Group is required.";
-        } else {
-          delete copy.bloodGroup;
-        }
+        delete copy.bloodGroup;
       }
 
       if (name === 'conditions') {
@@ -2256,14 +2247,14 @@ export default function App() {
                     {validationErrors.fullName && <span className="field-error">{validationErrors.fullName}</span>}
                   </div>
                   <div className="form-group">
-                    <label htmlFor="bs-age">Age <span className="required-asterisk">*</span></label>
+                    <label htmlFor="bs-age">Age</label>
                     <input type="number" id="bs-age" name="age" placeholder="e.g., 68"
                       value={activeCard.profile.age} onChange={updateActiveCardProfile}
                       style={validationErrors.age ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}} />
                     {validationErrors.age && <span className="field-error">{validationErrors.age}</span>}
                   </div>
                   <div className="form-group">
-                    <label htmlFor="bs-bloodGroup">Blood Group <span className="required-asterisk">*</span></label>
+                    <label htmlFor="bs-bloodGroup">Blood Group</label>
                     <select id="bs-bloodGroup" name="bloodGroup" value={activeCard.profile.bloodGroup} onChange={updateActiveCardProfile}
                       style={validationErrors.bloodGroup ? { borderColor: 'var(--danger)', backgroundColor: 'var(--danger-light)' } : {}}>
                       <option value="">Select Blood Group</option>

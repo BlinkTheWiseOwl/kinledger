@@ -609,16 +609,11 @@ app.post('/api/cards', authenticateToken, async (req, res) => {
         return res.status(400).json({ error: 'Relationship is required.' });
       }
 
-      if (age === undefined || age === null || String(age).trim() === '') {
-        return res.status(400).json({ error: 'Age is required.' });
-      }
-      const ageNum = Number(age);
-      if (isNaN(ageNum) || !Number.isInteger(ageNum) || ageNum < 0 || ageNum > 130) {
-        return res.status(400).json({ error: 'Age must be an integer between 0 and 130.' });
-      }
-
-      if (!bloodGroup || bloodGroup.trim() === '') {
-        return res.status(400).json({ error: 'Blood Group is required.' });
+      if (age !== undefined && age !== null && String(age).trim() !== '') {
+        const ageNum = Number(age);
+        if (isNaN(ageNum) || !Number.isInteger(ageNum) || ageNum < 0 || ageNum > 130) {
+          return res.status(400).json({ error: 'Age must be an integer between 0 and 130.' });
+        }
       }
 
       if (conditions && conditions.length > 5000) {
