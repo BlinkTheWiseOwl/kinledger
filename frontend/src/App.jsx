@@ -311,7 +311,7 @@ export default function App() {
 
   // Get readiness status of a card profile
   const getReadinessStatus = (card) => {
-    if (!card) return { status: 'incomplete', label: '\u26A0 7 items needed for emergency readiness', color: '#ef4444' };
+    if (!card) return { status: 'incomplete', label: '7 more items needed for emergency readiness', color: '#ef4444' };
     const { profile, emergencyContacts = [], medications = [] } = card;
     const { fullName, age, bloodGroup, conditions, allergies } = profile || {};
 
@@ -327,7 +327,7 @@ export default function App() {
     if (missingItems.length > 0) {
       return {
         status: 'incomplete',
-        label: `\u26A0 ${missingItems.length} item${missingItems.length > 1 ? 's' : ''} needed for emergency readiness`,
+        label: `${missingItems.length} more item${missingItems.length > 1 ? 's' : ''} needed for emergency readiness`,
         color: '#ef4444'
       };
     }
@@ -1960,12 +1960,12 @@ export default function App() {
                       {renderMaterialAvatar(card.avatar, 18, getInitials(card.profile.fullName))}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div className="member-name" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                      <div className="member-name" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                         <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '170px' }}>
                           {card.profile.fullName || 'Unnamed Profile'}
                         </span>
                         {card.isShared && (
-                          <span className="shared-badge" title={`Shared by ${card.ownerEmail}`}>
+                          <span className="shared-badge" title={`Shared by ${card.ownerEmail}`} style={{ flexShrink: 0 }}>
                             Shared
                           </span>
                         )}
@@ -2009,23 +2009,23 @@ export default function App() {
                           {card.profile.conditions.length > 50 ? '...' : ''}
                         </span>
                       ) : (
-                        <span style={{ color: 'var(--text-muted)' }}>None listed</span>
+                        <span style={{ color: 'var(--text-muted)' }}>None added</span>
                       )}
                     </div>
                     <div>
                       <strong>Meds:</strong>{' '}
                       {card.medications.length > 0
                         ? `${card.medications.length} active medication(s)`
-                        : <span style={{ color: 'var(--text-muted)' }}>No medications added.</span>
+                        : <span style={{ color: 'var(--text-muted)' }}>None added</span>
                       }
                     </div>
                     <div>
                       <strong>Emergency Contact:</strong>{' '}
-                      {card.emergencyContacts.length === 0 && (
-                        <span style={{ color: 'var(--text-muted)' }}>No contacts registered</span>
+                      {card.emergencyContacts.length === 0 ? (
+                        <span style={{ color: 'var(--text-muted)' }}>None added</span>
+                      ) : (
+                        card.emergencyContacts.length === 1 ? '1 contact registered' : '2 contacts registered'
                       )}
-                      {card.emergencyContacts.length === 1 && '1 contact registered'}
-                      {card.emergencyContacts.length === 2 && '2 contacts registered'}
                     </div>
 
                     {/* Last Updated Timestamp */}
