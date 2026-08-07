@@ -413,8 +413,7 @@ app.post('/api/auth/forgot-password', async (req, res) => {
     // Check user exists
     const userQuery = await db.query('SELECT id FROM public.users WHERE email = $1', [cleanEmail]);
     if (userQuery.rows.length === 0) {
-      // Prevent user enumeration
-      return res.json({ message: 'If this email is registered, a reset code has been sent.' });
+      return res.status(400).json({ error: 'There is no account registered with this email address.' });
     }
     const userId = userQuery.rows[0].id;
 

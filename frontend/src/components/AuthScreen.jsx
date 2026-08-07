@@ -242,6 +242,7 @@ export default function AuthScreen({ onAuthSuccess, showStatus, onShowPolicy }) 
         } else {
           setSuccessMsg('Reset code sent! Please check your email.');
           setResetEmail(email);
+          setResetCode('');
           setMode('reset');
         }
       } catch (err) {

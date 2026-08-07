@@ -1803,7 +1803,7 @@ export default function App() {
                 border: 'none'
               }}
             >
-              Vote for what's next!
+              Vote for what's next✨
             </button>
             <button
               className="hamburger-btn"
@@ -2871,7 +2871,7 @@ export default function App() {
               {joinedWaitlist ? (
                 <div className="waitlist-voted-area">
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '1rem 1.25rem', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--primary-light)', border: '1.5px solid rgba(15, 108, 95, 0.15)', color: 'var(--primary)', fontWeight: '600', fontSize: '1rem', marginBottom: '1.5rem' }}>
-                    <span style={{ fontSize: '1.25rem' }}>ðŸŽ¯</span>
+                    <span style={{ fontSize: '1.25rem' }}>🎯</span>
                     <span>{UPCOMING_FEATURES.find(f => f.id === votedFeature)?.label || 'General Interest'}</span>
                   </div>
                   <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', fontStyle: 'italic', margin: 0 }}>
