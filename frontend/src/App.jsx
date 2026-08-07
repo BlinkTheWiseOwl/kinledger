@@ -116,6 +116,7 @@ export default function App() {
   const [newMemberName, setNewMemberName] = useState('');
   const [expandedSections, setExpandedSections] = useState({ profile: true, insurance: false, contacts: false, meds: false, share: false });
   const [activeSheet, setActiveSheet] = useState(null);
+  const [avatarCollapsed, setAvatarCollapsed] = useState(true);
   const [cardsBackup, setCardsBackup] = useState(null);
 
   const toggleSection = (section) => {
@@ -310,19 +311,28 @@ export default function App() {
 
   // Get readiness status of a card profile
   const getReadinessStatus = (card) => {
-    if (!card) return { status: 'incomplete', label: 'Emergency Profile Incomplete', color: '#ef4444' };
+    if (!card) return { status: 'incomplete', label: '\u26A0 7 items needed for emergency readiness', color: '#ef4444' };
     const { profile, emergencyContacts = [], medications = [] } = card;
-    const { fullName, age, bloodGroup, conditions, allergies, insurancePolicy, insuranceNumber } = profile || {};
+    const { fullName, age, bloodGroup, conditions, allergies } = profile || {};
 
-    // Red: if missing primary details or contacts/medications
-    if (!fullName || !age || !bloodGroup || !conditions || !allergies || emergencyContacts.length === 0 || medications.length === 0) {
+    const missingItems = [];
+    if (!fullName) missingItems.push('Full Name');
+    if (!age) missingItems.push('Age');
+    if (!bloodGroup) missingItems.push('Blood Group');
+    if (!conditions) missingItems.push('Conditions');
+    if (!allergies) missingItems.push('Allergies');
+    if (emergencyContacts.length === 0) missingItems.push('Emergency Contacts');
+    if (medications.length === 0) missingItems.push('Medications');
+
+    if (missingItems.length > 0) {
       return {
         status: 'incomplete',
-        label: 'Emergency Profile Incomplete',
+        label: `\u26A0 ${missingItems.length} item${missingItems.length > 1 ? 's' : ''} needed for emergency readiness`,
         color: '#ef4444'
       };
     }
 
+    const { insurancePolicy, insuranceNumber } = profile || {};
     // Yellow: if complete on primary but missing insurance
     if (!insurancePolicy || !insuranceNumber) {
       return {
@@ -1793,7 +1803,7 @@ export default function App() {
                 border: 'none'
               }}
             >
-              Coming Up Next ✨
+              Vote for what's next!
             </button>
             <button
               className="hamburger-btn"
@@ -2006,7 +2016,7 @@ export default function App() {
                       <strong>Meds:</strong>{' '}
                       {card.medications.length > 0
                         ? `${card.medications.length} active medication(s)`
-                        : <span style={{ color: 'var(--text-muted)' }}>None listed</span>
+                        : <span style={{ color: 'var(--text-muted)' }}>No medications added.</span>
                       }
                     </div>
                     <div>
@@ -2188,7 +2198,7 @@ export default function App() {
                   <div className="section-row-left">
                     <div className="section-row-icon-wrap"><Users size={18} /></div>
                     <div className="section-row-info">
-                      <span className="section-row-label">Share</span>
+                      <span className="section-row-label">Share Profile Access</span>
                       <span className="section-row-status">
                         {activeCard.sharedWith && activeCard.sharedWith.length > 0
                           ? `Shared with ${activeCard.sharedWith.length}`
@@ -2227,7 +2237,7 @@ export default function App() {
                 {activeSheet === 'insurance' && <><Award size={18} /> Insurance</>}
                 {activeSheet === 'contacts' && <><Phone size={18} /> Emergency Contacts</>}
                 {activeSheet === 'meds' && <><CapsuleIcon size={18} /> Medications</>}
-                {activeSheet === 'share' && <><Users size={18} /> Share Card</>}
+                {activeSheet === 'share' && <><Users size={18} /> Share Profile Access</>}
               </h3>
               <button className="modal-close-btn" onClick={() => setActiveSheet(null)} aria-label="Close">
                 <X size={20} />
@@ -2318,115 +2328,141 @@ export default function App() {
                     </div>
                   )}
 
-                  <div className="form-group full-width">
-                    <label style={{ fontWeight: '600', marginBottom: '0.4rem', display: 'block' }}>Choose Profile Avatar Icon</label>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', backgroundColor: 'var(--bg-card)', padding: '0.85rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
-                      {[
-                        {
-                          groupName: 'Family (Kin)',
-                          avatars: [
-                            { key: 'avatar_father', label: 'Father' },
-                            { key: 'avatar_mother', label: 'Mother' },
-                            { key: 'avatar_me', label: 'Me' },
-                            { key: 'avatar_husband', label: 'Husband/Spouse' },
-                            { key: 'avatar_daughter', label: 'Daughter' },
-                            { key: 'avatar_son', label: 'Son' },
-                            { key: 'avatar_grandmother', label: 'Grandmother' },
-                            { key: 'avatar_grandfather', label: 'Grandfather' }
-                          ]
-                        },
-                        {
-                          groupName: 'Friends',
-                          avatars: [
-                            { key: 'avatar_friend_male', label: 'Male Friend' },
-                            { key: 'avatar_friend_female', label: 'Female Friend' },
-                            { key: 'avatar_friend_close', label: 'Close Friend' },
-                            { key: 'avatar_friend_best', label: 'Best Friend' },
-                            { key: 'avatar_friend_work', label: 'Work Friend' },
-                            { key: 'avatar_friend_neighbor', label: 'Neighbor' },
-                            { key: 'avatar_friend_senior', label: 'Senior Friend' },
-                            { key: 'avatar_friend_hijab', label: 'Friend (Hijab)' }
-                          ]
-                        },
-                        {
-                          groupName: 'General / Other',
-                          avatars: [
-                            { key: 'avatar_adult_male', label: 'Adult Male' },
-                            { key: 'avatar_adult_female', label: 'Adult Female' },
-                            { key: 'avatar_young_adult_male', label: 'Young Adult Male' },
-                            { key: 'avatar_young_adult_female', label: 'Young Adult Female' },
-                            { key: 'avatar_teen_male', label: 'Teen Male' },
-                            { key: 'avatar_teen_female', label: 'Teen Female' },
-                            { key: 'avatar_child_male', label: 'Child Male' },
-                            { key: 'avatar_child_female', label: 'Child Female' },
-                            { key: 'avatar_unknown', label: 'Unknown/Generic' }
-                          ]
-                        }
-                      ].map(group => (
-                        <div key={group.groupName}>
-                          <div style={{ fontSize: '0.72rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: '700', marginBottom: '0.4rem', letterSpacing: '0.03em' }}>
-                            {group.groupName}
-                          </div>
-                          <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
-                            {group.avatars.map(av => (
-                              <button
-                                key={av.key}
-                                type="button"
-                                onClick={() => updateActiveCardAvatar(av.key)}
-                                style={{
-                                  width: '42px',
-                                  height: '42px',
-                                  borderRadius: '50%',
-                                  border: 'none',
-                                  boxShadow: activeCard.avatar === av.key ? '0 0 0 3px var(--primary), var(--shadow-md)' : 'var(--shadow-sm)',
-                                  transform: activeCard.avatar === av.key ? 'scale(1.12)' : 'scale(1)',
-                                  padding: 0,
-                                  cursor: 'pointer',
-                                  transition: 'all 0.2s ease',
-                                  overflow: 'visible',
-                                  position: 'relative'
-                                }}
-                                title={av.label}
-                              >
-                                <div style={{ width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden' }}>
-                                  {renderMaterialAvatar(av.key, 20)}
-                                </div>
-                                {activeCard.avatar === av.key && (
-                                  <div style={{
-                                    position: 'absolute',
-                                    bottom: '-2px',
-                                    right: '-2px',
-                                    width: '16px',
-                                    height: '16px',
-                                    borderRadius: '50%',
-                                    backgroundColor: 'var(--primary)',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    color: '#ffffff',
-                                    boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
-                                    zIndex: 2
-                                  }}>
-                                    <Check size={10} strokeWidth={4} />
-                                  </div>
-                                )}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
+                  <div className="form-group full-width" style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem', backgroundColor: 'var(--bg-card)' }}>
+                    <button
+                      type="button"
+                      onClick={() => setAvatarCollapsed(!avatarCollapsed)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        width: '100%',
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        padding: 0,
+                        fontFamily: 'inherit',
+                        fontSize: '0.95rem',
+                        fontWeight: '600',
+                        color: 'var(--text-primary)'
+                      }}
+                    >
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {activeCard.avatar ? renderMaterialAvatar(activeCard.avatar, 14) : <User size={18} />}
+                        Choose Profile Avatar Icon
+                      </span>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{avatarCollapsed ? '▼ Expand' : '▲ Collapse'}</span>
+                    </button>
 
-                      {activeCard.avatar && (
-                        <button
-                          type="button"
-                          className="btn btn-outline btn-sm"
-                          onClick={() => updateActiveCardAvatar('')}
-                          style={{ alignSelf: 'flex-start', marginTop: '0.25rem', padding: '0.2rem 0.6rem', fontSize: '0.75rem' }}
-                        >
-                          Clear Avatar Icon
-                        </button>
-                      )}
-                    </div>
+                    {!avatarCollapsed && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
+                        {[
+                          {
+                            groupName: 'Family (Kin)',
+                            avatars: [
+                              { key: 'avatar_father', label: 'Father' },
+                              { key: 'avatar_mother', label: 'Mother' },
+                              { key: 'avatar_me', label: 'Me' },
+                              { key: 'avatar_husband', label: 'Husband/Spouse' },
+                              { key: 'avatar_daughter', label: 'Daughter' },
+                              { key: 'avatar_son', label: 'Son' },
+                              { key: 'avatar_grandmother', label: 'Grandmother' },
+                              { key: 'avatar_grandfather', label: 'Grandfather' }
+                            ]
+                          },
+                          {
+                            groupName: 'Friends',
+                            avatars: [
+                              { key: 'avatar_friend_male', label: 'Male Friend' },
+                              { key: 'avatar_friend_female', label: 'Female Friend' },
+                              { key: 'avatar_friend_close', label: 'Close Friend' },
+                              { key: 'avatar_friend_best', label: 'Best Friend' },
+                              { key: 'avatar_friend_work', label: 'Work Friend' },
+                              { key: 'avatar_friend_neighbor', label: 'Neighbor' },
+                              { key: 'avatar_friend_senior', label: 'Senior Friend' },
+                              { key: 'avatar_friend_hijab', label: 'Friend (Hijab)' }
+                            ]
+                          },
+                          {
+                            groupName: 'General / Other',
+                            avatars: [
+                              { key: 'avatar_adult_male', label: 'Adult Male' },
+                              { key: 'avatar_adult_female', label: 'Adult Female' },
+                              { key: 'avatar_young_adult_male', label: 'Young Adult Male' },
+                              { key: 'avatar_young_adult_female', label: 'Young Adult Female' },
+                              { key: 'avatar_teen_male', label: 'Teen Male' },
+                              { key: 'avatar_teen_female', label: 'Teen Female' },
+                              { key: 'avatar_child_male', label: 'Child Male' },
+                              { key: 'avatar_child_female', label: 'Child Female' },
+                              { key: 'avatar_unknown', label: 'Unknown/Generic' }
+                            ]
+                          }
+                        ].map(group => (
+                          <div key={group.groupName}>
+                            <div style={{ fontSize: '0.72rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: '700', marginBottom: '0.4rem', letterSpacing: '0.03em' }}>
+                              {group.groupName}
+                            </div>
+                            <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
+                              {group.avatars.map(av => (
+                                <button
+                                  key={av.key}
+                                  type="button"
+                                  onClick={() => updateActiveCardAvatar(av.key)}
+                                  style={{
+                                    width: '42px',
+                                    height: '42px',
+                                    borderRadius: '50%',
+                                    border: 'none',
+                                    boxShadow: activeCard.avatar === av.key ? '0 0 0 3px var(--primary), var(--shadow-md)' : 'var(--shadow-sm)',
+                                    transform: activeCard.avatar === av.key ? 'scale(1.12)' : 'scale(1)',
+                                    padding: 0,
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s ease',
+                                    overflow: 'visible',
+                                    position: 'relative'
+                                  }}
+                                  title={av.label}
+                                >
+                                  <div style={{ width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden' }}>
+                                    {renderMaterialAvatar(av.key, 20)}
+                                  </div>
+                                  {activeCard.avatar === av.key && (
+                                    <div style={{
+                                      position: 'absolute',
+                                      bottom: '-2px',
+                                      right: '-2px',
+                                      width: '16px',
+                                      height: '16px',
+                                      borderRadius: '50%',
+                                      backgroundColor: 'var(--primary)',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      color: '#ffffff',
+                                      boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+                                      zIndex: 2
+                                    }}>
+                                      <Check size={10} strokeWidth={4} />
+                                    </div>
+                                  )}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+
+                        {activeCard.avatar && (
+                          <button
+                            type="button"
+                            className="btn btn-outline btn-sm"
+                            onClick={() => updateActiveCardAvatar('')}
+                            style={{ alignSelf: 'flex-start', marginTop: '0.25rem', padding: '0.2rem 0.6rem', fontSize: '0.75rem' }}
+                          >
+                            Clear Avatar Icon
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
                   <div className="form-group full-width">
                     <label htmlFor="bs-conditions">Conditions (Optional)</label>
@@ -2724,27 +2760,35 @@ export default function App() {
                           marginBottom: '1.25rem',
                           lineHeight: '1.4'
                         }}>
-                          <div style={{ fontWeight: '700', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <ShieldAlert size={16} color={shareError.type === 'notEnrolled' ? 'var(--warning)' : 'var(--danger)'} />
-                            {shareError.type === 'notEnrolled' ? 'Family Member Not Enrolled' : 'Sharing Error'}
-                          </div>
-                          <p style={{ margin: '0 0 10px 0', color: 'var(--text-primary)' }}>{shareError.message}</p>
-                          
-                          {shareError.type === 'notEnrolled' && (
-                            <div style={{ marginTop: '8px', borderTop: '1px solid rgba(0,0,0,0.05)', paddingTop: '8px' }}>
-                              <p style={{ margin: '0 0 8px 0', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-                                To enable shared editing, they must have a KinLedger account. Share the app install/sign-up link with them now for easy enrollment:
+                          {shareError.type === 'notEnrolled' ? (
+                            <>
+                              <div style={{ fontWeight: '700', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <ShieldAlert size={16} color="var(--warning)" />
+                                Family member isn't on KinLedger yet.
+                              </div>
+                              <p style={{ margin: '0 0 10px 0', color: 'var(--text-primary)' }}>
+                                They need a KinLedger account to access and update this profile. Invite them to KinLedger:
                               </p>
-                              <button 
-                                type="button"
-                                className="btn btn-primary btn-sm"
-                                style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 10px', fontSize: '0.75rem' }}
-                                onClick={() => handleShareAppInstall(shareError.email)}
-                              >
-                                <Share2 size={13} />
-                                Share App Invite Link
-                              </button>
-                            </div>
+                              <div style={{ marginTop: '8px', borderTop: '1px solid rgba(0,0,0,0.05)', paddingTop: '8px' }}>
+                                <button 
+                                  type="button"
+                                  className="btn btn-primary btn-sm"
+                                  style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 10px', fontSize: '0.75rem' }}
+                                  onClick={() => handleShareAppInstall(shareError.email)}
+                                >
+                                  <Share2 size={13} />
+                                  Share App Invite Link
+                                </button>
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              <div style={{ fontWeight: '700', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <ShieldAlert size={16} color="var(--danger)" />
+                                Sharing Error
+                              </div>
+                              <p style={{ margin: '0 0 10px 0', color: 'var(--text-primary)' }}>{shareError.message}</p>
+                            </>
                           )}
                         </div>
                       )}

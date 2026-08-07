@@ -196,7 +196,7 @@ function buildCardPdf(profile, emergencyContacts, medications) {
     drawBox(8, false);
     doc.setTextColor(15, 23, 42);
     doc.setFontSize(9);
-    doc.text('No chronic medications listed.', col + 3, y + 5);
+    doc.text('No medications added.', col + 3, y + 5);
     y += 13;
   } else {
     medications.forEach((m) => {
@@ -303,7 +303,7 @@ function buildCardHtml(profile, emergencyContacts, medications) {
           </div>
           <span style="font-weight:600;color:#1e40af;">${m.dosage}</span>
         </div>`).join('')
-    : '<p style="color:#64748b;">No chronic medications listed.</p>';
+    : '<p style="color:#64748b;">No medications added.</p>';
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -531,7 +531,7 @@ export default function EmergencyCard({ profile, emergencyContacts, medications,
                   ))
                 ) : (
                   <div className="badge-section-content" style={{ color: 'var(--text-secondary)' }}>
-                    No chronic medications listed.
+                    No medications added.
                   </div>
                 )}
               </div>
