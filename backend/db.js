@@ -27,8 +27,14 @@ const initDb = async () => {
         id SERIAL PRIMARY KEY,
         email VARCHAR(255) UNIQUE NOT NULL,
         password_hash TEXT NOT NULL,
+        is_verified BOOLEAN DEFAULT TRUE,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
+    `);
+
+    // Ensure is_verified exists for backward compatibility with existing tables
+    await client.query(`
+      ALTER TABLE public.users ADD COLUMN IF NOT EXISTS is_verified BOOLEAN DEFAULT TRUE;
     `);
 
     // 2. Create Profiles Table (using VARCHAR id for backwards compatibility with client card-id hashes)
@@ -120,6 +126,30 @@ const initDb = async () => {
         email VARCHAR(255),
         feature_id VARCHAR(100) NOT NULL,
         voted_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
+      );
+    `);
+
+    // 8. Create Password Resets Table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS public.password_resets (
+        id SERIAL PRIMARY KEY,
+        email VARCHAR(255) NOT NULL,
+        code VARCHAR(6) NOT NULL,
+        expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+        used BOOLEAN DEFAULT FALSE NOT NULL,
+        attempts INTEGER DEFAULT 0 NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
+      );
+    `);
+
+    // 9. Create Email Verifications Table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS public.email_verifications (
+        id SERIAL PRIMARY KEY,
+        email VARCHAR(255) NOT NULL,
+        code VARCHAR(6) NOT NULL,
+        expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
       );
     `);
 

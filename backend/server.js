@@ -5,6 +5,78 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const db = require('./db');
 require('dotenv').config();
+const nodemailer = require('nodemailer');
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
+
+const sendResetEmail = async (toEmail, code) => {
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    console.log(`[DEV FALLBACK] Password reset code for ${toEmail}: ${code}`);
+    return { success: true, method: 'console' };
+  }
+
+  try {
+    await transporter.sendMail({
+      from: `"KinLedger" <${process.env.EMAIL_USER}>`,
+      to: toEmail,
+      subject: 'KinLedger — Password Reset Code',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
+          <h2 style="color: #2563eb; text-align: center;">KinLedger</h2>
+          <p style="color: #334155; font-size: 16px;">Hello,</p>
+          <p style="color: #334155; font-size: 16px;">Your password reset verification code is:</p>
+          <div style="background-color: #f1f5f9; padding: 16px; border-radius: 6px; text-align: center; margin: 24px 0;">
+            <span style="font-family: monospace; font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #0f172a;">${code}</span>
+          </div>
+          <p style="color: #64748b; font-size: 14px;">This code expires in 15 minutes.</p>
+          <p style="color: #64748b; font-size: 14px; margin-top: 24px;">If you didn't request this, you can safely ignore this email.</p>
+        </div>
+      `
+    });
+    return { success: true, method: 'email' };
+  } catch (err) {
+    console.error('[EMAIL ERROR]:', err);
+    console.log(`[FALLBACK] Password reset code for ${toEmail}: ${code}`);
+    return { success: true, method: 'console-fallback' };
+  }
+};
+
+const sendVerificationEmail = async (toEmail, code) => {
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    console.log(`[DEV FALLBACK] Email verification code for ${toEmail}: ${code}`);
+    return { success: true, method: 'console' };
+  }
+
+  try {
+    await transporter.sendMail({
+      from: `"KinLedger" <${process.env.EMAIL_USER}>`,
+      to: toEmail,
+      subject: 'KinLedger — Verify Your Email',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
+          <h2 style="color: #2563eb; text-align: center;">KinLedger</h2>
+          <p style="color: #334155; font-size: 16px;">Welcome!</p>
+          <p style="color: #334155; font-size: 16px;">Your email verification code is:</p>
+          <div style="background-color: #f1f5f9; padding: 16px; border-radius: 6px; text-align: center; margin: 24px 0;">
+            <span style="font-family: monospace; font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #0f172a;">${code}</span>
+          </div>
+          <p style="color: #64748b; font-size: 14px;">This code expires in 15 minutes.</p>
+        </div>
+      `
+    });
+    return { success: true, method: 'email' };
+  } catch (err) {
+    console.error('[EMAIL ERROR]:', err);
+    console.log(`[FALLBACK] Email verification code for ${toEmail}: ${code}`);
+    return { success: true, method: 'console-fallback' };
+  }
+};
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -175,24 +247,91 @@ app.post('/api/auth/signup', async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
-    // Insert user
+    // Insert user (unverified by default for email/password)
     const newUser = await db.query(
-      'INSERT INTO public.users (email, password_hash) VALUES ($1, $2) RETURNING id, email',
+      'INSERT INTO public.users (email, password_hash, is_verified) VALUES ($1, $2, FALSE) RETURNING id, email',
       [cleanEmail, passwordHash]
     );
 
     const userObj = newUser.rows[0];
     
-    // Create token
-    const token = jwt.sign({ id: userObj.id, email: userObj.email }, JWT_SECRET, { expiresIn: '30d' });
+    // Generate verification code
+    const code = crypto.randomInt(100000, 999999).toString();
+    
+    // Cleanup any old verifications for this email just in case
+    await db.query("DELETE FROM public.email_verifications WHERE email = $1", [cleanEmail]);
+    
+    // Insert verification code
+    await db.query(
+      "INSERT INTO public.email_verifications (email, code, expires_at) VALUES ($1, $2, NOW() + INTERVAL '15 minutes')",
+      [cleanEmail, code]
+    );
+    
+    // Send email
+    await sendVerificationEmail(cleanEmail, code);
 
     // Log signup audit event
-    await logAudit(userObj.id, userObj.email, 'SIGNUP', 'New user registered and accepted DPDP consent terms.');
+    await logAudit(userObj.id, userObj.email, 'SIGNUP_PENDING', 'New user registered, pending email verification.');
 
-    res.json({ token, user: { email: userObj.email } });
+    const responsePayload = { message: 'Account created. Please verify your email.', requiresVerification: true };
+    if (process.env.NODE_ENV !== 'production') {
+      responsePayload.devCode = code;
+    }
+    
+    res.json(responsePayload);
   } catch (err) {
     console.error('Signup error:', err);
     res.status(500).json({ error: 'Server error during signup.' });
+  }
+});
+
+// Verify Email Endpoint
+app.post('/api/auth/verify-email', async (req, res) => {
+  const { email, code } = req.body;
+  if (!email || !code) {
+    return res.status(400).json({ error: 'Email and code are required.' });
+  }
+  
+  try {
+    const cleanEmail = email.toLowerCase().trim();
+    
+    // Find valid code
+    const codeQuery = await db.query(
+      "SELECT * FROM public.email_verifications WHERE email = $1 AND expires_at > NOW() ORDER BY created_at DESC LIMIT 1",
+      [cleanEmail]
+    );
+    
+    if (codeQuery.rows.length === 0) {
+      return res.status(400).json({ error: 'Invalid or expired code. Please request a new one.' });
+    }
+    
+    const verificationRecord = codeQuery.rows[0];
+    
+    if (verificationRecord.code !== code) {
+      return res.status(400).json({ error: 'Incorrect verification code.' });
+    }
+    
+    // Update user to verified
+    const updateQuery = await db.query('UPDATE public.users SET is_verified = TRUE WHERE email = $1 RETURNING id, email', [cleanEmail]);
+    if (updateQuery.rows.length === 0) {
+      return res.status(400).json({ error: 'User not found.' });
+    }
+    
+    const userObj = updateQuery.rows[0];
+    
+    // Delete the used code
+    await db.query('DELETE FROM public.email_verifications WHERE id = $1', [verificationRecord.id]);
+    
+    // Log audit event
+    await logAudit(userObj.id, userObj.email, 'EMAIL_VERIFIED', 'User successfully verified their email address.');
+    
+    // Generate token and log them in
+    const token = jwt.sign({ id: userObj.id, email: userObj.email }, JWT_SECRET, { expiresIn: '30d' });
+    
+    res.json({ token, user: { email: userObj.email }, message: 'Email verified successfully.' });
+  } catch (err) {
+    console.error('Email verification error:', err);
+    res.status(500).json({ error: 'Server error processing verification.' });
   }
 });
 
@@ -228,6 +367,11 @@ app.post('/api/auth/login', async (req, res) => {
     if (!validPassword) {
       return res.status(400).json({ error: 'Invalid email or password.' });
     }
+    
+    // Check if verified
+    if (user.is_verified === false) {
+      return res.status(403).json({ error: 'Please verify your email address to log in.', requiresVerification: true });
+    }
 
     // Create token
     const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '30d' });
@@ -239,6 +383,147 @@ app.post('/api/auth/login', async (req, res) => {
   } catch (err) {
     console.error('Login error:', err);
     res.status(500).json({ error: 'Server error during login.' });
+  }
+});
+
+// Forgot Password
+app.post('/api/auth/forgot-password', async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({ error: 'Email is required.' });
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email.trim())) {
+    return res.status(400).json({ error: 'Please enter a valid email address.' });
+  }
+
+  try {
+    const cleanEmail = email.toLowerCase().trim();
+
+    // Rate Limit Check
+    const rateLimitCheck = await db.query(
+      "SELECT COUNT(*) FROM public.password_resets WHERE email = $1 AND created_at > NOW() - INTERVAL '1 hour' AND used = FALSE",
+      [cleanEmail]
+    );
+    if (parseInt(rateLimitCheck.rows[0].count) >= 3) {
+      return res.status(429).json({ error: 'Too many reset requests. Please try again later.' });
+    }
+
+    // Check user exists
+    const userQuery = await db.query('SELECT id FROM public.users WHERE email = $1', [cleanEmail]);
+    if (userQuery.rows.length === 0) {
+      // Prevent user enumeration
+      return res.json({ message: 'If this email is registered, a reset code has been sent.' });
+    }
+    const userId = userQuery.rows[0].id;
+
+    // Google-account detection
+    const googleSignupCheck = await db.query(
+      "SELECT 1 FROM public.audit_logs WHERE user_email = $1 AND action = 'SIGNUP' AND details ILIKE '%Google Sign-In%'",
+      [cleanEmail]
+    );
+    if (googleSignupCheck.rows.length > 0) {
+      return res.json({ 
+        message: 'This account uses Google Sign-In. Please use the Google button to log in.',
+        isGoogleAccount: true 
+      });
+    }
+
+    // Invalidate old codes
+    await db.query('UPDATE public.password_resets SET used = TRUE WHERE email = $1 AND used = FALSE', [cleanEmail]);
+    
+    // Cleanup expired rows
+    await db.query("DELETE FROM public.password_resets WHERE expires_at < NOW()");
+
+    // Generate code
+    const code = crypto.randomInt(100000, 999999).toString();
+
+    // Insert code
+    await db.query(
+      "INSERT INTO public.password_resets (email, code, expires_at) VALUES ($1, $2, NOW() + INTERVAL '15 minutes')",
+      [cleanEmail, code]
+    );
+
+    // Send email
+    await sendResetEmail(cleanEmail, code);
+
+    // Audit log
+    await logAudit(userId, cleanEmail, 'PASSWORD_RESET_REQUEST', 'User requested a password reset code.');
+
+    const responsePayload = { message: 'If this email is registered, a reset code has been sent.' };
+    if (process.env.NODE_ENV !== 'production') {
+      responsePayload.devCode = code; // Helper for local testing
+    }
+    
+    res.json(responsePayload);
+  } catch (err) {
+    console.error('Forgot password error:', err);
+    res.status(500).json({ error: 'Server error processing request.' });
+  }
+});
+
+// Reset Password
+app.post('/api/auth/reset-password', async (req, res) => {
+  const { email, code, newPassword } = req.body;
+  
+  if (!email || !code || !newPassword) {
+    return res.status(400).json({ error: 'Email, code, and new password are required.' });
+  }
+  
+  if (newPassword.length < 8) {
+    return res.status(400).json({ error: 'Password must be at least 8 characters.' });
+  }
+
+  try {
+    const cleanEmail = email.toLowerCase().trim();
+    
+    // Find valid code
+    const codeQuery = await db.query(
+      "SELECT * FROM public.password_resets WHERE email = $1 AND used = FALSE AND expires_at > NOW() ORDER BY created_at DESC LIMIT 1",
+      [cleanEmail]
+    );
+    
+    if (codeQuery.rows.length === 0) {
+      return res.status(400).json({ error: 'Invalid or expired code. Please request a new one.' });
+    }
+    
+    const resetRecord = codeQuery.rows[0];
+    
+    // Brute-force check
+    if (resetRecord.attempts >= 5) {
+      await db.query('UPDATE public.password_resets SET used = TRUE WHERE id = $1', [resetRecord.id]);
+      return res.status(400).json({ error: 'Too many failed attempts. Please request a new code.' });
+    }
+    
+    // Code mismatch
+    if (resetRecord.code !== code) {
+      await db.query('UPDATE public.password_resets SET attempts = attempts + 1 WHERE id = $1', [resetRecord.id]);
+      return res.status(400).json({ error: 'Incorrect verification code.' });
+    }
+    
+    // Code matches
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(newPassword, salt);
+    
+    // Update user
+    const updateQuery = await db.query('UPDATE public.users SET password_hash = $1 WHERE email = $2 RETURNING id', [passwordHash, cleanEmail]);
+    if (updateQuery.rows.length === 0) {
+      return res.status(400).json({ error: 'User not found.' });
+    }
+    
+    const userId = updateQuery.rows[0].id;
+    
+    // Mark code used
+    await db.query('UPDATE public.password_resets SET used = TRUE WHERE id = $1', [resetRecord.id]);
+    
+    // Audit log
+    await logAudit(userId, cleanEmail, 'PASSWORD_RESET_SUCCESS', 'Password successfully reset via email verification.');
+    
+    res.json({ message: 'Password reset successfully. You can now log in with your new password.' });
+  } catch (err) {
+    console.error('Reset password error:', err);
+    res.status(500).json({ error: 'Server error processing request.' });
   }
 });
 

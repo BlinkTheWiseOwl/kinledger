@@ -1525,6 +1525,68 @@ textarea {
   text-decoration: underline;
 }
 
+/* Forgot Password Link */
+.auth-forgot-link {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.825rem;
+  cursor: pointer;
+  text-align: right;
+  padding: 0;
+  margin-top: -0.5rem;
+  transition: var(--transition);
+}
+.auth-forgot-link:hover {
+  color: var(--primary);
+  text-decoration: underline;
+}
+
+/* Success Banner */
+.auth-success-banner {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-align: left;
+  font-size: 0.875rem;
+}
+
+/* Info Banner (for Google account message) */
+.auth-info-banner {
+  background-color: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-align: left;
+  font-size: 0.875rem;
+}
+
+/* Resend Code Link */
+.auth-resend-link {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  transition: var(--transition);
+}
+.auth-resend-link:hover {
+  color: var(--primary);
+  text-decoration: underline;
+}
+
 /* Header Auth Section */
 .header-auth-badge {
   display: flex;
