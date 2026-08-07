@@ -311,7 +311,7 @@ export default function App() {
 
   // Get readiness status of a card profile
   const getReadinessStatus = (card) => {
-    if (!card) return { status: 'incomplete', label: '7 more items needed for emergency readiness', color: '#ef4444' };
+    if (!card) return { status: 'incomplete', label: '7 items needed for emergency readiness', color: '#ef4444' };
     const { profile, emergencyContacts = [], medications = [] } = card;
     const { fullName, age, bloodGroup, conditions, allergies } = profile || {};
 
@@ -327,7 +327,7 @@ export default function App() {
     if (missingItems.length > 0) {
       return {
         status: 'incomplete',
-        label: `${missingItems.length} more item${missingItems.length > 1 ? 's' : ''} needed for emergency readiness`,
+        label: `${missingItems.length} item${missingItems.length > 1 ? 's' : ''} needed for emergency readiness`,
         color: '#ef4444'
       };
     }
@@ -2348,7 +2348,13 @@ export default function App() {
                       }}
                     >
                       <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        {activeCard.avatar ? renderMaterialAvatar(activeCard.avatar, 14) : <User size={18} />}
+                        {activeCard.avatar ? (
+                          <div style={{ width: '32px', height: '32px', borderRadius: '50%', overflow: 'hidden', border: '1px solid var(--border)', flexShrink: 0 }}>
+                            {renderMaterialAvatar(activeCard.avatar, 14)}
+                          </div>
+                        ) : (
+                          <User size={18} />
+                        )}
                         Choose Profile Avatar Icon
                       </span>
                       <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{avatarCollapsed ? '▼ Expand' : '▲ Collapse'}</span>
