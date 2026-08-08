@@ -125,7 +125,7 @@ export default function App() {
   const [expandedSections, setExpandedSections] = useState({ profile: true, insurance: false, contacts: false, meds: false, share: false });
   const [activeSheet, setActiveSheet] = useState(null);
   const [avatarCollapsed, setAvatarCollapsed] = useState(true);
-  const [cardsBackup, setCardsBackup] = useState(null);
+  const [lastSavedCards, setLastSavedCards] = useState(null);
 
   const toggleSection = (section) => {
     setExpandedSections(prev => ({
@@ -233,6 +233,7 @@ export default function App() {
       const { data, synced: isSynced } = await loadCardData(token);
       if (Array.isArray(data)) {
         setCards(data);
+        setLastSavedCards(JSON.parse(JSON.stringify(data)));
       }
       setSynced(isSynced);
 
@@ -272,18 +273,6 @@ export default function App() {
       setSelectedFeature(null);
     }
   }, [userEmail]);
-
-  // Handle cards backup and restore on sheet open/close to support discarding changes
-  useEffect(() => {
-    if (activeSheet !== null) {
-      setCardsBackup(JSON.parse(JSON.stringify(cards)));
-    } else {
-      if (cardsBackup) {
-        setCards(cardsBackup);
-        setCardsBackup(null);
-      }
-    }
-  }, [activeSheet]);
 
   // Clear local contact and medication input fields and validation errors when switching cards, sheets, or adding members
   useEffect(() => {
@@ -631,7 +620,7 @@ export default function App() {
       setSynced(result.synced);
       if (result.success) {
         showStatus('Changes saved successfully.', 'success');
-        setCardsBackup(JSON.parse(JSON.stringify(finalCards)));
+        setLastSavedCards(JSON.parse(JSON.stringify(finalCards)));
         return true;
       } else {
         showStatus(`Save failed: ${result.error}`, 'error');
@@ -1809,13 +1798,35 @@ export default function App() {
   }
 
 
+  const handleCloseSheet = async () => {
+    if (lastSavedCards && JSON.stringify(cards) !== JSON.stringify(lastSavedCards)) {
+      const success = await handleSaveActiveCard();
+      if (success) {
+        setActiveSheet(null);
+      }
+    } else {
+      setActiveSheet(null);
+    }
+  };
+
+  const handleCloseCard = async () => {
+    if (lastSavedCards && JSON.stringify(cards) !== JSON.stringify(lastSavedCards)) {
+      const success = await handleSaveActiveCard();
+      if (success) {
+        setSelectedCardId(null);
+      }
+    } else {
+      setSelectedCardId(null);
+    }
+  };
+
   return (
     <div className="app-container">
       {/* Header Banner */}
       <header className="app-header">
         <div className="header-content">
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <a href="#" className="logo" onClick={() => { setSelectedCardId(null); setMenuOpen(false); }}>
+            <a href="#" className="logo" onClick={() => { handleCloseCard(); setMenuOpen(false); }}>
               <BlueShield size={28} />
               <span>KinLedger</span>
             </a>
@@ -2179,7 +2190,7 @@ export default function App() {
             {/* Header bar back to dashboard */}
             <div className="workspace-header">
               <div className="workspace-info">
-                <button className="btn-icon-only" onClick={() => setSelectedCardId(null)} title="Back to Dashboard">
+                <button className="btn-icon-only" onClick={handleCloseCard} title="Back to Dashboard">
                   <ArrowLeft size={20} />
                 </button>
                 <div>
@@ -2193,9 +2204,7 @@ export default function App() {
               </div>
 
               <div className="workspace-actions">
-                <button className="btn btn-secondary" onClick={() => setSelectedCardId(null)} disabled={isSaving}>
-                  Home
-                </button>
+                <button className="btn btn-secondary" onClick={handleCloseCard} disabled={isSaving}>Close</button>
                 <button className="btn btn-primary" onClick={handleSaveActiveCard} disabled={isSaving || isOverLimit}>
                   {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
                   {isSaving ? 'Saving...' : 'Save'}
@@ -2325,7 +2334,7 @@ export default function App() {
 
       {/* -- Bottom Sheet: Edit section forms -- */}
       {activeSheet !== null && selectedCardId !== null && (
-        <div className="bottom-sheet-overlay" onClick={() => setActiveSheet(null)}>
+        <div className="bottom-sheet-overlay" onClick={handleCloseSheet}>
           <div className="bottom-sheet" onClick={e => e.stopPropagation()}>
             <div className="bottom-sheet-handle-bar" />
 
@@ -2338,7 +2347,7 @@ export default function App() {
                 {activeSheet === 'meds' && <><CapsuleIcon size={18} /> Medications</>}
                 {activeSheet === 'share' && <><Users size={18} /> Share Profile Access</>}
               </h3>
-              <button className="modal-close-btn" onClick={() => setActiveSheet(null)} aria-label="Close">
+              <button className="modal-close-btn" onClick={handleCloseSheet} aria-label="Close">
                 <X size={20} />
               </button>
             </div>
