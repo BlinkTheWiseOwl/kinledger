@@ -6,6 +6,15 @@ const jwt = require('jsonwebtoken');
 const db = require('./db');
 require('dotenv').config();
 const nodemailer = require('nodemailer');
+const Razorpay = require('razorpay');
+
+const razorpayInstance = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET
+});
+
+const MAX_FREE_PROFILES = 2;
+const FAMILY_PLAN_AMOUNT = 39900; // ₹399 in paise
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
@@ -635,6 +644,240 @@ app.delete('/api/auth/account', authenticateToken, async (req, res) => {
 });
 
 // ==========================================
+// 1b. SUBSCRIPTION / MONETIZATION ENDPOINTS
+// ==========================================
+
+app.get('/api/subscription', authenticateToken, async (req, res) => {
+  const userId = req.user.id;
+  try {
+    const subQuery = await db.query(
+      'SELECT * FROM public.subscriptions WHERE user_id = $1',
+      [userId]
+    );
+
+    const profileCountQuery = await db.query(
+      'SELECT COUNT(*) FROM public.profiles WHERE owner_id = $1',
+      [userId]
+    );
+    const ownedProfileCount = parseInt(profileCountQuery.rows[0].count);
+
+    if (subQuery.rows.length === 0) {
+      return res.json({
+        plan: 'free',
+        status: 'active',
+        ownedProfileCount,
+        maxFreeProfiles: MAX_FREE_PROFILES,
+        expiresAt: null
+      });
+    }
+
+    const sub = subQuery.rows[0];
+
+    if (sub.plan === 'family' && sub.status === 'active' && sub.expires_at) {
+      const now = new Date();
+      const expiresAt = new Date(sub.expires_at);
+      if (now > expiresAt) {
+        await db.query(
+          "UPDATE public.subscriptions SET status = 'expired', updated_at = CURRENT_TIMESTAMP WHERE id = $1",
+          [sub.id]
+        );
+        await logAudit(userId, req.user.email, 'SUBSCRIPTION_EXPIRED',
+          'Family plan expired automatically.');
+        return res.json({
+          plan: 'free',
+          status: 'expired',
+          ownedProfileCount,
+          maxFreeProfiles: MAX_FREE_PROFILES,
+          expiresAt: sub.expires_at,
+          wasFamily: true
+        });
+      }
+    }
+
+    res.json({
+      plan: sub.plan,
+      status: sub.status,
+      ownedProfileCount,
+      maxFreeProfiles: MAX_FREE_PROFILES,
+      expiresAt: sub.expires_at,
+      startedAt: sub.started_at
+    });
+  } catch (err) {
+    console.error('Subscription fetch error:', err);
+    res.status(500).json({ error: 'Failed to fetch subscription status.' });
+  }
+});
+
+app.post('/api/subscription/create-order', authenticateToken, async (req, res) => {
+  const userId = req.user.id;
+  const userEmail = req.user.email;
+
+  try {
+    const subQuery = await db.query(
+      "SELECT * FROM public.subscriptions WHERE user_id = $1 AND plan = 'family' AND status = 'active'",
+      [userId]
+    );
+    if (subQuery.rows.length > 0) {
+      const sub = subQuery.rows[0];
+      const expiresAt = new Date(sub.expires_at);
+      if (expiresAt > new Date()) {
+        return res.status(400).json({
+          error: 'You already have an active Family plan.',
+          expiresAt: sub.expires_at
+        });
+      }
+    }
+
+    const order = await razorpayInstance.orders.create({
+      amount: FAMILY_PLAN_AMOUNT,
+      currency: 'INR',
+      receipt: `kinledger_${userId}_${Date.now()}`,
+      notes: {
+        userId: String(userId),
+        email: userEmail,
+        plan: 'family'
+      }
+    });
+
+    await logAudit(userId, userEmail, 'SUBSCRIPTION_ORDER_CREATED',
+      `Razorpay order ${order.id} created for ₹${FAMILY_PLAN_AMOUNT / 100}`);
+
+    res.json({
+      orderId: order.id,
+      amount: order.amount,
+      currency: order.currency,
+      keyId: process.env.RAZORPAY_KEY_ID
+    });
+  } catch (err) {
+    console.error('Razorpay order creation error:', err);
+    res.status(500).json({ error: 'Failed to create payment order.' });
+  }
+});
+
+app.post('/api/subscription/verify', authenticateToken, async (req, res) => {
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+  const userId = req.user.id;
+  const userEmail = req.user.email;
+
+  if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+    return res.status(400).json({ error: 'Payment verification data is incomplete.' });
+  }
+
+  try {
+    const expectedSignature = crypto
+      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+      .digest('hex');
+
+    if (expectedSignature !== razorpay_signature) {
+      await logAudit(userId, userEmail, 'SUBSCRIPTION_VERIFY_FAILED',
+        `Signature mismatch for order ${razorpay_order_id}`);
+      return res.status(400).json({ error: 'Payment verification failed. Signature mismatch.' });
+    }
+
+    const now = new Date();
+    const expiresAt = new Date(now);
+    expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+
+    await db.query(`
+      INSERT INTO public.subscriptions
+        (user_id, plan, status, razorpay_order_id, razorpay_payment_id,
+         razorpay_signature, amount_paise, started_at, expires_at, updated_at)
+      VALUES ($1, 'family', 'active', $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP)
+      ON CONFLICT (user_id) DO UPDATE SET
+        plan = 'family',
+        status = 'active',
+        razorpay_order_id = $2,
+        razorpay_payment_id = $3,
+        razorpay_signature = $4,
+        amount_paise = $5,
+        started_at = $6,
+        expires_at = $7,
+        updated_at = CURRENT_TIMESTAMP
+    `, [userId, razorpay_order_id, razorpay_payment_id, razorpay_signature,
+        FAMILY_PLAN_AMOUNT, now.toISOString(), expiresAt.toISOString()]);
+
+    await logAudit(userId, userEmail, 'SUBSCRIPTION_ACTIVATED',
+      `Family plan activated. Payment: ${razorpay_payment_id}. Expires: ${expiresAt.toISOString()}`);
+
+    res.json({
+      success: true,
+      plan: 'family',
+      status: 'active',
+      expiresAt: expiresAt.toISOString(),
+      message: 'Welcome to KinLedger Family! 🎉'
+    });
+  } catch (err) {
+    console.error('Payment verification error:', err);
+    res.status(500).json({ error: 'Server error during payment verification.' });
+  }
+});
+
+app.post('/api/subscription/cancel', authenticateToken, async (req, res) => {
+  const userId = req.user.id;
+  const userEmail = req.user.email;
+
+  try {
+    const subQuery = await db.query(
+      "SELECT * FROM public.subscriptions WHERE user_id = $1 AND plan = 'family' AND status = 'active'",
+      [userId]
+    );
+
+    if (subQuery.rows.length === 0) {
+      return res.status(400).json({ error: 'No active Family subscription to cancel.' });
+    }
+
+    const sub = subQuery.rows[0];
+
+    await db.query(
+      "UPDATE public.subscriptions SET status = 'cancelled', updated_at = CURRENT_TIMESTAMP WHERE id = $1",
+      [sub.id]
+    );
+
+    await logAudit(userId, userEmail, 'SUBSCRIPTION_CANCELLED',
+      `Family plan cancelled. Access continues until ${sub.expires_at}`);
+
+    res.json({
+      success: true,
+      message: 'Your Family plan has been cancelled. You will continue to have access until your current period ends.',
+      accessUntil: sub.expires_at
+    });
+  } catch (err) {
+    console.error('Subscription cancellation error:', err);
+    res.status(500).json({ error: 'Server error processing cancellation.' });
+  }
+});
+
+app.post('/api/subscription/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+  const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
+  
+  if (!webhookSecret) {
+    return res.status(200).json({ status: 'ok' });
+  }
+
+  try {
+    const signature = req.headers['x-razorpay-signature'];
+    const expectedSignature = crypto
+      .createHmac('sha256', webhookSecret)
+      .update(req.body)
+      .digest('hex');
+
+    if (signature !== expectedSignature) {
+      console.error('[WEBHOOK] Signature verification failed');
+      return res.status(400).json({ error: 'Invalid webhook signature' });
+    }
+
+    const event = JSON.parse(req.body);
+    console.log(`[WEBHOOK] Received event: ${event.event}`);
+
+    res.status(200).json({ status: 'ok' });
+  } catch (err) {
+    console.error('[WEBHOOK] Error:', err);
+    res.status(500).json({ error: 'Webhook processing failed' });
+  }
+});
+
+// ==========================================
 // 2. COLLABORATIVE SHARING ENDPOINTS
 // ==========================================
 
@@ -839,6 +1082,36 @@ app.post('/api/cards', authenticateToken, async (req, res) => {
 
   const userId = req.user.id;
   const userEmail = req.user.email.toLowerCase().trim();
+
+  // ---- MONETIZATION GUARD: Check profile limit for free users ----
+  const ownedCardsInPayload = cards.filter(c => !c.isShared);
+
+  if (ownedCardsInPayload.length > MAX_FREE_PROFILES) {
+    const subCheck = await db.query(
+      "SELECT plan, status, expires_at FROM public.subscriptions WHERE user_id = $1",
+      [userId]
+    );
+
+    let isPaid = false;
+    if (subCheck.rows.length > 0) {
+      const sub = subCheck.rows[0];
+      if (sub.plan === 'family' && (sub.status === 'active' || sub.status === 'cancelled')) {
+        if (sub.expires_at && new Date(sub.expires_at) > new Date()) {
+          isPaid = true;
+        }
+      }
+    }
+
+    if (!isPaid) {
+      return res.status(403).json({
+        error: 'Free plan allows up to 2 family profiles. Upgrade to KinLedger Family for unlimited profiles.',
+        code: 'UPGRADE_REQUIRED',
+        maxFreeProfiles: MAX_FREE_PROFILES,
+        ownedCount: ownedCardsInPayload.length
+      });
+    }
+  }
+  // ---- END MONETIZATION GUARD ----
 
   const client = await db.pool.connect();
   try {

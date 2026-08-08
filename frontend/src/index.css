@@ -2594,3 +2594,321 @@ textarea {
 .quick-access-badge.add-badge:hover span {
   color: var(--primary-dark);
 }
+
+/* ==========================================
+   PAYWALL MODAL
+   ========================================== */
+
+.paywall-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 37, 35, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 1rem;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.paywall-modal {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.24);
+  max-width: 400px;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.paywall-close-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: white;
+  z-index: 2;
+  transition: background 0.2s;
+}
+.paywall-close-btn:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.paywall-header {
+  background: linear-gradient(135deg, #0f6c5f 0%, #2bb396 50%, #0c564c 100%);
+  padding: 2rem 1.5rem 1.5rem;
+  display: flex;
+  justify-content: center;
+}
+
+.paywall-icon-group {
+  position: relative;
+  width: 72px;
+  height: 72px;
+}
+
+.paywall-icon-circle {
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.paywall-icon-main {
+  width: 64px;
+  height: 64px;
+  background: rgba(255, 255, 255, 0.18);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.paywall-icon-secondary {
+  position: absolute;
+  bottom: -4px;
+  right: -8px;
+  width: 36px;
+  height: 36px;
+  background: #d4af37;
+  border: 3px solid var(--bg-card);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.paywall-body {
+  padding: 1.5rem;
+}
+
+.paywall-title {
+  font-family: var(--font-title);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.paywall-subtitle {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  text-align: center;
+  line-height: 1.5;
+  margin-bottom: 1.25rem;
+}
+
+.paywall-features {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-bottom: 1.5rem;
+  padding: 0 0.25rem;
+}
+
+.paywall-feature-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.paywall-check-icon {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--primary-light);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.paywall-price-block {
+  text-align: center;
+  margin-bottom: 1.25rem;
+  padding: 1rem;
+  background: var(--accent-light);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(43, 179, 150, 0.15);
+}
+
+.paywall-price {
+  font-family: var(--font-title);
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.paywall-price-period {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.paywall-price-monthly {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.paywall-error {
+  background: var(--danger-light);
+  color: var(--danger);
+  padding: 0.6rem 0.8rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.paywall-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.paywall-cta-primary {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+  color: white;
+  font-family: var(--font-title);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 4px 12px rgba(15, 108, 95, 0.3);
+}
+.paywall-cta-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(15, 108, 95, 0.4);
+}
+.paywall-cta-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+.paywall-cta-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.paywall-cta-secondary {
+  width: 100%;
+  padding: 0.6rem 1rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.paywall-cta-secondary:hover {
+  color: var(--text-secondary);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ==========================================
+   SUBSCRIPTION BADGE (Hamburger Menu)
+   ========================================== */
+
+.subscription-badge-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  margin-bottom: 4px;
+}
+
+.subscription-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  width: fit-content;
+}
+
+.subscription-badge.family {
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  color: #92400e;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+.subscription-badge.free {
+  background: var(--primary-light);
+  color: var(--primary);
+  border: 1px solid rgba(15, 108, 95, 0.15);
+}
+
+.subscription-meta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  padding-left: 2px;
+}
+
+.subscription-cancel-link {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  cursor: pointer;
+  text-align: left;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 0.2s;
+}
+.subscription-cancel-link:hover {
+  color: var(--danger);
+}
+
+.subscription-upgrade-link {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  padding: 2px;
+  transition: color 0.2s;
+}
+.subscription-upgrade-link:hover {
+  color: var(--primary-hover);
+  text-decoration: underline;
+}

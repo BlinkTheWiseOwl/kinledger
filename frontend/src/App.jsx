@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Shield, FileText, Plus, Trash2, Save, User, Users, Heart, Activity, ShieldAlert, Award, Phone, ArrowLeft, Printer, Eye, Share2, LogOut, Menu, X, ChevronDown, ChevronRight, Loader2, Check, Pencil, Tablets } from 'lucide-react';
-import { loadCardData, saveCardData, BACKEND_URL } from './utils/storage';
+import { loadCardData, saveCardData, BACKEND_URL, fetchSubscription } from './utils/storage';
 import CapsuleIcon from './components/CapsuleIcon';
 import { Capacitor } from '@capacitor/core';
 import { Share } from '@capacitor/share';
@@ -8,6 +8,8 @@ import EmergencyCard from './components/EmergencyCard';
 import AuthScreen from './components/AuthScreen';
 import PolicyPage from './components/PolicyPage';
 import HelpPage from './components/HelpPage';
+import PaywallModal from './components/PaywallModal';
+import SubscriptionBadge from './components/SubscriptionBadge';
 
 const BlueShield = ({ size = 24, className = "" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={{ display: 'inline-block', verticalAlign: 'middle' }}>
@@ -102,6 +104,12 @@ export default function App() {
   const [statusMessage, setStatusMessage] = useState('');
   const [statusType, setStatusType] = useState(''); // 'success' or 'info' or 'error'
   const [joinedWaitlist, setJoinedWaitlist] = useState(false);
+
+  // Subscription / monetization state
+  const [userPlan, setUserPlan] = useState('free');
+  const [planStatus, setPlanStatus] = useState('active');
+  const [planExpiresAt, setPlanExpiresAt] = useState(null);
+  const [showPaywall, setShowPaywall] = useState(false);
 
   // New UX States
   const [showSplash, setShowSplash] = useState(true);
@@ -227,6 +235,13 @@ export default function App() {
         setCards(data);
       }
       setSynced(isSynced);
+
+      // Fetch subscription status
+      const sub = await fetchSubscription(token);
+      setUserPlan(sub.plan || 'free');
+      setPlanStatus(sub.status || 'active');
+      setPlanExpiresAt(sub.expiresAt || null);
+
       setLoading(false);
 
     }
@@ -1424,7 +1439,18 @@ export default function App() {
     setUserEmail(null);
     setCards([]);
     setSelectedCardId(null);
+    setUserPlan('free');
+    setPlanStatus('active');
+    setPlanExpiresAt(null);
     showStatus("Logged out successfully.", "info");
+  };
+
+  const handleUpgradeSuccess = (result) => {
+    setUserPlan(result.plan);
+    setPlanStatus(result.status);
+    setPlanExpiresAt(result.expiresAt);
+    setShowPaywall(false);
+    showStatus('Welcome to KinLedger Family! 🎉 You can now add unlimited family profiles.', 'success');
   };
 
   // Delete account permanently (DPDP / Right to Erasure)
@@ -1819,6 +1845,21 @@ export default function App() {
                   <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Signed in as</div>
                   <span className="menu-user-email" style={{ fontSize: '0.9rem', fontWeight: '600', color: 'var(--text-primary)', wordBreak: 'break-all' }}>{userEmail}</span>
                 </div>
+                <SubscriptionBadge
+                  plan={userPlan}
+                  status={planStatus}
+                  expiresAt={planExpiresAt}
+                  token={token}
+                  onPlanChange={(plan, status) => {
+                    setPlanStatus(status);
+                    showStatus('Your Family plan has been cancelled. Access continues until the end of your billing period.', 'info');
+                  }}
+                  onShowPaywall={() => {
+                    setShowPaywall(true);
+                    setMenuOpen(false);
+                  }}
+                />
+                <hr className="menu-separator" style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '4px 0' }} />
                 <div className="menu-items" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   <button
                     onClick={() => { setShowHelp(true); setMenuOpen(false); }}
@@ -1891,6 +1932,11 @@ export default function App() {
               <button 
                 className="quick-access-badge add-badge"
                 onClick={() => {
+                  const ownedCards = cards.filter(c => !c.isShared);
+                  if (userPlan !== 'family' && ownedCards.length >= 2) {
+                    setShowPaywall(true);
+                    return;
+                  }
                   setShowAddMenu(true);
                   setShowAddMenuAtTop(true);
                 }}
@@ -2066,6 +2112,11 @@ export default function App() {
               ) : (
                 !showAddMenu && (
                   <button className="add-member-card" onClick={() => {
+                    const ownedCards = cards.filter(c => !c.isShared);
+                    if (userPlan !== 'family' && ownedCards.length >= 2) {
+                      setShowPaywall(true);
+                      return;
+                    }
                     setShowAddMenu(true);
                     setShowAddMenuAtTop(false);
                   }}>
@@ -2938,6 +2989,15 @@ export default function App() {
           </div>
         </div>
       )}
+
+      {/* Paywall Modal */}
+      <PaywallModal
+        isOpen={showPaywall}
+        onClose={() => setShowPaywall(false)}
+        onUpgradeSuccess={handleUpgradeSuccess}
+        token={token}
+        userEmail={userEmail}
+      />
     </div>
   );
 }

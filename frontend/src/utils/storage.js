@@ -158,3 +158,68 @@ export async function saveCardData(cards, token) {
 
   return { success: true, synced: false };
 }
+
+// ==========================================
+// SUBSCRIPTION API HELPERS
+// ==========================================
+
+export async function fetchSubscription(token) {
+  if (!token) return { plan: 'free', ownedProfileCount: 0, maxFreeProfiles: 2 };
+  try {
+    const response = await fetch(`${BACKEND_URL}/subscription`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (response.ok) {
+      return await response.json();
+    }
+  } catch (err) {
+    console.warn('Failed to fetch subscription status:', err);
+  }
+  return { plan: 'free', ownedProfileCount: 0, maxFreeProfiles: 2 };
+}
+
+export async function createUpgradeOrder(token) {
+  const response = await fetch(`${BACKEND_URL}/subscription/create-order`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    }
+  });
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.error || 'Failed to create order.');
+  }
+  return await response.json();
+}
+
+export async function verifyPayment(token, paymentData) {
+  const response = await fetch(`${BACKEND_URL}/subscription/verify`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify(paymentData)
+  });
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.error || 'Payment verification failed.');
+  }
+  return await response.json();
+}
+
+export async function cancelSubscription(token) {
+  const response = await fetch(`${BACKEND_URL}/subscription/cancel`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    }
+  });
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.error || 'Cancellation failed.');
+  }
+  return await response.json();
+}

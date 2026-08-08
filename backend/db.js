@@ -153,6 +153,25 @@ const initDb = async () => {
       );
     `);
 
+    // 10. Create Subscriptions Table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS public.subscriptions (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES public.users(id) ON DELETE CASCADE NOT NULL,
+        plan VARCHAR(50) NOT NULL DEFAULT 'free',
+        status VARCHAR(50) NOT NULL DEFAULT 'active',
+        razorpay_order_id VARCHAR(255),
+        razorpay_payment_id VARCHAR(255),
+        razorpay_signature VARCHAR(512),
+        amount_paise INTEGER DEFAULT 39900,
+        started_at TIMESTAMP WITH TIME ZONE,
+        expires_at TIMESTAMP WITH TIME ZONE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        CONSTRAINT unique_user_subscription UNIQUE (user_id)
+      );
+    `);
+
     console.log('Database tables successfully verified / created.');
   } catch (error) {
     console.error('\n==================================================================');
