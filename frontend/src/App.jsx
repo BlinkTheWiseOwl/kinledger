@@ -1931,11 +1931,9 @@ export default function App() {
             <strong>⚠️ Your KinLedger Family Plan has expired.</strong>
             <span>
               Your family profiles are safe. You can still view your Emergency Medical Cards, but editing and adding profiles is temporarily unavailable because your account is above the free-plan limit.
-              <br/><br/>
-              Renew to continue managing your family.
             </span>
             <button className="btn btn-primary btn-sm" style={{ width: 'fit-content', marginTop: '4px', marginBottom: '8px' }} onClick={() => setShowPaywall(true)}>
-              Renew Family Plan
+              Renew Now
             </button>
             <span style={{ fontSize: '0.85rem', fontStyle: 'italic', color: 'var(--text-secondary)' }}>
               Prefer the free plan? Remove profiles to return within the free limit.
