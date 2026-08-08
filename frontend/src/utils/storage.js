@@ -188,7 +188,7 @@ export async function createUpgradeOrder(token) {
   });
   if (!response.ok) {
     const data = await response.json();
-    throw new Error(data.error || 'Failed to create order.');
+    throw new Error(data.error || "We couldn't start the payment. Please try again.");
   }
   return await response.json();
 }

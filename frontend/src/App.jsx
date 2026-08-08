@@ -747,8 +747,7 @@ export default function App() {
           showStatus('Failed to remove shared card from dashboard.', 'error');
         }
       } else {
-        saveCollection(updated);
-        showStatus('Emergency card deleted.', 'info');
+        await saveCollection(updated);
       }
 
       if (selectedCardId === id) {
