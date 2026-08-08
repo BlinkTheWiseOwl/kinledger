@@ -2203,13 +2203,7 @@ export default function App() {
                 </div>
               </div>
 
-              <div className="workspace-actions">
-                <button className="btn btn-secondary" onClick={handleCloseCard} disabled={isSaving}>Close</button>
-                <button className="btn btn-primary" onClick={handleSaveActiveCard} disabled={isSaving || isOverLimit}>
-                  {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-                  {isSaving ? 'Saving...' : 'Save'}
-                </button>
-              </div>
+
             </div>
 
             {/* Sub Tabs Inside Workspace */}
