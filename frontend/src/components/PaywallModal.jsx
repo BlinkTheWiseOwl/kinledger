@@ -71,7 +71,7 @@ export default function PaywallModal({ isOpen, onClose, onUpgradeSuccess, token,
     { icon: <Users size={16} />, text: 'Unlimited family profiles' },
     { icon: <Share2 size={16} />, text: 'Share with family caregivers' },
     { icon: <Shield size={16} />, text: 'Emergency Medical Cards' },
-    { icon: <Heart size={16} />, text: 'Future features included in your plan' }
+    { icon: <Heart size={16} />, text: 'More features included over time' }
   ];
 
   return (
@@ -96,10 +96,10 @@ export default function PaywallModal({ isOpen, onClose, onUpgradeSuccess, token,
 
         {/* Content */}
         <div className="paywall-body">
-          <h2 className="paywall-title">Your family is ready for more.</h2>
+          <h2 className="paywall-title">Make your whole family Emergency Ready.</h2>
           <p className="paywall-subtitle">
-            You’ve made <strong>2 family members <em>Emergency Ready</em> for free.</strong>
-            <br />Upgrade to KinLedger Family to add everyone you care about.
+            You’ve made <strong>2 family members Emergency Ready for free.</strong>
+            <br />Upgrade to add everyone you care about.
           </p>
 
           {/* Features checklist */}
