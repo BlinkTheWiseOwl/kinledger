@@ -1928,11 +1928,18 @@ export default function App() {
 
         {isOverLimit && (
           <div className="overlimit-banner animated">
-            <strong>⚠️ Your Family Plan has expired.</strong>
-            <span>Your account is over the free limit and is currently read-only. Renew your Family Plan or delete profiles to resume editing.</span>
-            <button className="btn btn-danger btn-sm" style={{ width: 'fit-content', marginTop: '4px' }} onClick={() => setShowPaywall(true)}>
-              Renew Now
+            <strong>⚠️ Your KinLedger Family Plan has expired.</strong>
+            <span>
+              Your family profiles are safe. You can still view your Emergency Medical Cards, but editing and adding profiles is temporarily unavailable because your account is above the free-plan limit.
+              <br/><br/>
+              Renew to continue managing your family.
+            </span>
+            <button className="btn btn-primary btn-sm" style={{ width: 'fit-content', marginTop: '4px', marginBottom: '8px' }} onClick={() => setShowPaywall(true)}>
+              Renew Family Plan
             </button>
+            <span style={{ fontSize: '0.85rem', fontStyle: 'italic', color: 'var(--text-secondary)' }}>
+              Prefer the free plan? Remove profiles to return within the free limit.
+            </span>
           </div>
         )}
 
