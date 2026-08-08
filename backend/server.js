@@ -1355,7 +1355,8 @@ app.post('/api/cards', authenticateToken, async (req, res) => {
         
         // Guard: If over limit, block updates to owned cards
         if (isOverLimit && ownerId === userId) {
-          return res.status(403).json({ error: 'Your account is over the free limit. Renew your Family Plan or delete profiles to edit.' });
+          // Silently skip updating existing cards to allow deletions to proceed
+          continue;
         }
 
         // Perform profile update
