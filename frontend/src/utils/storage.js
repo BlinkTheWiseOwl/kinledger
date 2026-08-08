@@ -11,8 +11,8 @@ const getBackendUrl = () => {
                         (window.location.hostname === 'localhost' && window.location.port !== '3000' && window.location.port !== '5000');
 
     if (isCapacitor) {
-      // Production Vercel API URL (fallback placeholder - user can change/configure)
-      return 'https://kinledger.vercel.app/api';
+      // Production Vercel API URL
+      return 'https://kinledger-blush.vercel.app/api';
     }
 
     // If running in Vite development mode (port 3000), route to the separate Express API on port 5000
