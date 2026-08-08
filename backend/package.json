@@ -15,7 +15,7 @@
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^9.0.5",
     "pg": "^8.11.5",
-    "razorpay": "^2.9.4"
+    "razorpay": "^2.9.8"
   },
   "devDependencies": {
     "nodemon": "^3.1.0"
