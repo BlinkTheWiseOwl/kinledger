@@ -71,7 +71,7 @@ export default function PaywallModal({ isOpen, onClose, onUpgradeSuccess, token,
     { icon: <Users size={16} />, text: 'Unlimited family profiles' },
     { icon: <Share2 size={16} />, text: 'Share with family caregivers' },
     { icon: <Shield size={16} />, text: 'Emergency Medical Cards' },
-    { icon: <Heart size={16} />, text: 'All future Family features' }
+    { icon: <Heart size={16} />, text: 'Future features included in your plan' }
   ];
 
   return (
@@ -96,10 +96,10 @@ export default function PaywallModal({ isOpen, onClose, onUpgradeSuccess, token,
 
         {/* Content */}
         <div className="paywall-body">
-          <h2 className="paywall-title">You've reached your free limit</h2>
+          <h2 className="paywall-title">Your family is ready for more.</h2>
           <p className="paywall-subtitle">
-            You've already protected 2 family members.
-            <br />Protect everyone you care about with <strong>KinLedger Family</strong>.
+            You’ve made <strong>2 family members <em>Emergency Ready</em> for free.</strong>
+            <br />Upgrade to KinLedger Family to add everyone you care about.
           </p>
 
           {/* Features checklist */}
@@ -137,7 +137,7 @@ export default function PaywallModal({ isOpen, onClose, onUpgradeSuccess, token,
               )}
             </button>
             <button className="paywall-cta-secondary" onClick={onClose}>
-              Maybe later
+              Continue with Free
             </button>
           </div>
         </div>

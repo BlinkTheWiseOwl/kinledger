@@ -759,7 +759,7 @@ app.post('/api/subscription/create-order', authenticateToken, async (req, res) =
     });
   } catch (err) {
     console.error('Razorpay order creation error:', err);
-    res.status(500).json({ error: `Failed to create payment order: ${err.message || JSON.stringify(err)}` });
+    res.status(500).json({ error: `We couldn't start the payment. Please try again.` });
   }
 });
 
