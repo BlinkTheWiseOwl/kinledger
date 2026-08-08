@@ -61,6 +61,20 @@ export default function SubscriptionBadge({ plan, status, expiresAt, token, onPl
     );
   }
 
+  if (plan === 'free' && status === 'expired') {
+    return (
+      <div className="subscription-badge-container">
+        <div className="subscription-badge" style={{ backgroundColor: 'var(--warning-light)', color: '#92400e', borderColor: 'var(--warning)' }}>
+          <Crown size={14} />
+          <span>Plan Expired</span>
+        </div>
+        <button className="subscription-upgrade-link" onClick={onShowPaywall}>
+          Renew Family Plan
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="subscription-badge-container">
       <div className="subscription-badge free">

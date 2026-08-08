@@ -916,6 +916,30 @@ app.post('/api/shares', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'You cannot share a card with yourself.' });
     }
 
+    // ---- MONETIZATION GUARD ----
+    let isPaid = false;
+    const subCheck = await db.query(
+      "SELECT plan, status, expires_at FROM public.subscriptions WHERE user_id = $1",
+      [userId]
+    );
+    if (subCheck.rows.length > 0) {
+      const sub = subCheck.rows[0];
+      if (sub.plan === 'family' && (sub.status === 'active' || sub.status === 'cancelled')) {
+        if (sub.expires_at && new Date(sub.expires_at) > new Date()) {
+          isPaid = true;
+        }
+      }
+    }
+
+    const existingOwnedQuery = await db.query('SELECT COUNT(*) FROM public.profiles WHERE owner_id = $1', [userId]);
+    const existingOwnedCount = parseInt(existingOwnedQuery.rows[0].count, 10);
+    const isOverLimit = !isPaid && existingOwnedCount > MAX_FREE_PROFILES;
+    
+    if (isOverLimit) {
+      return res.status(403).json({ error: 'Sharing is not available while your account is over the free limit. Renew your Family Plan or delete profiles to share.' });
+    }
+    // ---- END MONETIZATION GUARD ----
+
     // Verify target email is registered (enrolled)
     const userCheck = await db.query('SELECT id FROM public.users WHERE email = $1', [cleanEmail]);
     if (userCheck.rows.length === 0) {
@@ -1092,35 +1116,25 @@ app.post('/api/cards', authenticateToken, async (req, res) => {
   const userId = req.user.id;
   const userEmail = req.user.email.toLowerCase().trim();
 
-  // ---- MONETIZATION GUARD: Check profile limit for free users ----
-  const ownedCardsInPayload = cards.filter(c => !c.isShared);
-
-  if (ownedCardsInPayload.length > MAX_FREE_PROFILES) {
-    const subCheck = await db.query(
-      "SELECT plan, status, expires_at FROM public.subscriptions WHERE user_id = $1",
-      [userId]
-    );
-
-    let isPaid = false;
-    if (subCheck.rows.length > 0) {
-      const sub = subCheck.rows[0];
-      if (sub.plan === 'family' && (sub.status === 'active' || sub.status === 'cancelled')) {
-        if (sub.expires_at && new Date(sub.expires_at) > new Date()) {
-          isPaid = true;
-        }
+  // ---- MONETIZATION STATE ----
+  let isPaid = false;
+  const subCheck = await db.query(
+    "SELECT plan, status, expires_at FROM public.subscriptions WHERE user_id = $1",
+    [userId]
+  );
+  if (subCheck.rows.length > 0) {
+    const sub = subCheck.rows[0];
+    if (sub.plan === 'family' && (sub.status === 'active' || sub.status === 'cancelled')) {
+      if (sub.expires_at && new Date(sub.expires_at) > new Date()) {
+        isPaid = true;
       }
     }
-
-    if (!isPaid) {
-      return res.status(403).json({
-        error: 'Free plan allows up to 2 family profiles. Upgrade to KinLedger Family for unlimited profiles.',
-        code: 'UPGRADE_REQUIRED',
-        maxFreeProfiles: MAX_FREE_PROFILES,
-        ownedCount: ownedCardsInPayload.length
-      });
-    }
   }
-  // ---- END MONETIZATION GUARD ----
+
+  const existingOwnedQuery = await db.query('SELECT COUNT(*) FROM public.profiles WHERE owner_id = $1', [userId]);
+  const existingOwnedCount = parseInt(existingOwnedQuery.rows[0].count, 10);
+  const isOverLimit = !isPaid && existingOwnedCount > MAX_FREE_PROFILES;
+  // ---- END MONETIZATION STATE ----
 
   const client = await db.pool.connect();
   try {
@@ -1301,6 +1315,15 @@ app.post('/api/cards', authenticateToken, async (req, res) => {
       const pCheck = await client.query('SELECT owner_id FROM public.profiles WHERE id = $1', [id]);
 
       if (pCheck.rows.length === 0) {
+        // Guard: If over limit, block inserts
+        if (isOverLimit) {
+          return res.status(403).json({ error: 'Your account is over the free limit. Renew your Family Plan or delete profiles to add more.' });
+        }
+        // Guard: If not over limit, but this insert would put them over (and not paid)
+        if (!isPaid && existingOwnedCount >= MAX_FREE_PROFILES) {
+          return res.status(403).json({ error: 'Free plan allows up to 2 family profiles. Upgrade to KinLedger Family for unlimited profiles.' });
+        }
+
         // Insert new profile owned by current user
         await client.query(`
           INSERT INTO public.profiles (
@@ -1328,6 +1351,11 @@ app.post('/api/cards', authenticateToken, async (req, res) => {
         if (!authorized) {
           // Skip card updates if not authorized
           continue;
+        }
+        
+        // Guard: If over limit, block updates to owned cards
+        if (isOverLimit && ownerId === userId) {
+          return res.status(403).json({ error: 'Your account is over the free limit. Renew your Family Plan or delete profiles to edit.' });
         }
 
         // Perform profile update

@@ -1796,6 +1796,20 @@ export default function App() {
     );
   }
 
+  // --- Subscription State Derivations ---
+  const ownedCardsForLimit = cards.filter(c => !c.isShared);
+  const isOverLimit = userPlan !== 'family' && ownedCardsForLimit.length > 2;
+  
+  let showExpiryWarning = false;
+  let expiryDaysLeft = 0;
+  if (userPlan === 'family' && planStatus === 'active' && planExpiresAt) {
+    expiryDaysLeft = Math.ceil((new Date(planExpiresAt) - new Date()) / (1000 * 60 * 60 * 24));
+    if (expiryDaysLeft <= 30 && expiryDaysLeft > 0) {
+      showExpiryWarning = true;
+    }
+  }
+
+
   return (
     <div className="app-container">
       {/* Header Banner */}
@@ -1909,6 +1923,26 @@ export default function App() {
         {statusMessage && (
           <div className={`sync-banner ${statusType === 'success' ? 'success' : ''} ${statusType === 'error' ? 'danger' : ''}`}>
             <span>{statusMessage}</span>
+          </div>
+        )}
+
+        {isOverLimit && (
+          <div className="overlimit-banner animated">
+            <strong>⚠️ Your Family Plan has expired.</strong>
+            <span>Your account is over the free limit and is currently read-only. Renew your Family Plan or delete profiles to resume editing.</span>
+            <button className="btn btn-danger btn-sm" style={{ width: 'fit-content', marginTop: '4px' }} onClick={() => setShowPaywall(true)}>
+              Renew Now
+            </button>
+          </div>
+        )}
+
+        {showExpiryWarning && (
+          <div className="expiry-warning-banner animated">
+            <strong>🔔 Your Family Plan expires soon</strong>
+            <span>You have {expiryDaysLeft} day{expiryDaysLeft !== 1 ? 's' : ''} left on your current Family Plan.</span>
+            <button className="btn btn-primary btn-sm" style={{ width: 'fit-content', marginTop: '4px' }} onClick={() => setShowPaywall(true)}>
+              Renew Early
+            </button>
           </div>
         )}
 
@@ -2086,6 +2120,10 @@ export default function App() {
                       style={{ flex: 1, display: 'flex', gap: '0.25rem', alignItems: 'center', justifyContent: 'center' }}
                       onClick={(e) => {
                         e.stopPropagation();
+                        if (isOverLimit) {
+                          setShowPaywall(true);
+                          return;
+                        }
                         setSelectedCardId(card.id);
                         setActiveTab('edit');
                       }}
@@ -2154,7 +2192,7 @@ export default function App() {
                 <button className="btn btn-secondary" onClick={() => setSelectedCardId(null)} disabled={isSaving}>
                   Home
                 </button>
-                <button className="btn btn-primary" onClick={handleSaveActiveCard} disabled={isSaving}>
+                <button className="btn btn-primary" onClick={handleSaveActiveCard} disabled={isSaving || isOverLimit}>
                   {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
                   {isSaving ? 'Saving...' : 'Save'}
                 </button>
@@ -2165,7 +2203,13 @@ export default function App() {
             <div className="nav-tabs">
               <button
                 className={`tab-btn ${activeTab === 'edit' ? 'active' : ''}`}
-                onClick={() => setActiveTab('edit')}
+                onClick={() => {
+                  if (isOverLimit) {
+                    setShowPaywall(true);
+                    return;
+                  }
+                  setActiveTab('edit');
+                }}
               >
                 <Pencil size={15} />
                 {getReadinessStatus(activeCard).status === 'complete' ? 'Edit' : 'Set Up'}
@@ -2790,22 +2834,30 @@ export default function App() {
 
               {/* -- Share -- */}
               {activeSheet === 'share' && (
-                <div>
+                <div className="sheet-section">
                   {activeCard.isShared ? (
                     <div className="item-list-empty">
                       This profile is owned by <strong>{activeCard.ownerEmail}</strong>. Only the owner can manage sharing.
                     </div>
                   ) : (
-                    <div>
-                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1rem' }}>
-                        Share this medical card with family members so they can view and update it jointly.
-                      </p>
-                      <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.25rem' }}>
-                        <input type="email" placeholder="family.member@email.com"
-                          value={shareEmail} onChange={(e) => { setShareEmail(e.target.value); setShareError(null); }} style={{ flex: 1 }} />
-                        <button className="btn btn-primary btn-sm" onClick={handleShareCard}>Share</button>
-                      </div>
-
+                    <>
+                      {isOverLimit ? (
+                        <div className="item-list-empty" style={{ color: 'var(--danger)', border: '1px solid var(--danger-light)', backgroundColor: 'var(--danger-light)' }}>
+                          Sharing is not available while your account is over the free limit. Renew your Family Plan or delete profiles to share.
+                        </div>
+                      ) : (
+                        <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                          <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1rem', lineHeight: '1.4' }}>
+                            Share this medical card with family members so they can view and update it jointly.
+                          </p>
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <input type="email" placeholder="Family member's email" className="form-control"
+                              value={shareEmail} onChange={(e) => { setShareEmail(e.target.value); setShareError(null); }} style={{ flex: 1 }} />
+                            <button className="btn btn-primary btn-sm" onClick={handleShareCard}>Share</button>
+                          </div>
+                        </div>
+                      )}
+                      
                       {shareError && (
                         <div style={{ 
                           padding: '12px', 
@@ -2864,7 +2916,7 @@ export default function App() {
                       ) : (
                         <div className="item-list-empty">Private - not shared with anyone yet.</div>
                       )}
-                    </div>
+                    </>
                   )}
                 </div>
               )}
@@ -2889,7 +2941,7 @@ export default function App() {
       )}
 
       {/* Mobile Sticky Save Footer - only when editing a card */}
-      {selectedCardId !== null && activeTab === 'edit' && (
+      {selectedCardId !== null && activeTab === 'edit' && !isOverLimit && (
         <div className="sticky-save-footer">
           <button
             className="btn btn-primary"
