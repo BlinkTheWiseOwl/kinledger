@@ -8,10 +8,15 @@ require('dotenv').config();
 const nodemailer = require('nodemailer');
 const Razorpay = require('razorpay');
 
-const razorpayInstance = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET
-});
+let razorpayInstance = null;
+if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
+  razorpayInstance = new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET
+  });
+} else {
+  console.warn('Razorpay keys missing from environment variables. Payments will not work.');
+}
 
 const MAX_FREE_PROFILES = 2;
 const FAMILY_PLAN_AMOUNT = 39900; // ₹399 in paise
@@ -726,6 +731,10 @@ app.post('/api/subscription/create-order', authenticateToken, async (req, res) =
           expiresAt: sub.expires_at
         });
       }
+    }
+
+    if (!razorpayInstance) {
+      return res.status(503).json({ error: 'Payment gateway is not configured on the server.' });
     }
 
     const order = await razorpayInstance.orders.create({
