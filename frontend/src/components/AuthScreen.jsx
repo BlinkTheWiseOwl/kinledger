@@ -674,7 +674,7 @@ export default function AuthScreen({ onAuthSuccess, showStatus, onShowPolicy }) 
         )}
 
         {onShowPolicy && (
-          <div style={{ marginTop: '20px', display: 'flex', gap: '15px', justifyContent: 'center', fontSize: '0.8rem', borderTop: '1px solid var(--border)', paddingTop: '15px' }}>
+          <div style={{ marginTop: '20px', display: 'flex', gap: '15px', justifyContent: 'center', fontSize: '0.8rem', borderTop: '1px solid var(--border)', paddingTop: '15px', flexWrap: 'wrap' }}>
             <button 
               type="button" 
               onClick={() => onShowPolicy('privacy')} 
@@ -689,6 +689,22 @@ export default function AuthScreen({ onAuthSuccess, showStatus, onShowPolicy }) 
               style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}
             >
               Terms of Service
+            </button>
+            <span style={{ color: 'var(--text-muted)' }}>|</span>
+            <button 
+              type="button" 
+              onClick={() => onShowPolicy('refund')} 
+              style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}
+            >
+              Refund Policy
+            </button>
+            <span style={{ color: 'var(--text-muted)' }}>|</span>
+            <button 
+              type="button" 
+              onClick={() => onShowPolicy('contact')} 
+              style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}
+            >
+              Contact Us
             </button>
           </div>
         )}

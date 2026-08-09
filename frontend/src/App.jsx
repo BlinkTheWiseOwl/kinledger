@@ -1906,6 +1906,20 @@ export default function App() {
                   >
                     Terms of Service
                   </button>
+                  <button
+                    onClick={() => { setShowPolicy('refund'); setMenuOpen(false); }}
+                    style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', textAlign: 'left', cursor: 'pointer', padding: '6px 8px', fontSize: '0.9rem', borderRadius: 'var(--radius-sm)', width: '100%', transition: 'background-color 0.2s' }}
+                    className="menu-item-hover"
+                  >
+                    Refund Policy
+                  </button>
+                  <button
+                    onClick={() => { setShowPolicy('contact'); setMenuOpen(false); }}
+                    style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', textAlign: 'left', cursor: 'pointer', padding: '6px 8px', fontSize: '0.9rem', borderRadius: 'var(--radius-sm)', width: '100%', transition: 'background-color 0.2s' }}
+                    className="menu-item-hover"
+                  >
+                    Contact Us
+                  </button>
                   <hr className="menu-separator" style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '4px 0' }} />
                   <button
                     className="menu-btn-logout"

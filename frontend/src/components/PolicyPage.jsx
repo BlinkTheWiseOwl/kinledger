@@ -2,7 +2,182 @@ import React from 'react';
 import { ArrowLeft } from 'lucide-react';
 
 export default function PolicyPage({ type, onClose }) {
-  const isPrivacy = type === 'privacy';
+
+  const renderContent = () => {
+    switch (type) {
+      case 'privacy':
+        return (
+          <article style={{ lineHeight: '1.6', color: 'var(--text-primary)' }}>
+            <h1 style={{ fontFamily: 'var(--font-title)', color: 'var(--primary)', fontSize: '2rem', marginBottom: '0.5rem' }}>Privacy Policy</h1>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>Effective Date: August 9, 2026</p>
+            
+            <p style={{ marginBottom: '1.25rem' }}>
+              Welcome to <strong>KinLedger</strong>. Your privacy is important to us. This Privacy Policy explains how KinLedger ("we", "our", or "us"), operated by Katyayini Kumar, collects, uses, stores, and protects your personal information when you use the KinLedger application.
+            </p>
+
+            <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>1. Information We Collect</h2>
+            <p style={{ marginBottom: '1rem' }}>
+              KinLedger collects account information (email), family member information (name, relationship, age, blood group), medical information (conditions, allergies, medications), insurance information, and emergency contacts.
+            </p>
+
+            <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>2. How We Use Your Information</h2>
+            <p style={{ marginBottom: '1rem' }}>
+              We use your information solely to provide the services offered by KinLedger, including creating and displaying emergency medical profiles. We do <strong>not</strong> use your personal or medical information for advertising purposes.
+            </p>
+
+            <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>3. Payment Processing</h2>
+            <p style={{ marginBottom: '1.25rem' }}>
+              We use Razorpay as a third-party payment gateway for processing subscription payments. We do not store your full credit card details on our servers. When you make a payment, necessary billing information (such as your email address and transaction IDs) is shared securely with Razorpay for processing. Razorpay's use of your personal information is governed by their own privacy policy.
+            </p>
+
+            <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>4. Data Security & Third-Party Services</h2>
+            <p style={{ marginBottom: '1rem' }}>
+              We use industry-standard security measures including secure HTTPS/SSL encryption. We use trusted third-party service providers to operate the application (e.g., cloud hosting, authentication, payment processing). They process information only as necessary to provide these services.
+            </p>
+
+            <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>5. Medical Disclaimer</h2>
+            <p style={{ marginBottom: '1.25rem' }}>
+              KinLedger is designed to help organize and securely store personal health information. KinLedger does <strong>not</strong> provide medical advice, diagnosis, treatment, or emergency medical services.
+            </p>
+
+            <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>6. Contact Us</h2>
+            <p style={{ marginBottom: '1.25rem' }}>
+              If you have any questions, please contact us at: <a href="mailto:support.kinledger@gmail.com" style={{ color: 'var(--primary)', fontWeight: '600', textDecoration: 'none' }}>support.kinledger@gmail.com</a>.
+            </p>
+          </article>
+        );
+
+      case 'terms':
+        return (
+          <article style={{ lineHeight: '1.6', color: 'var(--text-primary)' }}>
+            <h1 style={{ fontFamily: 'var(--font-title)', color: 'var(--primary)', fontSize: '2rem', marginBottom: '0.5rem' }}>Terms of Service</h1>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>Effective Date: August 9, 2026</p>
+
+            <p style={{ marginBottom: '1.25rem' }}>
+              Welcome to <strong>KinLedger</strong>, operated by Katyayini Kumar. These Terms of Service ("Terms") govern your access to and use of the KinLedger application ("Service"). By creating an account or using KinLedger, you agree to these Terms.
+            </p>
+
+            <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>1. About KinLedger</h2>
+            <p style={{ marginBottom: '1.25rem' }}>
+              KinLedger is a digital tool designed to help individuals and families organize, store, and share personal health information. It is intended for informational and organizational purposes only.
+            </p>
+
+            <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>2. Subscriptions, Billing, and Payments</h2>
+            <p style={{ marginBottom: '1.25rem' }}>
+              Certain features of KinLedger (e.g., KinLedger Family) require a paid subscription. All payments are securely processed through our third-party payment provider, Razorpay. By upgrading to a paid plan, you authorize us (via Razorpay) to charge the applicable subscription fees to your chosen payment method. You are responsible for maintaining a valid payment method. Subscription fees are billed in advance and are non-refundable, except as expressly set forth in our Refund Policy.
+            </p>
+
+            <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>3. Medical Disclaimer</h2>
+            <p style={{ marginBottom: '1.25rem', fontWeight: '600', color: 'var(--danger)' }}>
+              KinLedger is <strong>not</strong> a medical device and does <strong>not</strong> provide medical advice, diagnosis, treatment, or emergency medical services.
+            </p>
+            <p style={{ marginBottom: '1.25rem' }}>
+              Information displayed within KinLedger is entered by users and is not independently verified. In a medical emergency, always contact your local emergency services (such as 108 or 112 in India) or seek immediate assistance from qualified healthcare professionals. Do not rely solely on KinLedger during a medical emergency.
+            </p>
+
+            <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>4. Limitation of Liability and "As-Is" Warranty</h2>
+            <p style={{ marginBottom: '1.25rem', fontWeight: 'bold' }}>
+              YOU EXPRESSLY UNDERSTAND AND AGREE THAT YOUR USE OF KINLEDGER IS AT YOUR SOLE RISK. THE SERVICE IS PROVIDED ON AN "AS IS" AND "AS AVAILABLE" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+            </p>
+            <p style={{ marginBottom: '1rem', fontWeight: 'bold' }}>
+              TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, KINLEDGER, KATYAYINI KUMAR, AND ANY AFFILIATED DEVELOPERS OR SERVICE PROVIDERS SHALL NOT BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, CONSEQUENTIAL, SPECIAL, OR PUNITIVE DAMAGES, OR ANY LOSS OF PROFITS OR REVENUES, WHETHER INCURRED DIRECTLY OR INDIRECTLY, OR ANY LOSS OF DATA, USE, GOODWILL, OR OTHER INTANGIBLE LOSSES, RESULTING FROM:
+            </p>
+            <ul style={{ paddingLeft: '20px', marginBottom: '1.25rem', display: 'flex', flexDirection: 'column', gap: '6px', fontWeight: 'bold' }}>
+              <li>YOUR ACCESS TO, USE OF, OR INABILITY TO ACCESS OR USE THE SERVICE;</li>
+              <li>ANY FAILURE OF THE SERVICE TO BE AVAILABLE DURING A MEDICAL EMERGENCY;</li>
+              <li>INACCURATE, INCOMPLETE, OR OUTDATED INFORMATION ENTERED BY USERS;</li>
+              <li>UNAUTHORIZED ACCESS, USE, OR ALTERATION OF YOUR TRANSMISSIONS OR CONTENT.</li>
+            </ul>
+
+            <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>5. Governing Law</h2>
+            <p style={{ marginBottom: '1.25rem' }}>
+              These Terms shall be governed by and interpreted in accordance with the laws of India, without regard to its conflict of law provisions.
+            </p>
+
+            <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>6. Contact Us</h2>
+            <p style={{ marginBottom: '1.25rem' }}>
+              If you have any questions regarding these Terms, please contact us at: <a href="mailto:support.kinledger@gmail.com" style={{ color: 'var(--primary)', fontWeight: '600', textDecoration: 'none' }}>support.kinledger@gmail.com</a>.
+            </p>
+          </article>
+        );
+
+      case 'refund':
+        return (
+          <article style={{ lineHeight: '1.6', color: 'var(--text-primary)' }}>
+            <h1 style={{ fontFamily: 'var(--font-title)', color: 'var(--primary)', fontSize: '2rem', marginBottom: '0.5rem' }}>Refund and Cancellation Policy</h1>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>Effective Date: August 9, 2026</p>
+
+            <p style={{ marginBottom: '1.25rem' }}>
+              Thank you for subscribing to KinLedger. This policy outlines our terms regarding subscription cancellations and refunds.
+            </p>
+
+            <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>1. Cancellation Policy (Cancel Anytime)</h2>
+            <p style={{ marginBottom: '1.25rem' }}>
+              You may cancel your KinLedger subscription at any time. When you cancel, your subscription will not automatically renew, and you will not be charged for the next billing cycle. You will continue to have access to KinLedger's premium features until the end of your current paid billing period.
+            </p>
+            <p style={{ marginBottom: '1.25rem' }}>
+              To cancel your subscription, please use the subscription management portal within the application or contact our support team.
+            </p>
+
+            <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>2. Refund Policy (No Refunds)</h2>
+            <p style={{ marginBottom: '1.25rem' }}>
+              Due to the digital nature of our service, <strong>all subscription payments are final and non-refundable</strong>. We do not provide refunds or credits for partially used billing periods or for accidental renewals. 
+            </p>
+            <p style={{ marginBottom: '1.25rem' }}>
+              If you experience a technical issue that prevents you from using the service you paid for, please contact our support team, and we will work with you to resolve the issue.
+            </p>
+
+            <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>3. Contact Us</h2>
+            <p style={{ marginBottom: '1.25rem' }}>
+              If you have any questions regarding your subscription or this policy, please contact us at: <a href="mailto:support.kinledger@gmail.com" style={{ color: 'var(--primary)', fontWeight: '600', textDecoration: 'none' }}>support.kinledger@gmail.com</a>.
+            </p>
+          </article>
+        );
+
+      case 'contact':
+        return (
+          <article style={{ lineHeight: '1.6', color: 'var(--text-primary)' }}>
+            <h1 style={{ fontFamily: 'var(--font-title)', color: 'var(--primary)', fontSize: '2rem', marginBottom: '0.5rem' }}>Contact Us</h1>
+            <p style={{ marginBottom: '1.5rem' }}>We are here to help! If you have any questions, concerns, or feedback, please reach out to us using the details below.</p>
+
+            <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '1.5rem', borderRadius: 'var(--radius-md)', marginBottom: '2rem' }}>
+              <h3 style={{ fontSize: '1.1rem', color: 'var(--primary)', marginBottom: '0.5rem' }}>Support Email</h3>
+              <p style={{ marginBottom: '0.25rem' }}>
+                <a href="mailto:support.kinledger@gmail.com" style={{ color: 'var(--text-primary)', fontWeight: '500', textDecoration: 'none' }}>support.kinledger@gmail.com</a>
+              </p>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>We aim to respond to all inquiries within 2 business days.</p>
+            </div>
+
+            <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '1.5rem', borderRadius: 'var(--radius-md)', marginBottom: '2rem' }}>
+              <h3 style={{ fontSize: '1.1rem', color: 'var(--primary)', marginBottom: '0.5rem' }}>Privacy & Data Requests</h3>
+              <p style={{ marginBottom: '0.25rem' }}>
+                <a href="mailto:privacy.kinledger@gmail.com" style={{ color: 'var(--text-primary)', fontWeight: '500', textDecoration: 'none' }}>privacy.kinledger@gmail.com</a>
+              </p>
+            </div>
+
+            <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '1.5rem', borderRadius: 'var(--radius-md)', marginBottom: '2rem' }}>
+              <h3 style={{ fontSize: '1.1rem', color: 'var(--primary)', marginBottom: '0.5rem' }}>Operating Address</h3>
+              <p style={{ marginBottom: '0.25rem', color: 'var(--text-primary)', whiteSpace: 'pre-line', lineHeight: '1.5' }}>
+                Katyayini Kumar{'\n'}
+                Kutchappa Street, Dodballapur{'\n'}
+                Bangalore - 561203{'\n'}
+                India
+              </p>
+            </div>
+
+            <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '1.5rem', borderRadius: 'var(--radius-md)' }}>
+              <h3 style={{ fontSize: '1.1rem', color: 'var(--primary)', marginBottom: '0.5rem' }}>Phone Support</h3>
+              <p style={{ marginBottom: '0.25rem', color: 'var(--text-primary)' }}>
+                +91 7975763988
+              </p>
+            </div>
+          </article>
+        );
+
+      default:
+        return <p>Policy not found.</p>;
+    }
+  };
 
   return (
     <div style={{ maxWidth: '800px', margin: '2rem auto', padding: '2rem', backgroundColor: 'var(--bg-card)', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-md)', minHeight: '80vh' }}>
@@ -13,261 +188,7 @@ export default function PolicyPage({ type, onClose }) {
         <ArrowLeft size={18} /> Back to App
       </button>
 
-      {isPrivacy ? (
-        <article style={{ lineHeight: '1.6', color: 'var(--text-primary)' }}>
-          <h1 style={{ fontFamily: 'var(--font-title)', color: 'var(--primary)', fontSize: '2rem', marginBottom: '0.5rem' }}>Privacy Policy</h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>Effective Date: June 29, 2026</p>
-          
-          <p style={{ marginBottom: '1.25rem' }}>
-            Welcome to <strong>KinLedger</strong>. Your privacy is important to us. This Privacy Policy explains how KinLedger ("we", "our", or "us") collects, uses, stores, and protects your personal information when you use the KinLedger application.
-          </p>
-
-          <p style={{ marginBottom: '1.25rem' }}>
-            By creating an account or using KinLedger, you agree to the collection and use of your information as described in this Privacy Policy.
-          </p>
-
-          <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>1. Information We Collect</h2>
-          <p style={{ marginBottom: '1rem' }}>
-            KinLedger is designed to help families securely organize and access emergency medical information. Depending on how you use the application, we may collect the following information:
-          </p>
-
-          <h3 style={{ fontSize: '1.1rem', color: 'var(--text-primary)', marginTop: '1.25rem', marginBottom: '0.5rem' }}>Account Information</h3>
-          <ul style={{ paddingLeft: '20px', marginBottom: '1.25rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <li>Email address</li>
-            <li>Secure authentication credentials (your password is never stored in plain text)</li>
-          </ul>
-
-          <h3 style={{ fontSize: '1.1rem', color: 'var(--text-primary)', marginTop: '1.25rem', marginBottom: '0.5rem' }}>Family Member Information</h3>
-          <ul style={{ paddingLeft: '20px', marginBottom: '1.25rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <li>Full name</li>
-            <li>Relationship</li>
-            <li>Age</li>
-            <li>Blood group</li>
-          </ul>
-
-          <h3 style={{ fontSize: '1.1rem', color: 'var(--text-primary)', marginTop: '1.25rem', marginBottom: '0.5rem' }}>Medical Information</h3>
-          <ul style={{ paddingLeft: '20px', marginBottom: '1.25rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <li>Medical conditions</li>
-            <li>Allergies</li>
-            <li>Current medications, dosage, frequency, and instructions</li>
-          </ul>
-
-          <h3 style={{ fontSize: '1.1rem', color: 'var(--text-primary)', marginTop: '1.25rem', marginBottom: '0.5rem' }}>Insurance Information</h3>
-          <ul style={{ paddingLeft: '20px', marginBottom: '1.25rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <li>Insurance provider</li>
-            <li>Policy number</li>
-            <li>Policy expiry date</li>
-          </ul>
-
-          <h3 style={{ fontSize: '1.1rem', color: 'var(--text-primary)', marginTop: '1.25rem', marginBottom: '0.5rem' }}>Emergency Contacts</h3>
-          <ul style={{ paddingLeft: '20px', marginBottom: '1.25rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <li>Contact name</li>
-            <li>Relationship</li>
-            <li>Phone number</li>
-            <li>Optional email address</li>
-          </ul>
-
-          <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>2. How We Use Your Information</h2>
-          <p style={{ marginBottom: '1rem' }}>
-            We use your information solely to provide the services offered by KinLedger, including:
-          </p>
-          <ul style={{ paddingLeft: '20px', marginBottom: '1.25rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <li>Creating emergency medical profiles</li>
-            <li>Displaying emergency medical cards</li>
-            <li>Securely storing family health information</li>
-            <li>Synchronizing your information across supported devices</li>
-            <li>Allowing you to share emergency information when you choose to do so</li>
-            <li>Improving the reliability, security, and performance of the application</li>
-          </ul>
-          <p style={{ marginBottom: '1.25rem' }}>
-            We do <strong>not</strong> use your personal or medical information for advertising purposes.
-          </p>
-
-          <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>3. Data Security</h2>
-          <p style={{ marginBottom: '1rem' }}>
-            Protecting your information is one of our highest priorities. We use industry-standard security measures including:
-          </p>
-          <ul style={{ paddingLeft: '20px', marginBottom: '1.25rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <li>Secure HTTPS/SSL encryption for all communication between your device and our servers</li>
-            <li>Secure authentication mechanisms</li>
-            <li>Encrypted cloud infrastructure and secure storage technologies</li>
-            <li>Appropriate access controls to protect stored information</li>
-          </ul>
-          <p style={{ marginBottom: '1.25rem' }}>
-            While we take reasonable measures to safeguard your information, no system connected to the internet can be guaranteed to be completely secure.
-          </p>
-
-          <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>4. Offline Storage</h2>
-          <p style={{ marginBottom: '1.25rem' }}>
-            To ensure emergency medical information remains accessible even without an internet connection, KinLedger securely stores a local copy of your family profiles on your device. This information is synchronized with our servers whenever an internet connection is available.
-          </p>
-          <p style={{ marginBottom: '1.25rem', fontStyle: 'italic' }}>
-            Please note that anyone with physical access to your unlocked device may be able to access locally stored information.
-          </p>
-
-          <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>5. Third-Party Service Providers</h2>
-          <p style={{ marginBottom: '1.25rem' }}>
-            KinLedger uses trusted third-party service providers to operate and secure the application, including cloud hosting, authentication, storage, and infrastructure services. These providers process information only as necessary to provide the services requested by KinLedger and are expected to maintain appropriate security and confidentiality measures.
-          </p>
-          <p style={{ marginBottom: '1.25rem' }}>
-            We do <strong>not</strong> sell, rent, or trade your personal or medical information to advertisers or data brokers.
-          </p>
-
-          <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>6. Your Rights</h2>
-          <p style={{ marginBottom: '1rem' }}>
-            In accordance with the Digital Personal Data Protection (DPDP) Act, 2023 and other applicable laws, you have the right to:
-          </p>
-          <ul style={{ paddingLeft: '20px', marginBottom: '1.25rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <li>Access your information</li>
-            <li>Update or correct your information</li>
-            <li>Delete your account and associated family profiles</li>
-            <li>Withdraw your consent by discontinuing use of the application and deleting your account</li>
-          </ul>
-          <p style={{ marginBottom: '1.25rem' }}>
-            You can permanently delete your account at any time using the <strong>Delete Account</strong> option available within the application. Account deletion permanently removes your account and associated data from our systems, subject to reasonable technical processing time and any legal obligations that may apply.
-          </p>
-
-          <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>7. Emergency Contacts</h2>
-          <p style={{ marginBottom: '1.25rem' }}>
-            If you add emergency contact information to KinLedger, you confirm that you have obtained the necessary permission to provide their contact details for emergency purposes.
-          </p>
-
-          <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>8. Cookies and Essential Technologies</h2>
-          <p style={{ marginBottom: '1.25rem' }}>
-            When using the web version of KinLedger, we may use essential cookies or similar technologies required for authentication, security, and application functionality. These technologies are not used to sell or advertise products to you.
-          </p>
-
-          <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>9. Medical Disclaimer</h2>
-          <p style={{ marginBottom: '1.25rem' }}>
-            KinLedger is designed to help organize and securely store personal health information. KinLedger does <strong>not</strong> provide medical advice, diagnosis, treatment, or emergency medical services.
-          </p>
-          <p style={{ marginBottom: '1.25rem' }}>
-            Any health information stored within KinLedger is provided by you. You should always consult qualified healthcare professionals regarding medical decisions or emergencies.
-          </p>
-
-          <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>10. Future Features</h2>
-          <p style={{ marginBottom: '1.25rem' }}>
-            As KinLedger evolves, future features such as AI-assisted summaries or health insights will only process information that you choose to provide. Where additional consent is required by applicable law, we will request your permission before enabling such features.
-          </p>
-
-          <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>11. Changes to This Privacy Policy</h2>
-          <p style={{ marginBottom: '1.25rem' }}>
-            We may update this Privacy Policy from time to time to reflect improvements to our services or changes in applicable laws. When we make significant changes, the updated Privacy Policy will be made available within the application, and the Effective Date at the top of this document will be revised. Continued use of KinLedger after changes become effective constitutes acceptance of the updated Privacy Policy.
-          </p>
-
-          <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>12. Contact Us</h2>
-          <p style={{ marginBottom: '1.25rem' }}>
-            If you have any questions, concerns, or requests regarding this Privacy Policy or your personal information, please contact us at: <a href="mailto:support.kinledger@gmail.com" style={{ color: 'var(--primary)', fontWeight: '600', textDecoration: 'none' }}>support.kinledger@gmail.com</a>.
-          </p>
-        </article>
-      ) : (
-        <article style={{ lineHeight: '1.6', color: 'var(--text-primary)' }}>
-          <h1 style={{ fontFamily: 'var(--font-title)', color: 'var(--primary)', fontSize: '2rem', marginBottom: '0.5rem' }}>Terms of Service</h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>Effective Date: June 29, 2026</p>
-
-          <p style={{ marginBottom: '1.25rem' }}>
-            Welcome to <strong>KinLedger</strong>. These Terms of Service ("Terms") govern your access to and use of the KinLedger application ("Service"). By creating an account or using KinLedger, you agree to these Terms.
-          </p>
-
-          <p style={{ marginBottom: '1.25rem' }}>
-            If you do not agree with these Terms, please do not use the Service.
-          </p>
-
-          <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>1. About KinLedger</h2>
-          <p style={{ marginBottom: '1.25rem' }}>
-            KinLedger is a digital tool designed to help individuals and families organize, store, and share personal health information, including emergency medical profiles. KinLedger is intended for informational and organizational purposes only.
-          </p>
-
-          <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>2. Medical Disclaimer</h2>
-          <p style={{ marginBottom: '1.25rem', fontWeight: '600', color: 'var(--danger)' }}>
-            KinLedger is <strong>not</strong> a medical device and does <strong>not</strong> provide medical advice, diagnosis, treatment, or emergency medical services.
-          </p>
-          <p style={{ marginBottom: '1.25rem' }}>
-            Information displayed within KinLedger is entered by users and is not independently verified.
-          </p>
-          <p style={{ marginBottom: '1.25rem', fontWeight: '600' }}>
-            In a medical emergency, always contact your local emergency services (such as <strong>108</strong> or <strong>112</strong> in India) or seek immediate assistance from qualified healthcare professionals. Do not rely solely on KinLedger during a medical emergency.
-          </p>
-
-          <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>3. Your Responsibilities</h2>
-          <p style={{ marginBottom: '1rem' }}>
-            You are responsible for:
-          </p>
-          <ul style={{ paddingLeft: '20px', marginBottom: '1.25rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <li>Providing accurate and up-to-date information.</li>
-            <li>Reviewing and updating medical conditions, medications, allergies, insurance details, and emergency contacts when changes occur.</li>
-            <li>Obtaining permission before entering another person's contact information, including emergency contacts.</li>
-            <li>Using KinLedger only for lawful purposes.</li>
-          </ul>
-
-          <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>4. Account Security</h2>
-          <p style={{ marginBottom: '1.25rem' }}>
-            To synchronize your information across devices, you must create an account. You are responsible for maintaining the confidentiality of your login credentials and for all activities that occur under your account.
-          </p>
-          <p style={{ marginBottom: '1.25rem' }}>
-            If you believe your account has been accessed without authorization, please notify us as soon as reasonably possible.
-          </p>
-
-          <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>5. Your Data</h2>
-          <p style={{ marginBottom: '1.25rem' }}>
-            You retain ownership of the information you enter into KinLedger. You may update, modify, or delete your information at any time.
-          </p>
-          <p style={{ marginBottom: '1.25rem' }}>
-            Deleting your account will permanently remove your account and associated data from our systems, subject to reasonable technical processing time and any legal obligations that may apply.
-          </p>
-
-          <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>6. Service Availability</h2>
-          <p style={{ marginBottom: '1.25rem' }}>
-            We strive to keep KinLedger available and reliable, but we cannot guarantee uninterrupted or error-free operation. The Service may occasionally be unavailable due to maintenance, technical issues, security updates, or circumstances beyond our reasonable control.
-          </p>
-
-          <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>7. Future Features</h2>
-          <p style={{ marginBottom: '1.25rem' }}>
-            KinLedger may introduce new features, including document storage, family collaboration, reminders, and AI-assisted summaries. Where required, additional notices or consent requests will be presented before such features become available.
-          </p>
-
-          <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>8. Acceptable Use</h2>
-          <p style={{ marginBottom: '1rem' }}>
-            You agree not to:
-          </p>
-          <ul style={{ paddingLeft: '20px', marginBottom: '1.25rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <li>Attempt to gain unauthorized access to KinLedger or its systems.</li>
-            <li>Interfere with the operation or security of the Service.</li>
-            <li>Upload malicious software or harmful content.</li>
-            <li>Use the Service in violation of applicable laws.</li>
-          </ul>
-
-          <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>9. Limitation of Liability</h2>
-          <p style={{ marginBottom: '1rem' }}>
-            To the maximum extent permitted by applicable law, KinLedger and its owners, developers, and service providers shall not be liable for any indirect, incidental, consequential, special, or punitive damages arising from:
-          </p>
-          <ul style={{ paddingLeft: '20px', marginBottom: '1.25rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <li>Use or inability to use the Service.</li>
-            <li>Inaccurate, incomplete, or outdated information entered by users.</li>
-            <li>Delays or interruptions in service.</li>
-            <li>Data loss or unauthorized access despite reasonable security measures.</li>
-            <li>Reliance on information stored within KinLedger.</li>
-          </ul>
-          <p style={{ marginBottom: '1.25rem' }}>
-            Nothing in these Terms limits any rights that cannot legally be excluded under applicable law.
-          </p>
-
-          <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>10. Changes to These Terms</h2>
-          <p style={{ marginBottom: '1.25rem' }}>
-            We may update these Terms from time to time. If significant changes are made, the revised Terms will be made available within the application and the Effective Date will be updated. Continued use of KinLedger after the revised Terms become effective constitutes acceptance of the updated Terms.
-          </p>
-
-          <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>11. Governing Law</h2>
-          <p style={{ marginBottom: '1.25rem' }}>
-            These Terms shall be governed by and interpreted in accordance with the laws of India. Any disputes arising from these Terms shall be subject to the jurisdiction of the competent courts located in India.
-          </p>
-
-          <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>12. Contact Us</h2>
-          <p style={{ marginBottom: '1.25rem' }}>
-            If you have any questions regarding these Terms, please contact us at: <a href="mailto:support.kinledger@gmail.com" style={{ color: 'var(--primary)', fontWeight: '600', textDecoration: 'none' }}>support.kinledger@gmail.com</a>.
-          </p>
-        </article>
-      )}
+      {renderContent()}
     </div>
   );
 }
