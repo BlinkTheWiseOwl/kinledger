@@ -1,10 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Shield, Users, Share2, CreditCard, Heart, Check, X, Loader2 } from 'lucide-react';
+import { AnalyticsService } from '../utils/analytics';
 import { createUpgradeOrder, verifyPayment } from '../utils/storage';
 
 export default function PaywallModal({ isOpen, onClose, onUpgradeSuccess, token, userEmail }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (isOpen) {
+      AnalyticsService.logEvent('paywall_viewed', { source_screen: 'modal' });
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -40,6 +47,7 @@ export default function PaywallModal({ isOpen, onClose, onUpgradeSuccess, token,
             });
 
             if (result.success) {
+              AnalyticsService.logEvent('subscription_purchased', { plan: 'yearly', price: 399.0 });
               onUpgradeSuccess(result);
             }
           } catch (verifyErr) {

@@ -3,6 +3,7 @@ import { Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { BACKEND_URL } from '../utils/storage';
 import { Capacitor } from '@capacitor/core';
 import { SocialLogin } from '@capgo/capacitor-social-login';
+import { AnalyticsService } from '../utils/analytics';
 
 const isNative = Capacitor.isNativePlatform();
 
@@ -127,6 +128,7 @@ export default function AuthScreen({ onAuthSuccess, showStatus, onShowPolicy }) 
 
       localStorage.setItem('kinledger_jwt_token', data.token);
       localStorage.setItem('kinledger_user_email', data.user.email);
+      AnalyticsService.identify(data.user.email);
       showStatus('Logged in with Google successfully!', 'success');
       onAuthSuccess(data.token, data.user.email);
     } catch (err) {
@@ -166,6 +168,7 @@ export default function AuthScreen({ onAuthSuccess, showStatus, onShowPolicy }) 
 
       localStorage.setItem('kinledger_jwt_token', data.token);
       localStorage.setItem('kinledger_user_email', data.user.email);
+      AnalyticsService.identify(data.user.email);
       showStatus('Logged in with Google successfully!', 'success');
       onAuthSuccess(data.token, data.user.email);
     } catch (err) {
@@ -211,6 +214,8 @@ export default function AuthScreen({ onAuthSuccess, showStatus, onShowPolicy }) 
         
         localStorage.setItem('kinledger_jwt_token', data.token);
         localStorage.setItem('kinledger_user_email', data.user.email);
+        AnalyticsService.identify(data.user.email);
+        AnalyticsService.logEvent('user_signed_up', { method: 'email' });
         showStatus('Email verified successfully!', 'success');
         onAuthSuccess(data.token, data.user.email);
       } catch (err) {
@@ -354,6 +359,11 @@ export default function AuthScreen({ onAuthSuccess, showStatus, onShowPolicy }) 
       // Store token and email
       localStorage.setItem('kinledger_jwt_token', data.token);
       localStorage.setItem('kinledger_user_email', data.user.email);
+      AnalyticsService.identify(data.user.email);
+      
+      if (mode === 'signup') {
+        AnalyticsService.logEvent('user_signed_up', { method: 'email' });
+      }
       
       showStatus(
         mode === 'login' ? 'Logged in successfully!' : 'Account registered successfully!', 

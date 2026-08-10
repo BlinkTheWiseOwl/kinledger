@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Shield, FileText, Plus, Trash2, Save, User, Users, Heart, Activity, ShieldAlert, Award, Phone, ArrowLeft, Printer, Eye, Share2, LogOut, Menu, X, ChevronDown, ChevronRight, Loader2, Check, Pencil, Tablets } from 'lucide-react';
 import { loadCardData, saveCardData, BACKEND_URL, fetchSubscription } from './utils/storage';
+import { AnalyticsService } from './utils/analytics';
 import CapsuleIcon from './components/CapsuleIcon';
 import { Capacitor } from '@capacitor/core';
 import { Share } from '@capacitor/share';

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "46069273611",
+    "project_id": "kinledger-747882",
+    "storage_bucket": "kinledger-747882.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:46069273611:android:0fbbf3212221d4cc5e630e",
+        "android_client_info": {
+          "package_name": "com.kinledger.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAOt35bnVMRZ8yIwYXCcfMper6Bu1GQF5A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
