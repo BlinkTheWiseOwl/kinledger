@@ -12,7 +12,7 @@ export default function PolicyPage({ type, onClose }) {
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>Effective Date: August 9, 2026</p>
             
             <p style={{ marginBottom: '1.25rem' }}>
-              Welcome to <strong>KinLedger</strong>. Your privacy is important to us. This Privacy Policy explains how KinLedger ("we", "our", or "us"), operated by Katyayini Kumar, collects, uses, stores, and protects your personal information when you use the KinLedger application.
+              Welcome to <strong>KinLedger</strong>. Your privacy is important to us. This Privacy Policy explains how KinLedger ("we", "our", or "us"), operated by Shilpa Kumar, collects, uses, stores, and protects your personal information when you use the KinLedger application.
             </p>
 
             <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>1. Information We Collect</h2>
@@ -54,7 +54,7 @@ export default function PolicyPage({ type, onClose }) {
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>Effective Date: August 9, 2026</p>
 
             <p style={{ marginBottom: '1.25rem' }}>
-              Welcome to <strong>KinLedger</strong>, operated by Katyayini Kumar. These Terms of Service ("Terms") govern your access to and use of the KinLedger application ("Service"). By creating an account or using KinLedger, you agree to these Terms.
+              Welcome to <strong>KinLedger</strong>, operated by Shilpa Kumar. These Terms of Service ("Terms") govern your access to and use of the KinLedger application ("Service"). By creating an account or using KinLedger, you agree to these Terms.
             </p>
 
             <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>1. About KinLedger</h2>
@@ -80,7 +80,7 @@ export default function PolicyPage({ type, onClose }) {
               YOU EXPRESSLY UNDERSTAND AND AGREE THAT YOUR USE OF KINLEDGER IS AT YOUR SOLE RISK. THE SERVICE IS PROVIDED ON AN "AS IS" AND "AS AVAILABLE" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED.
             </p>
             <p style={{ marginBottom: '1rem', fontWeight: 'bold' }}>
-              TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, KINLEDGER, KATYAYINI KUMAR, AND ANY AFFILIATED DEVELOPERS OR SERVICE PROVIDERS SHALL NOT BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, CONSEQUENTIAL, SPECIAL, OR PUNITIVE DAMAGES, OR ANY LOSS OF PROFITS OR REVENUES, WHETHER INCURRED DIRECTLY OR INDIRECTLY, OR ANY LOSS OF DATA, USE, GOODWILL, OR OTHER INTANGIBLE LOSSES, RESULTING FROM:
+              TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, KINLEDGER, SHILPA KUMAR, AND ANY AFFILIATED DEVELOPERS OR SERVICE PROVIDERS SHALL NOT BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, CONSEQUENTIAL, SPECIAL, OR PUNITIVE DAMAGES, OR ANY LOSS OF PROFITS OR REVENUES, WHETHER INCURRED DIRECTLY OR INDIRECTLY, OR ANY LOSS OF DATA, USE, GOODWILL, OR OTHER INTANGIBLE LOSSES, RESULTING FROM:
             </p>
             <ul style={{ paddingLeft: '20px', marginBottom: '1.25rem', display: 'flex', flexDirection: 'column', gap: '6px', fontWeight: 'bold' }}>
               <li>YOUR ACCESS TO, USE OF, OR INABILITY TO ACCESS OR USE THE SERVICE;</li>
@@ -158,7 +158,7 @@ export default function PolicyPage({ type, onClose }) {
             <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '1.5rem', borderRadius: 'var(--radius-md)', marginBottom: '2rem' }}>
               <h3 style={{ fontSize: '1.1rem', color: 'var(--primary)', marginBottom: '0.5rem' }}>Operating Address</h3>
               <p style={{ marginBottom: '0.25rem', color: 'var(--text-primary)', whiteSpace: 'pre-line', lineHeight: '1.5' }}>
-                Katyayini Kumar{'\n'}
+                Shilpa Kumar{'\n'}
                 Kutchappa Street, Dodballapur{'\n'}
                 Bangalore - 561203{'\n'}
                 India
