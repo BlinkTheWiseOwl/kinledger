@@ -687,6 +687,10 @@ export default function App() {
 
     const updated = [...cards, newCard];
     setCards(updated);
+    
+    // Track that a new emergency profile was created
+    AnalyticsService.logEvent('emergency_profile_created', { fields_filled: 2 }); // Initial Name and Relationship
+
     try {
       localStorage.setItem('elder_navigator_cards_collection', JSON.stringify(updated));
     } catch (err) {
