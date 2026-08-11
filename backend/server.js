@@ -1463,6 +1463,27 @@ app.get('*', (req, res, next) => {
   });
 });
 
+// Temporary endpoint to reset subscriptions for testing
+app.get('/api/debug/reset-subs', async (req, res) => {
+  const emails = [
+    'blinkrealestate@gmail.com', 
+    'shilpasujathk@gmail.com', 
+    'support.kinledger@gmail.com', 
+    'sterling4shilpa@gmail.com'
+  ];
+  try {
+    const r = await db.query(`
+      DELETE FROM public.subscriptions 
+      WHERE user_id IN (
+        SELECT id FROM public.users WHERE email = ANY($1)
+      )
+    `, [emails]);
+    res.json({ success: true, message: `Successfully reset! Deleted ${r.rowCount} subscriptions.` });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Initialize database tables conditionally, then run server if not running serverlessly on Vercel
 if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
   db.initDb().then(() => {
