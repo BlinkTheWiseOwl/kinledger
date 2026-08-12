@@ -86,11 +86,38 @@ input::-ms-clear {
 .app-header {
   background-color: var(--bg-card);
   border-bottom: 1px solid var(--border);
-  padding: calc(1rem + env(safe-area-inset-top, 0px)) 2rem 1rem;
+  padding: calc(1rem + env(safe-area-inset-top, 0px)) 1rem 1rem;
   position: sticky;
   top: 0;
   z-index: 100;
   box-shadow: var(--shadow-sm);
+}
+
+@media (min-width: 768px) {
+  .app-header {
+    padding: calc(1rem + env(safe-area-inset-top, 0px)) 2rem 1rem;
+  }
+}
+
+@media (max-width: 450px) {
+  .coming-up-text-full {
+    display: none;
+  }
+  .coming-up-text-short {
+    display: inline;
+  }
+  .header-actions {
+    gap: 8px !important;
+  }
+}
+
+@media (min-width: 451px) {
+  .coming-up-text-full {
+    display: inline;
+  }
+  .coming-up-text-short {
+    display: none;
+  }
 }
 
 .header-content {

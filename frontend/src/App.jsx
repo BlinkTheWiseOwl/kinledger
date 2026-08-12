@@ -1866,10 +1866,12 @@ export default function App() {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '4px',
-                border: 'none'
+                border: 'none',
+                whiteSpace: 'nowrap'
               }}
             >
-              Vote for what's next✨
+              <span className="coming-up-text-full">Vote for what's next✨</span>
+              <span className="coming-up-text-short">Vote✨</span>
             </button>
             <button
               className="hamburger-btn"
@@ -2887,10 +2889,10 @@ export default function App() {
                           <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1rem', lineHeight: '1.4' }}>
                             Share this medical card with family members so they can view and update it jointly.
                           </p>
-                          <div style={{ display: 'flex', gap: '8px' }}>
+                          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                             <input type="email" placeholder="Family member's email" className="form-control"
-                              value={shareEmail} onChange={(e) => { setShareEmail(e.target.value); setShareError(null); }} style={{ flex: 1 }} />
-                            <button className="btn btn-primary btn-sm" onClick={handleShareCard}>Share</button>
+                              value={shareEmail} onChange={(e) => { setShareEmail(e.target.value); setShareError(null); }} style={{ flex: '1 1 200px', minWidth: 0 }} />
+                            <button className="btn btn-primary btn-sm" onClick={handleShareCard} style={{ flexShrink: 0 }}>Share</button>
                           </div>
                         </div>
                       )}
