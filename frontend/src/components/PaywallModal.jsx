@@ -71,7 +71,11 @@ export default function PaywallModal({ isOpen, onClose, onUpgradeSuccess, token,
       razorpay.open();
 
     } catch (err) {
-      setError(err.message || 'Something went wrong. Please try again.');
+      let errorMessage = err.message || 'Something went wrong. Please try again.';
+      if (errorMessage.toLowerCase().includes('token')) {
+        errorMessage = 'Your login session has expired. Please close this window, sign out from the menu, and sign in again to upgrade.';
+      }
+      setError(errorMessage);
       setLoading(false);
     }
   };
