@@ -19,7 +19,7 @@ if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
 }
 
 const MAX_FREE_PROFILES = 2;
-const FAMILY_PLAN_AMOUNT = 100; // ₹1 in paise (temporary for testing)
+const FAMILY_PLAN_AMOUNT = 39900; // ₹399 in paise
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
