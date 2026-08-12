@@ -31,6 +31,7 @@ export default function PaywallModal({ isOpen, onClose, onUpgradeSuccess, token,
         name: 'KinLedger',
         description: 'KinLedger Family — 1 Year',
         order_id: order.orderId,
+        image: 'https://kinledger-blush.vercel.app/logo.svg',
         webview_intent: true,
         prefill: {
           email: userEmail
