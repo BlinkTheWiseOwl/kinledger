@@ -572,8 +572,14 @@ app.post('/api/auth/google', async (req, res) => {
       
       // If configured, verify the client ID (aud)
       const expectedClientId = process.env.GOOGLE_CLIENT_ID;
-      if (expectedClientId && payload.aud !== expectedClientId) {
-        return res.status(400).json({ error: 'Token audience mismatch.' });
+      if (expectedClientId) {
+        // The audience can be the Web Client ID or any of the Android Client IDs.
+        // All client IDs for this project start with the same project number.
+        const projectPrefix = expectedClientId.split('-')[0] + '-';
+        if (payload.aud !== expectedClientId && !payload.aud.startsWith(projectPrefix)) {
+          console.error(`Token audience mismatch. Expected: ${expectedClientId}, Got: ${payload.aud}`);
+          return res.status(400).json({ error: 'Token audience mismatch.' });
+        }
       }
     }
 
