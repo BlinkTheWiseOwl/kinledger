@@ -425,11 +425,16 @@ app.post('/api/auth/forgot-password', async (req, res) => {
     }
 
     // Check user exists
-    const userQuery = await db.query('SELECT id FROM public.users WHERE email = $1', [cleanEmail]);
+    const userQuery = await db.query('SELECT id, is_verified FROM public.users WHERE email = $1', [cleanEmail]);
     if (userQuery.rows.length === 0) {
       return res.status(400).json({ error: 'There is no account registered with this email address.' });
     }
-    const userId = userQuery.rows[0].id;
+    const user = userQuery.rows[0];
+    
+    if (user.is_verified === false) {
+      return res.status(403).json({ error: 'This email address is not verified yet.' });
+    }
+    const userId = user.id;
 
     // Google-account detection
     const googleSignupCheck = await db.query(
