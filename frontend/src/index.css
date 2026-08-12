@@ -2425,6 +2425,7 @@ textarea {
   font-weight: 600;
   font-size: 0.9rem;
   color: var(--text-primary);
+  word-break: break-all;
 }
 
 .contact-sheet-meta {
@@ -2646,7 +2647,8 @@ textarea {
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.24);
   max-width: 400px;
   width: 100%;
-  overflow: hidden;
+  max-height: 95vh;
+  overflow-y: auto;
   position: relative;
   animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }

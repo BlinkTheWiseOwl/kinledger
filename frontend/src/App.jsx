@@ -2948,7 +2948,7 @@ export default function App() {
                               <div className="contact-sheet-info">
                                 <div className="contact-sheet-name" style={{ fontSize: '0.9rem' }}>{email}</div>
                               </div>
-                              <button className="btn btn-danger btn-sm" onClick={() => handleRevokeShare(email)}>Revoke</button>
+                              <button className="btn btn-danger btn-sm" style={{ flexShrink: 0 }} onClick={() => handleRevokeShare(email)}>Revoke</button>
                             </div>
                           ))}
                         </div>
