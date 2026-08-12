@@ -578,7 +578,7 @@ app.post('/api/auth/google', async (req, res) => {
         const projectPrefix = expectedClientId.split('-')[0] + '-';
         if (payload.aud !== expectedClientId && !payload.aud.startsWith(projectPrefix)) {
           console.error(`Token audience mismatch. Expected: ${expectedClientId}, Got: ${payload.aud}`);
-          return res.status(400).json({ error: 'Token audience mismatch.' });
+          return res.status(400).json({ error: `Token audience mismatch. Expected starts with: ${projectPrefix}, Got: ${payload.aud}` });
         }
       }
     }
