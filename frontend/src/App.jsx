@@ -189,6 +189,17 @@ export default function App() {
     }, 2500); // 2.5 seconds
     return () => clearTimeout(splashTimer);
   }, []);
+
+  // Auto-scroll onboarding slides
+  useEffect(() => {
+    let interval;
+    if (showOnboarding) {
+      interval = setInterval(() => {
+        setOnboardingSlide((prev) => (prev < 2 ? prev + 1 : 0));
+      }, 4000);
+    }
+    return () => clearInterval(interval);
+  }, [showOnboarding]);
   const [votedFeature, setVotedFeature] = useState(null);
   const [selectedFeature, setSelectedFeature] = useState(null);
 
