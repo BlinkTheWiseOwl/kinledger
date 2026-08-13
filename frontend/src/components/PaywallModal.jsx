@@ -128,7 +128,7 @@ export default function PaywallModal({ isOpen, onClose, onUpgradeSuccess, token,
 
           {/* Price */}
           <div className="paywall-price-block">
-            <div className="paywall-price">₹399<span className="paywall-price-period">/year</span></div>
+            <div className="paywall-price">₹399<span className="paywall-price-period">/Year</span></div>
             <div className="paywall-price-monthly">That's just ₹33/month.</div>
           </div>
 
