@@ -1312,26 +1312,29 @@ export default function App() {
 
   // Share app invite / install link
   const handleShareAppInstall = async (invitedEmail) => {
-    const inviteMessage = `Hey! Join me on KinLedger to securely manage family medical emergency cards together. Please register your account using ${invitedEmail || 'your email'} at:`;
-    const appUrl = 'https://kinledger-blush.vercel.app';
+    const androidLink = import.meta.env.VITE_ANDROID_APP_LINK || 'https://play.google.com/store/apps/details?id=com.kinledger.app';
+    const webLink = import.meta.env.VITE_WEB_APP_LINK || 'https://kinledger-blush.vercel.app';
+    
+    const inviteMessage = `Hey! Join me on KinLedger to securely manage family medical emergency cards together. Please register your account using ${invitedEmail || 'your email'}.
+
+Android App: ${androidLink}
+Web App: ${webLink}`;
     
     try {
       if (Capacitor.isNativePlatform()) {
         await Share.share({
           title: 'Join KinLedger',
           text: inviteMessage,
-          url: appUrl,
           dialogTitle: 'Invite Family Member'
         });
       } else if (navigator.share) {
         await navigator.share({
           title: 'Join KinLedger',
-          text: inviteMessage,
-          url: appUrl
+          text: inviteMessage
         });
       } else {
         // Fallback: Copy to Clipboard
-        await navigator.clipboard.writeText(`${inviteMessage} ${appUrl}`);
+        await navigator.clipboard.writeText(inviteMessage);
         showStatus('Invite link copied to clipboard! Send it to your family.', 'success');
       }
     } catch (err) {
