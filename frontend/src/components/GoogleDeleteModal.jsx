@@ -73,13 +73,13 @@ export default function GoogleDeleteModal({ onClose, onConfirm, error }) {
 
   return (
     <div className="modal-overlay" style={{ zIndex: 10000 }}>
-      <div className="modal-content" style={{ maxWidth: '400px', padding: 0, overflow: 'hidden' }}>
+      <div className="modal-content" style={{ maxWidth: '400px', padding: 0, overflow: 'hidden', backgroundColor: 'var(--bg-card)' }}>
         <div className="modal-header" style={{ backgroundColor: 'var(--primary)', padding: '1.25rem', margin: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: 'none' }}>
           <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', margin: 0 }}>
             <AlertTriangle size={20} color="#ffffff" />
             Delete Account
           </h2>
-          <button onClick={onClose} className="icon-btn" disabled={loading} style={{ color: '#ffffff', background: 'transparent', padding: '4px' }}>
+          <button onClick={onClose} className="icon-btn" disabled={loading} style={{ color: '#ffffff', background: 'transparent', padding: '4px', border: 'none' }}>
             <X size={20} />
           </button>
         </div>
