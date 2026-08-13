@@ -25,10 +25,14 @@ export default function GoogleDeleteModal({ onClose, onConfirm, error }) {
       if (window.google && window.google.accounts) {
         window.google.accounts.id.initialize({
           client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID || '1234567890-placeholder.apps.googleusercontent.com',
-          callback: (res) => {
+          callback: async (res) => {
             if (res.credential) {
               setLoading(true);
-              onConfirm(res.credential);
+              try {
+                await onConfirm(res.credential);
+              } finally {
+                setLoading(false);
+              }
             }
           }
         });
@@ -58,32 +62,33 @@ export default function GoogleDeleteModal({ onClose, onConfirm, error }) {
       const result = await SocialLogin.login({ provider: 'google' });
       const idToken = result?.result?.idToken;
       if (idToken) {
-        onConfirm(idToken);
-      } else {
-        setLoading(false);
+        await onConfirm(idToken);
       }
     } catch (err) {
       console.error(err);
+    } finally {
       setLoading(false);
     }
   };
 
   return (
     <div className="modal-overlay" style={{ zIndex: 10000 }}>
-      <div className="modal-content">
+      <div className="modal-content" style={{ maxWidth: '400px' }}>
         <div className="modal-header">
-          <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#dc2626' }}>
-            <AlertTriangle size={20} />
-            Confirm Deletion
+          <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-primary)' }}>
+            <AlertTriangle size={20} className="text-primary" />
+            Delete Account
           </h2>
           <button onClick={onClose} className="icon-btn" disabled={loading}><X size={20} /></button>
         </div>
         <div className="modal-body">
-          <p style={{ marginBottom: '1rem', color: '#dc2626', fontWeight: '500' }}>
-            WARNING: This will permanently delete your KinLedger account and all associated family medical profiles. This action cannot be undone.
-          </p>
-          <p style={{ marginBottom: '1.5rem', color: 'var(--text-light)' }}>
-            Please re-authenticate with Google to verify your identity.
+          <div style={{ backgroundColor: '#fef2f2', border: '1px solid #fecaca', padding: '1rem', borderRadius: 'var(--radius-md)', marginBottom: '1.5rem' }}>
+            <p style={{ margin: 0, color: '#991b1b', fontSize: '0.9rem', lineHeight: '1.5' }}>
+              <strong>Warning:</strong> This will permanently delete your KinLedger account and all associated family medical profiles. This action cannot be undone.
+            </p>
+          </div>
+          <p style={{ marginBottom: '1.5rem', color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
+            Please re-authenticate with Google to verify your identity before deleting.
           </p>
           
           {error && (
