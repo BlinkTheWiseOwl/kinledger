@@ -24,6 +24,18 @@ export default function HelpPage({ onClose, onReplayOnboarding }) {
     {
       q: "How do I delete my account and data?",
       a: "You can permanently delete your account and all associated family profiles at any time. Open the hamburger menu in the top right corner and click 'Delete Account'. This action is immediate and cannot be undone."
+    },
+    {
+      q: "How does the subscription work? Will it auto-renew?",
+      a: "The KinLedger Family subscription is a 1-year prepaid pass. It does not auto-renew and we do not store your card details for future charges. Once your 1-year term expires, you will need to manually renew to continue accessing premium features."
+    },
+    {
+      q: "What payment methods are supported?",
+      a: "All payments are securely processed through Razorpay, our payment partner. You can pay using Credit/Debit Cards, UPI (GPay, PhonePe, Paytm, etc.), Net Banking, and popular mobile wallets."
+    },
+    {
+      q: "Can I get a refund if I change my mind?",
+      a: "Due to the digital nature of our service, all subscription payments are final and non-refundable. We do not provide refunds or credits for partially used prepaid periods."
     }
   ];
 

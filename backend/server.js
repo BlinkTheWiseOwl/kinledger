@@ -342,7 +342,7 @@ app.post('/api/auth/verify-email', async (req, res) => {
     // Generate token and log them in
     const token = jwt.sign({ id: userObj.id, email: userObj.email }, JWT_SECRET, { expiresIn: '30d' });
     
-    res.json({ token, user: { email: userObj.email }, message: 'Email verified successfully.' });
+    res.json({ token, user: { email: userObj.email, authProvider: 'email' }, message: 'Email verified successfully.' });
   } catch (err) {
     console.error('Email verification error:', err);
     res.status(500).json({ error: 'Server error processing verification.' });
@@ -393,7 +393,7 @@ app.post('/api/auth/login', async (req, res) => {
     // Log login audit event
     await logAudit(user.id, user.email, 'LOGIN', 'User successfully logged in.');
 
-    res.json({ token, user: { email: user.email } });
+    res.json({ token, user: { email: user.email, authProvider: 'email' } });
   } catch (err) {
     console.error('Login error:', err);
     res.status(500).json({ error: 'Server error during login.' });
@@ -616,7 +616,7 @@ app.post('/api/auth/google', async (req, res) => {
     // Create app token
     const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '30d' });
 
-    res.json({ token, user: { email: user.email } });
+    res.json({ token, user: { email: user.email, authProvider: 'google' } });
   } catch (err) {
     console.error('Google Auth error:', err);
     res.status(400).json({ error: err.message || 'Google authentication failed.' });
@@ -626,12 +626,12 @@ app.post('/api/auth/google', async (req, res) => {
 
 // Delete User Account for DPDP compliance (Right to Erasure)
 app.delete('/api/auth/account', authenticateToken, async (req, res) => {
-  const { password } = req.body;
+  const { password, googleToken } = req.body;
   const userId = req.user.id;
   const userEmail = req.user.email.toLowerCase().trim();
 
-  if (!password) {
-    return res.status(400).json({ error: 'Password is required to delete your account.' });
+  if (!password && !googleToken) {
+    return res.status(400).json({ error: 'Password or Google verification is required to delete your account.' });
   }
 
   try {
@@ -641,9 +641,36 @@ app.delete('/api/auth/account', authenticateToken, async (req, res) => {
       return res.status(404).json({ error: 'User not found.' });
     }
 
-    const validPassword = await bcrypt.compare(password, userQuery.rows[0].password_hash);
-    if (!validPassword) {
-      return res.status(400).json({ error: 'Incorrect password. Account deletion rejected.' });
+    if (googleToken) {
+      // Verify Google Token
+      const googleVerifyUrl = `https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(googleToken)}`;
+      const response = await fetch(googleVerifyUrl);
+      
+      if (!response.ok) {
+        return res.status(400).json({ error: 'Invalid Google credential token. Account deletion rejected.' });
+      }
+      
+      const payload = await response.json();
+      const googleEmail = payload.email.toLowerCase().trim();
+      
+      if (googleEmail !== userEmail) {
+        return res.status(400).json({ error: 'Google account email does not match KinLedger account. Account deletion rejected.' });
+      }
+      
+      // If configured, verify the client ID (aud)
+      const expectedClientId = process.env.GOOGLE_CLIENT_ID;
+      if (expectedClientId) {
+        const projectPrefix = expectedClientId.split('-')[0] + '-';
+        if (payload.aud !== expectedClientId && !payload.aud.startsWith(projectPrefix)) {
+          return res.status(400).json({ error: 'Token audience mismatch. Account deletion rejected.' });
+        }
+      }
+    } else {
+      // Verify Password
+      const validPassword = await bcrypt.compare(password, userQuery.rows[0].password_hash);
+      if (!validPassword) {
+        return res.status(400).json({ error: 'Incorrect password. Account deletion rejected.' });
+      }
     }
 
     // 2. Delete user record. Foreign keys with ON DELETE CASCADE will purge profiles, shares, contacts, medications.
@@ -833,40 +860,7 @@ app.post('/api/subscription/verify', authenticateToken, async (req, res) => {
   }
 });
 
-app.post('/api/subscription/cancel', authenticateToken, async (req, res) => {
-  const userId = req.user.id;
-  const userEmail = req.user.email;
 
-  try {
-    const subQuery = await db.query(
-      "SELECT * FROM public.subscriptions WHERE user_id = $1 AND plan = 'family' AND status = 'active'",
-      [userId]
-    );
-
-    if (subQuery.rows.length === 0) {
-      return res.status(400).json({ error: 'No active Family subscription to cancel.' });
-    }
-
-    const sub = subQuery.rows[0];
-
-    await db.query(
-      "UPDATE public.subscriptions SET status = 'cancelled', updated_at = CURRENT_TIMESTAMP WHERE id = $1",
-      [sub.id]
-    );
-
-    await logAudit(userId, userEmail, 'SUBSCRIPTION_CANCELLED',
-      `Family plan cancelled. Access continues until ${sub.expires_at}`);
-
-    res.json({
-      success: true,
-      message: 'Your Family plan has been cancelled. You will continue to have access until your current period ends.',
-      accessUntil: sub.expires_at
-    });
-  } catch (err) {
-    console.error('Subscription cancellation error:', err);
-    res.status(500).json({ error: 'Server error processing cancellation.' });
-  }
-});
 
 app.post('/api/subscription/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
   const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;

@@ -64,7 +64,7 @@ export default function PolicyPage({ type, onClose }) {
 
             <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>2. Subscriptions, Billing, and Payments</h2>
             <p style={{ marginBottom: '1.25rem' }}>
-              Certain features of KinLedger (e.g., KinLedger Family) require a paid subscription. All payments are securely processed through our third-party payment provider, Razorpay. By upgrading to a paid plan, you authorize us (via Razorpay) to charge the applicable subscription fees to your chosen payment method. You are responsible for maintaining a valid payment method. Subscription fees are billed in advance and are non-refundable, except as expressly set forth in our Refund Policy.
+              Certain features of KinLedger (e.g., KinLedger Family) require a paid subscription. All payments are securely processed through our third-party payment provider, Razorpay. By upgrading to a paid plan, you authorize us (via Razorpay) to charge the applicable prepaid fee to your chosen payment method. Subscription fees are billed once for the duration of the term and are non-refundable, except as expressly set forth in our Refund Policy. Your plan will not auto-renew.
             </p>
 
             <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>3. Medical Disclaimer</h2>
@@ -111,17 +111,17 @@ export default function PolicyPage({ type, onClose }) {
               Thank you for subscribing to KinLedger. This policy outlines our terms regarding subscription cancellations and refunds.
             </p>
 
-            <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>1. Cancellation Policy (Cancel Anytime)</h2>
+            <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>1. Prepaid Subscriptions (No Auto-Renewal)</h2>
             <p style={{ marginBottom: '1.25rem' }}>
-              You may cancel your KinLedger subscription at any time. When you cancel, your subscription will not automatically renew, and you will not be charged for the next billing cycle. You will continue to have access to KinLedger's premium features until the end of your current paid billing period.
+              Your KinLedger Family subscription is a prepaid plan for a specified term (e.g., 1 year). Your subscription will not automatically renew at the end of the term, and you will not be automatically charged. To continue using premium features after your term expires, you must manually renew your subscription.
             </p>
             <p style={{ marginBottom: '1.25rem' }}>
-              To cancel your subscription, please use the subscription management portal within the application or contact our support team.
+              Since the plan does not auto-renew, there is no need to manually cancel your subscription to prevent future charges.
             </p>
 
             <h2 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginTop: '1.5rem', marginBottom: '0.75rem' }}>2. Refund Policy (No Refunds)</h2>
             <p style={{ marginBottom: '1.25rem' }}>
-              Due to the digital nature of our service, <strong>all subscription payments are final and non-refundable</strong>. We do not provide refunds or credits for partially used billing periods or for accidental renewals. 
+              Due to the digital nature of our service, <strong>all subscription payments are final and non-refundable</strong>. We do not provide refunds or credits for partially used prepaid periods. 
             </p>
             <p style={{ marginBottom: '1.25rem' }}>
               If you experience a technical issue that prevents you from using the service you paid for, please contact our support team, and we will work with you to resolve the issue.

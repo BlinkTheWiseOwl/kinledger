@@ -128,6 +128,9 @@ export default function AuthScreen({ onAuthSuccess, showStatus, onShowPolicy }) 
 
       localStorage.setItem('kinledger_jwt_token', data.token);
       localStorage.setItem('kinledger_user_email', data.user.email);
+      if (data.user.authProvider) {
+        localStorage.setItem('kinledger_auth_provider', data.user.authProvider);
+      }
       AnalyticsService.identify(data.user.email);
       showStatus('Logged in with Google successfully!', 'success');
       onAuthSuccess(data.token, data.user.email);
@@ -168,6 +171,9 @@ export default function AuthScreen({ onAuthSuccess, showStatus, onShowPolicy }) 
 
       localStorage.setItem('kinledger_jwt_token', data.token);
       localStorage.setItem('kinledger_user_email', data.user.email);
+      if (data.user.authProvider) {
+        localStorage.setItem('kinledger_auth_provider', data.user.authProvider);
+      }
       AnalyticsService.identify(data.user.email);
       showStatus('Logged in with Google successfully!', 'success');
       onAuthSuccess(data.token, data.user.email);
@@ -214,6 +220,9 @@ export default function AuthScreen({ onAuthSuccess, showStatus, onShowPolicy }) 
         
         localStorage.setItem('kinledger_jwt_token', data.token);
         localStorage.setItem('kinledger_user_email', data.user.email);
+        if (data.user.authProvider) {
+          localStorage.setItem('kinledger_auth_provider', data.user.authProvider);
+        }
         AnalyticsService.identify(data.user.email);
         AnalyticsService.logEvent('user_signed_up', { method: 'email' });
         showStatus('Email verified successfully!', 'success');
@@ -359,6 +368,9 @@ export default function AuthScreen({ onAuthSuccess, showStatus, onShowPolicy }) 
       // Store token and email
       localStorage.setItem('kinledger_jwt_token', data.token);
       localStorage.setItem('kinledger_user_email', data.user.email);
+      if (data.user.authProvider) {
+        localStorage.setItem('kinledger_auth_provider', data.user.authProvider);
+      }
       AnalyticsService.identify(data.user.email);
       
       if (mode === 'signup') {

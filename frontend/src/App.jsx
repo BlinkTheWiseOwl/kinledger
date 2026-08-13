@@ -11,6 +11,7 @@ import PolicyPage from './components/PolicyPage';
 import HelpPage from './components/HelpPage';
 import PaywallModal from './components/PaywallModal';
 import SubscriptionBadge from './components/SubscriptionBadge';
+import GoogleDeleteModal from './components/GoogleDeleteModal';
 
 const BlueShield = ({ size = 24, className = "" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={{ display: 'inline-block', verticalAlign: 'middle' }}>
@@ -120,6 +121,7 @@ export default function App() {
   const [showPolicy, setShowPolicy] = useState(null); // 'privacy' | 'terms' | null
   const [showHelp, setShowHelp] = useState(false);
   const [showVoteModal, setShowVoteModal] = useState(false);
+  const [showGoogleDeleteModal, setShowGoogleDeleteModal] = useState(false);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
 
   const [newMemberName, setNewMemberName] = useState('');
@@ -1460,15 +1462,7 @@ Web App: ${webLink}`;
     showStatus('Welcome to KinLedger Family! 🎉 You can now add unlimited family profiles.', 'success');
   };
 
-  // Delete account permanently (DPDP / Right to Erasure)
-  const handleDeleteAccount = async () => {
-    const password = window.prompt("WARNING: This will permanently delete your KinLedger account and all associated family medical profiles. This action cannot be undone.\n\nEnter your password to confirm deletion:");
-    if (password === null) return; // User cancelled
-    if (!password.trim()) {
-      showStatus("Password is required to delete account.", "error");
-      return;
-    }
-
+  const executeDeletion = async (payload) => {
     try {
       const response = await fetch(`${BACKEND_URL}/auth/account`, {
         method: 'DELETE',
@@ -1476,7 +1470,7 @@ Web App: ${webLink}`;
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ password })
+        body: JSON.stringify(payload)
       });
 
       const data = await response.json();
@@ -1489,14 +1483,36 @@ Web App: ${webLink}`;
       // Purge credentials and return to auth screen
       localStorage.removeItem('kinledger_jwt_token');
       localStorage.removeItem('kinledger_user_email');
+      localStorage.removeItem('kinledger_auth_provider');
       setToken(null);
       setUserEmail(null);
       setCards([]);
       setSelectedCardId(null);
+      setShowGoogleDeleteModal(false);
     } catch (err) {
       showStatus(err.message, 'error');
     }
   };
+
+  // Delete account permanently (DPDP / Right to Erasure)
+  const handleDeleteAccount = async () => {
+    const authProvider = localStorage.getItem('kinledger_auth_provider');
+    
+    if (authProvider === 'google') {
+      setShowGoogleDeleteModal(true);
+      return;
+    }
+
+    const password = window.prompt("WARNING: This will permanently delete your KinLedger account and all associated family medical profiles. This action cannot be undone.\n\nEnter your password to confirm deletion:");
+    if (password === null) return; // User cancelled
+    if (!password.trim()) {
+      showStatus("Password is required to delete account.", "error");
+      return;
+    }
+
+    await executeDeletion({ password });
+  };
+
 
   const handleFeatureSelect = (featureId) => {
     setSelectedFeature(featureId);
@@ -3082,6 +3098,14 @@ Web App: ${webLink}`;
             </div>
           </div>
         </div>
+      )}
+
+      {showGoogleDeleteModal && (
+        <GoogleDeleteModal
+          onClose={() => setShowGoogleDeleteModal(false)}
+          onConfirm={(googleToken) => executeDeletion({ googleToken })}
+          error={null}
+        />
       )}
 
       {/* Paywall Modal */}

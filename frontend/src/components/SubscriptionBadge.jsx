@@ -1,35 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Crown, Shield, Loader2 } from 'lucide-react';
-import { cancelSubscription } from '../utils/storage';
 
 export default function SubscriptionBadge({ plan, status, expiresAt, token, onPlanChange, onShowPaywall }) {
-  const [cancelling, setCancelling] = useState(false);
-
   const isFamily = plan === 'family' && (status === 'active' || status === 'cancelled');
   const isCancelled = status === 'cancelled';
   const expiryDate = expiresAt ? new Date(expiresAt).toLocaleDateString('en-IN', {
     day: 'numeric', month: 'short', year: 'numeric'
   }) : null;
-
-  const handleCancel = async () => {
-    const confirmed = window.confirm(
-      'Are you sure you want to cancel your Family plan?\n\n' +
-      'You will continue to have access until your current period ends' +
-      (expiryDate ? ` (${expiryDate})` : '') + '.\n\n' +
-      'After that, you\'ll be limited to 2 family profiles.'
-    );
-    if (!confirmed) return;
-
-    setCancelling(true);
-    try {
-      await cancelSubscription(token);
-      onPlanChange('family', 'cancelled');
-    } catch (err) {
-      alert(err.message || 'Failed to cancel subscription.');
-    } finally {
-      setCancelling(false);
-    }
-  };
 
   if (isFamily) {
     return (
@@ -45,16 +22,11 @@ export default function SubscriptionBadge({ plan, status, expiresAt, token, onPl
         ) : (
           <>
             <span className="subscription-meta">
-              Renews {expiryDate || '—'}
+              Expires {expiryDate || '—'}
             </span>
-            <button
-              className="subscription-cancel-link"
-              onClick={handleCancel}
-              disabled={cancelling}
-            >
-              {cancelling ? <Loader2 size={12} className="spin-icon" /> : null}
-              {cancelling ? 'Cancelling...' : 'Cancel plan'}
-            </button>
+            <div className="subscription-prepaid-note">
+              1-Year Prepaid (Does not auto-renew)
+            </div>
           </>
         )}
       </div>
